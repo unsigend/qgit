@@ -17,4 +17,9 @@
 
 #include <cmd.h>
 
-int main(int argc, char *argv[]) { return runcmd(argc, argv); }
+int cmd_check_ignore(int argc, char **argv)
+{
+  (void)argc;
+  (void)argv;
+  return 0;
+}
