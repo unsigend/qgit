@@ -15,14 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <stdio.h>
+#ifndef REPO_H
+#define REPO_H
 
-int main(int argc, char *argv[])
-{
-  if (argc < 2) {
-    showcmds();
-    return 0;
-  }
-  return runcmd(argc - 1, argv + 1);
-}
+#include <stdbool.h>
+#include <stddef.h>
+
+struct repo {
+  char *worktree;
+  char *qgit_dir;
+  bool bare;
+};
+
+extern int repo_init(struct repo *repo, const char *path, bool bare);
+extern int repo_create(const struct repo *repo, const char *bname);
+extern void repo_fini(struct repo *repo);
+
+#endif

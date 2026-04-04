@@ -26,6 +26,9 @@ LIB_PATH      := $(BUILD_PATH)/lib
 
 include $(CONFIG_PATH)/config.mk
 
+PREFIX  ?= /usr/local
+BINDIR  ?= $(PREFIX)/bin
+
 ifeq ($(filter $(LIB_BUILD),static shared),)
 $(error LIB_BUILD must be static or shared (got $(LIB_BUILD)))
 endif
@@ -74,7 +77,7 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
 -include $(DEPS)
 
 .DEFAULT_GOAL := help
-.PHONY: all bin lib clean help create_build_dir list info clang format docker
+.PHONY: all bin lib clean help create_build_dir list info clang format docker install
 
 create_build_dir:
 	@mkdir -p $(OBJ_PATH)
@@ -133,6 +136,12 @@ info:
 	@echo "  HOST_OS     : $(HOST_OS)"
 	@echo ""
 
+install: bin
+	@mkdir -p $(DESTDIR)$(BINDIR)
+	@cp $(BIN_PATH)/$(BIN_NAME) $(DESTDIR)$(BINDIR)/$(BIN_NAME)
+	@chmod 755 $(DESTDIR)$(BINDIR)/$(BIN_NAME)
+	@echo "  + INSTALL	$(DESTDIR)$(BINDIR)/$(BIN_NAME)"
+
 help:
 	@echo "USAGE:"
 	@echo "  make all       - build executable and library"
@@ -145,6 +154,7 @@ help:
 	@echo "  make format    - format .c and .h"
 	@echo "  make flags     - show compiler flags"
 	@echo "  make docker    - build and run development container"
+	@echo "  make install   - install executable globally"
 	@echo "  make help      - this message\n"
 
 flags:

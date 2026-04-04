@@ -15,14 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <util.h>
 
-int main(int argc, char *argv[])
+noreturn void fatal()
 {
-  if (argc < 2) {
-    showcmds();
-    return 0;
-  }
-  return runcmd(argc - 1, argv + 1);
+  perror("qgit");
+  exit(EXIT_FAILURE);
+}
+
+noreturn void error(const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  exit(EXIT_FAILURE);
 }

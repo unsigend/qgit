@@ -15,14 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <stdio.h>
+#ifndef UTIL_H
+#define UTIL_H
 
-int main(int argc, char *argv[])
-{
-  if (argc < 2) {
-    showcmds();
-    return 0;
-  }
-  return runcmd(argc - 1, argv + 1);
-}
+#include <stddef.h>
+#include <stdnoreturn.h>
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+noreturn void fatal();
+noreturn void error(const char *fmt, ...);
+
+#endif

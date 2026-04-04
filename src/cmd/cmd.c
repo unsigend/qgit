@@ -17,46 +17,66 @@
 
 #include <cmd.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
+#include <util.h>
 
-struct subcmd subcmds[] = {
-    {"init", cmd_init},
-    {"add", cmd_add},
-    {"status", cmd_status},
-    {"commit", cmd_commit},
-    {"log", cmd_log},
-    {"cat-file", cmd_cat_file},
-    {"check-ignore", cmd_check_ignore},
-    {"checkout", cmd_checkout},
-    {"hash-object", cmd_hash_object},
-    {"ls-files", cmd_ls_files},
-    {"ls-tree", cmd_ls_tree},
-    {"rev-parse", cmd_rev_parse},
-    {"rm", cmd_rm},
-    {"show-ref", cmd_show_ref},
-    {"tag", cmd_tag},
-    {"merge", cmd_merge},
-    {"branch", cmd_branch},
+const struct subcmd subcmds[] = {
+    {"init", "Initialize a new repository", cmd_init},
+    {"add", "Add file contents to the index", cmd_add},
+    {"status", "Show the working tree status", cmd_status},
+    {"commit", "Record changes to the repository", cmd_commit},
+    {"log", "Show commit logs", cmd_log},
+    {"cat-file",
+     "Provide content or type and size information for repository objects",
+     cmd_cat_file},
+    {"check-ignore", "Check if a file is ignored", cmd_check_ignore},
+    {"checkout", "Checkout a branch or paths to the working tree",
+     cmd_checkout},
+    {"hash-object",
+     "Compute the object ID and optionally creates a blob from a file",
+     cmd_hash_object},
+    {"ls-files", "List files in the index and the working tree", cmd_ls_files},
+    {"ls-tree", "List the contents of a tree object", cmd_ls_tree},
+    {"rev-parse", "Parse revision or ref arguments", cmd_rev_parse},
+    {"rm", "Remove files from the working tree and from the index", cmd_rm},
+    {"show-ref", "List references in a repository", cmd_show_ref},
+    {"tag", "Create, list, delete or verify a tag object signed with GPG",
+     cmd_tag},
+    {"merge", "Join two or more development histories together", cmd_merge},
+    {"branch", "List, create, or delete branches", cmd_branch},
 };
+
+const size_t subcmdslen = sizeof(subcmds) / sizeof(subcmds[0]);
+
+void showcmds(void)
+{
+  puts("qgit - A simplified git like version control system\n");
+  puts("Usage: qgit <subcommand> [options]\n");
+  puts("Subcommands:");
+  for (size_t i = 0; i < subcmdslen; i++)
+    printf("  %-16s %s\n", subcmds[i].name, subcmds[i].desc);
+  putc('\n', stdout);
+}
 
 int runcmd(int argc, char **argv)
 {
-  if (!argc || !argv)
-    return -1;
-
   struct subcmd *subcmd = NULL;
-  subcmd->name = argv[0];
 
-  for (size_t i = 0; i < sizeof(subcmds) / sizeof(subcmds[0]); i++) {
-    if (!strcmp(subcmds[i].name, subcmd->name)) {
-      subcmd = &subcmds[i];
+  for (size_t i = 0; i < subcmdslen; i++) {
+    if (!strcmp(subcmds[i].name, argv[0])) {
+      subcmd = (struct subcmd *)&subcmds[i];
       break;
     }
   }
 
   if (!subcmd) {
-    return -1;
+    if (!strcmp(argv[0], "--help") || !strcmp(argv[0], "-h")) {
+      showcmds();
+      return 0;
+    } else
+      error("qgit: '%s' is not a qgit command. See 'qgit --help'\n", argv[0]);
   }
 
-  return subcmd->fn(argc, argv);
+  return subcmd->fn(argc - 1, argv + 1);
 }

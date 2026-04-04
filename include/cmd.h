@@ -24,11 +24,15 @@ typedef int (*subcmd_fn)(int argc, char **argv);
 
 struct subcmd {
   const char *name;
+  const char *desc;
   subcmd_fn fn;
 };
 
-extern struct subcmd subcmds[];
+extern const struct subcmd subcmds[];
+extern const size_t subcmdslen;
+
 extern int runcmd(int, char **);
+extern void showcmds(void);
 
 /* subcommands */
 extern int cmd_init(int, char **);

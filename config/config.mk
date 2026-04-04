@@ -15,9 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # configure for debug mode
-DEBUG := 0
+DEBUG := 1
 
-# Output executable and library name
+# output executable and library name
 BIN_NAME := qgit
 LIB_NAME := qgit
 
