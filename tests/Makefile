@@ -14,16 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# configure for debug mode
-DEBUG := 0
+MK_DIR := ../scripts/mk
 
-# Output executable and library name
-BIN_NAME := qgit
-LIB_NAME := qgit
+include $(MK_DIR)/config.mk
 
-CC := gcc
-CXX := g++
-AR := ar
-LD := gcc
+.PHONY: test clean
 
-LIB_BUILD ?= static
+test: 
+
+	

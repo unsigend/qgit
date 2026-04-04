@@ -1,230 +1,171 @@
-# MIT License
+# qgit - A simplified git like version control system
+# Copyright (C) 2025 - 2026 Qiu Yixiang
 #
-# Copyright (c) 2025 Qiu Yixiang
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+CUR_DIR       := .
+SRC_PATH      := $(CUR_DIR)/src
+INCLUDE_PATH  := $(CUR_DIR)/include
+CONFIG_PATH   := $(CUR_DIR)/config
+BUILD_PATH    := $(CUR_DIR)/build
+OBJ_PATH      := $(BUILD_PATH)/obj
+DEP_PATH      := $(BUILD_PATH)/dep
+BIN_PATH      := $(BUILD_PATH)/bin
+LIB_PATH      := $(BUILD_PATH)/lib
 
-# Makefile for build gitlet
-# Main Makefile
+include $(CONFIG_PATH)/config.mk
 
-# Variables for paths
-BUILD_PATH          	:= 	./build
-CONFIG_PATH         	:= 	./config
-EXTERNAL_PATH       	:= 	./external
-LIB_PATH            	:= 	./lib
-TEST_PATH           	:= 	./test
-SCRIPT_PATH         	:= 	./script
-DEP_PATH            	:= 	$(BUILD_PATH)/dep
-
-OBJ_PATH            	:= 	$(BUILD_PATH)/obj
-EXTERNAL_OBJ_PATH   	:= 	$(BUILD_PATH)/external_obj
-
-INCLUDE_PATH        	:= 	./include
-SRC_PATH            	:= 	./src
-
-EXTERNAL_INCLUDE_PATH	:= 	$(EXTERNAL_PATH)/include
-EXTERNAL_SRC_PATH		:= 	$(EXTERNAL_PATH)/src
-
-# Variables for files
-CONFIG_FILE         	:= 	$(CONFIG_PATH)/config.mk
-
--include $(CONFIG_FILE)
-
-# Variables for GCC compiler
-CC                  	:= 	gcc
-CXX                 	:= 	g++
-AR                      := 	ar
-LD                      :=  $(CC)
-BASH                    := 	bash
-PYTHON               	:= 	python3
-
-# Variable for Host OS
-HOST_OS                 := 	$(shell uname -s)
-
-# Variable for GCC compiler flags
-CC_FLAGS                :=  -std=c11
-
-ifeq ($(HOST_OS), Linux)
-	CC_FLAGS                +=  -fPIC
+ifeq ($(filter $(LIB_BUILD),static shared),)
+$(error LIB_BUILD must be static or shared (got $(LIB_BUILD)))
 endif
 
-# Variable for GCC include paths
-CC_INCLUDE_PATHS        :=  -I $(INCLUDE_PATH)
-CC_INCLUDE_PATHS       	+=  -isystem $(EXTERNAL_INCLUDE_PATH)
+HOST_OS := $(shell uname -s)
+SRCS := $(shell find $(SRC_PATH) -name "*.c" 2>/dev/null)
+OBJS := $(patsubst $(SRC_PATH)/%.c, $(OBJ_PATH)/%.o, $(SRCS))
+DEPS := $(patsubst $(SRC_PATH)/%.c, $(DEP_PATH)/%.d, $(SRCS))
+MAIN_OBJ := $(OBJ_PATH)/main.o
+LIB_OBJS := $(filter-out $(MAIN_OBJ),$(OBJS))
 
-# Include the openssl header file
-ifeq ($(HOST_OS), Darwin)
-CC_INCLUDE_PATHS        +=  -I /opt/homebrew/opt/openssl/include
-endif
-
-ifeq ($(HOST_OS), Linux)
-CC_INCLUDE_PATHS        +=  -I /usr/include/openssl
-endif
-
-# Variable for GCC compiler warnings
-CC_WARNINGS            	:= 	-Wall -Wextra -Werror
-CC_WARNINGS             +=  -Wextra -Wno-unused-parameter
-CC_WARNINGS             +=  -Wno-unused-function
-
-# Variable for GCC debugger flag
-CC_DEBUG                :=
-ifeq ($(DEBUG), 1)
-	CC_DEBUG            +=  -g
-endif
-
-# Variable for GCC Optimize flag
-CC_OPTIMIZE             :=
-ifeq ($(DEBUG), 1)
-	CC_OPTIMIZE        	+=  -O0
+ifeq ($(LIB_BUILD),shared)
+ifeq ($(HOST_OS),Darwin)
+LIB_ARTIFACT := $(LIB_PATH)/lib$(LIB_NAME).dylib
 else
-	CC_OPTIMIZE         +=  -O2
+LIB_ARTIFACT := $(LIB_PATH)/lib$(LIB_NAME).so
 endif
-
-CC_DEPENDENCY           :=
-CC_DEPENDENCY           +=  -MMD -MP -MF
-
-CC_FLAGS                +=  $(CC_WARNINGS) $(CC_DEBUG) $(CC_OPTIMIZE) $(CC_INCLUDE_PATHS)
-
-# Variable for Linker flags
-LD_FLAGS                :=
-
-EXTERNAL_LIBS           :=  -lssl -lcrypto -lz
-
-EXTERNAL_LIB_PATH       :=
-ifeq ($(HOST_OS), Darwin)
-EXTERNAL_LIB_PATH       +=  -L /opt/homebrew/opt/openssl/lib
-endif
-ifeq ($(HOST_OS), Linux)
-EXTERNAL_LIB_PATH       +=  -L /usr/lib/openssl
-endif
-
-LD_FLAGS                +=  $(EXTERNAL_LIBS)
-LD_FLAGS                +=  $(EXTERNAL_LIB_PATH)
-
-# Variables for program and library names
-PROGRAM_NAME            := 	gitlet
-LIBRARY_NAME            := 	$(PROGRAM_NAME)
-
-STATIC_LIBRARY_POSTFIX  := 	.a
-ifeq ($(HOST_OS), Darwin)
-SHARED_LIBRARY_POSTFIX  := 	.dylib
 else
-SHARED_LIBRARY_POSTFIX  := 	.so
+LIB_ARTIFACT := $(LIB_PATH)/lib$(LIB_NAME).a
 endif
 
-SRCS                    := 	$(shell find $(SRC_PATH) -type f -name "*.c")
-OBJS                    := 	$(patsubst $(SRC_PATH)/%.c, $(OBJ_PATH)/%.o, $(SRCS))
+CC_FLAGS := -std=c11 -Wall -Wextra -Werror -Wshadow
+CC_FLAGS += -I$(INCLUDE_PATH)
+ifeq ($(HOST_OS), Linux)
+CC_FLAGS += -D_POSIX_C_SOURCE=200809L
+endif
+ifeq ($(LIB_BUILD),shared)
+CC_FLAGS += -fPIC
+endif
+ifeq ($(DEBUG), 1)
+CC_FLAGS += -g -O0
+CC_FLAGS += -fsanitize=address,undefined
+else
+CC_FLAGS += -O2
+endif
 
-EXTERNAL_SRCS           := 	$(shell find $(EXTERNAL_SRC_PATH) -type f -name "*.c")
-EXTERNAL_OBJS           := 	$(patsubst $(EXTERNAL_SRC_PATH)/%.c, $(EXTERNAL_OBJ_PATH)/%.o, $(EXTERNAL_SRCS))
-
-# Export variables for sub-makefiles
-export PYTHON
-
-.DEFAULT_GOAL := help
-.PHONY: all clean help lib test mkdir-lib dep add-env sync
+AR_FLAGS := -rcs
+CC_DEP := -MMD -MP -MF
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
-	@mkdir -p $(dir $@) $(dir $(DEP_PATH)/$*.d)
-	@$(CC) $(CC_FLAGS) $(CC_DEPENDENCY) $(DEP_PATH)/$*.d -c $< -o $@
-	@echo " + CC\t$<"
+	@mkdir -p $(dir $@)
+	@mkdir -p $(dir $(DEP_PATH)/$*.d)
+	@$(CC) $(CC_FLAGS) $(CC_DEP) $(DEP_PATH)/$*.d -MT $@ -c $< -o $@
+	@echo "  + CC	$<"
 
-$(EXTERNAL_OBJ_PATH)/%.o: $(EXTERNAL_SRC_PATH)/%.c
-	@mkdir -p $(EXTERNAL_OBJ_PATH)
-	@$(CC) $(CC_FLAGS) -c $< -o $@
-	@echo " + CC\t$<"
+-include $(DEPS)
 
-# if DEP_PATH exist then search for all .d files in DEP_PATH
-ALL_DEPS                := 	$(shell if [ -d $(DEP_PATH) ]; then find $(DEP_PATH) -type f -name "*.d"; fi)
--include $(ALL_DEPS)
+.DEFAULT_GOAL := help
+.PHONY: all bin lib clean help create_build_dir list info clang format docker
 
-# Build the program
-all: $(OBJS) $(EXTERNAL_OBJS)
-	@$(CC) $(CC_FLAGS) $(LD_FLAGS) $(OBJS) $(EXTERNAL_OBJS) -o $(PROGRAM_NAME)
-	@echo " + LD\t$(PROGRAM_NAME)"
-	@echo "Build program $(PROGRAM_NAME) successfully in $(CURDIR)"
-
-# Show help
-help:
-	@echo "Makefile for build $(PROGRAM_NAME)"
-	@echo "USAGE:"
-	@echo "  make all\t- Build the program"
-	@echo "  make clean\t- Clean all build files"
-	@echo "  make help\t- Show this help"
-	@echo "  make lib\t- Build the $(LIBRARY_NAME) library"
-	@echo "  make test\t- Run all test cases"
-	@echo "  make dep\t- Install dependencies"
-	@echo "  make add-env\t- Export the program to the PATH variable"
-	@echo "  make sync\t- Sync the external library"
-	@echo ""
-
-# Test the program library
-test: lib all
-	@$(MAKE) -j4 -C $(TEST_PATH) test
-
-
-# filter out the main.o file
-LIB_OBJS                :=  $(filter-out $(OBJ_PATH)/main.o, $(OBJS))
-# Build the library
-lib: mkdir-lib $(LIB_OBJS) $(EXTERNAL_OBJS)
-	@$(AR) rcs $(LIB_PATH)/lib$(LIBRARY_NAME)$(STATIC_LIBRARY_POSTFIX) $(LIB_OBJS) $(EXTERNAL_OBJS)
-	@echo " + AR\tlib$(LIBRARY_NAME)$(STATIC_LIBRARY_POSTFIX)"
-	@$(CC) $(CC_FLAGS) $(LD_FLAGS) -shared $(LIB_OBJS) $(EXTERNAL_OBJS) -o $(LIB_PATH)/lib$(LIBRARY_NAME)$(SHARED_LIBRARY_POSTFIX)
-	@echo " + LD\tlib$(LIBRARY_NAME)$(SHARED_LIBRARY_POSTFIX)"
-	@echo "Build lib$(LIBRARY_NAME)$(STATIC_LIBRARY_POSTFIX) and lib$(LIBRARY_NAME)$(SHARED_LIBRARY_POSTFIX) library in $(LIB_PATH)"
-
-# Make the lib directory
-mkdir-lib:
+create_build_dir:
+	@mkdir -p $(OBJ_PATH)
+	@mkdir -p $(DEP_PATH)
+	@mkdir -p $(BIN_PATH)
 	@mkdir -p $(LIB_PATH)
 
-# Clean all build files
-clean:
-	@rm -rf $(BUILD_PATH)
-	@rm -rf $(LIB_PATH)
-	@rm -f $(PROGRAM_NAME)
-
-# Clean all build file and cache (danger for performance)
-clean-all:
-	@$(MAKE) clean
-	@$(MAKE) -C $(TEST_PATH) clean-all
-
-# Install dependencies
-dep:
-	@$(BASH) $(SCRIPT_PATH)/install-dep.sh
-
-# Export the program to the shell environment
-SHELL_NAME = $(shell echo $$SHELL)
-add-env:
-ifeq ($(SHELL_NAME), /bin/bash)
-	@echo 'export PATH="$(CURDIR):$$PATH"' >> ~/.bashrc
-	@echo "Use command 'source ~/.bashrc' to update the env variable"
-else ifeq ($(SHELL_NAME), /bin/zsh)
-	@echo 'export PATH="$(CURDIR):$$PATH"' >> ~/.zshrc
-	@echo "Use command 'source ~/.zshrc' to update the env variable"
-else ifeq ($(SHELL_NAME), /bin/sh)
-	@echo 'export PATH="$(CURDIR):$$PATH"' >> ~/.profile
-	@echo "Use command 'source ~/.profile' to update the env variable"
+ifeq ($(strip $(SRCS)),)
+$(BIN_PATH)/$(BIN_NAME): create_build_dir
+	@echo "Error: no .c files under $(SRC_PATH)"
+	@exit 1
 else
-	@echo "Unsupported shell: $(SHELL_NAME)"
+$(BIN_PATH)/$(BIN_NAME): create_build_dir $(OBJS)
+	@$(CC) $(CC_FLAGS) -o $@ $(OBJS)
+	@echo "  + LD	$@"
 endif
 
-# Sync the external library
-sync:
-	@$(BASH) $(SCRIPT_PATH)/sync-lib.sh
+ifeq ($(strip $(LIB_OBJS)),)
+$(LIB_ARTIFACT): create_build_dir
+	@echo "Error: no library objects (need at least one .c besides main.c under $(SRC_PATH))"
+	@exit 1
+else
+$(LIB_ARTIFACT): create_build_dir $(LIB_OBJS)
+ifeq ($(LIB_BUILD),static)
+	@$(AR) $(AR_FLAGS) $@ $(LIB_OBJS)
+	@echo "  + AR	$@"
+else
+	@$(LD) -shared -o $@ $(LIB_OBJS)
+	@echo "  + LD	$@"
+endif
+endif
+
+bin: $(BIN_PATH)/$(BIN_NAME)
+
+lib: $(LIB_ARTIFACT)
+
+all: bin lib
+
+clean:
+	@rm -rf $(BUILD_PATH)
+
+list:
+	@echo "Sources:"
+	@echo $(SRCS) | tr ' ' '\n' | sed 's/^/  /'
+	@echo "Total: $(words $(SRCS)) files"
+	@echo "Library objects (excluding main.o):"
+	@echo $(LIB_OBJS) | tr ' ' '\n' | sed 's/^/  /'
+
+info:
+	@echo "Build configuration"
+	@echo "  BIN_NAME    : $(BIN_NAME)"
+	@echo "  LIB_NAME    : $(LIB_NAME)"
+	@echo "  LIB_BUILD   : $(LIB_BUILD)"
+	@echo "  LIB_ARTIFACT: $(LIB_ARTIFACT)"
+	@echo "  DEBUG       : $(DEBUG)"
+	@echo "  HOST_OS     : $(HOST_OS)"
+	@echo ""
+
+help:
+	@echo "USAGE:"
+	@echo "  make all       - build executable and library"
+	@echo "  make bin       - build executable"
+	@echo "  make lib       - build library"
+	@echo "  make clean     - clean build directory"
+	@echo "  make list      - list source files"
+	@echo "  make info      - show build configuration"
+	@echo "  make clang     - generate compile_commands.json"
+	@echo "  make format    - format .c and .h"
+	@echo "  make docker    - build and run development container"
+	@echo "  make help      - this message\n"
+
+clang:
+	@$(MAKE) clean
+	@bear -- $(MAKE) all
+
+format:
+	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \
+		[ -d "$$d" ] || continue; \
+		find "$$d" \( -name "*.c" -o -name "*.h" \) -exec clang-format -i {} +; \
+	done
+	@echo "Format done."
+
+export CC
+
+DOCKER_IMAGE := qgit
+docker:
+	@if [ -z "$$(docker images -q $(DOCKER_IMAGE) 2>/dev/null)" ]; then \
+		echo "Building Docker image $(DOCKER_IMAGE)..."; \
+		docker build -t $(DOCKER_IMAGE) -f Dockerfile .; \
+	fi
+	@if [ -n "$$(docker ps -aq -f name=$(DOCKER_IMAGE)-container 2>/dev/null)" ]; then \
+		docker rm -f $(DOCKER_IMAGE)-container 2>/dev/null || true; \
+	fi
+	@docker run -it --name $(DOCKER_IMAGE)-container -v $(CUR_DIR):/workspace $(DOCKER_IMAGE) /bin/bash

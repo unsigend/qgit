@@ -1,1 +1,0 @@
-"""Test Suite for cmd module"""
