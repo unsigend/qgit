@@ -143,8 +143,13 @@ help:
 	@echo "  make info      - show build configuration"
 	@echo "  make clang     - generate compile_commands.json"
 	@echo "  make format    - format .c and .h"
+	@echo "  make flags     - show compiler flags"
 	@echo "  make docker    - build and run development container"
 	@echo "  make help      - this message\n"
+
+flags:
+	@echo "Compiler flags:"
+	@echo $(CC_FLAGS)
 
 clang:
 	@$(MAKE) clean
