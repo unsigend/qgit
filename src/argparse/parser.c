@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 
-#include <argparse.h>
+#include "argparse.h"
+
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>

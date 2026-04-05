@@ -14,12 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-MK_DIR := ../scripts/mk
+CUR_DIR       := .
+ROOT_DIR      := $(CUR_DIR)/..
+CONFIG_PATH   := $(ROOT_DIR)/config
+BUILD_PATH    := $(ROOT_DIR)/build
+BIN_PATH      := $(BUILD_PATH)/bin
 
-include $(MK_DIR)/config.mk
+include $(CONFIG_PATH)/config.mk
 
-.PHONY: test clean
+BATS       ?= bats
+CMD_TESTS  := $(CUR_DIR)/cmd
+QGIT       := $(abspath $(BIN_PATH)/$(BIN_NAME))
+GIT        ?= git
 
-test: 
+export QGIT GIT
 
-	
+.DEFAULT_GOAL := test
+
+.PHONY: test
+
+test:
+	@$(MAKE) -C $(ROOT_DIR) bin
+	@$(BATS) $(CMD_TESTS)
+

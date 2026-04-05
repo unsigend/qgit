@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <stddef.h>
+#include "cmd.h"
+#include "util.h"
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <util.h>
 
 const struct subcmd subcmds[] = {
     {"init", "Initialize a new repository", cmd_init},
@@ -73,7 +74,7 @@ int runcmd(int argc, char **argv)
   if (!subcmd) {
     if (!strcmp(argv[0], "--help") || !strcmp(argv[0], "-h")) {
       showcmds();
-      return 0;
+      return EXIT_SUCCESS;
     } else
       error("qgit: '%s' is not a qgit command. See 'qgit --help'\n", argv[0]);
   }

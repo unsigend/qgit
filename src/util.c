@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <util.h>
+#include <stdnoreturn.h>
 
 noreturn void fatal()
 {

@@ -15,13 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <argparse.h>
-#include <cmd.h>
-#include <repo.h>
+#include "argparse.h"
+#include "cmd.h"
+#include "repo.h"
+#include "util.h"
+
+#include <limits.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <util.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 int cmd_init(int argc, char **argv)
 {
@@ -56,17 +60,22 @@ int cmd_init(int argc, char **argv)
     bname = "main"; /* TODO: get this from config file, init.defaultBranch
                        configuration */
 
-  char **remargv = argparse_getremargv(&ctx);
-  if (remargv)
-    path = remargv[0];
+  if (argparse_getremargc(&ctx) > 0)
+    path = argparse_getremargv(&ctx)[0];
   else
     path = ".";
 
+  char abspath[PATH_MAX];
+  if (!realpath(path, abspath))
+    fatal();
+
   struct repo repo;
+  if (repo_init(&repo, abspath, bare, false) == -1)
+    fatal();
+  if (repo_create(&repo, bname) == -1)
+    fatal();
 
-  (void)path;
-  (void)repo;
-
+  repo_fini(&repo);
   argparse_fini(&ctx);
   return 0;
 }

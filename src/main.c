@@ -15,14 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include "cmd.h"
+
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
   if (argc < 2) {
     showcmds();
-    return 0;
+    return EXIT_FAILURE;
   }
   return runcmd(argc - 1, argv + 1);
 }

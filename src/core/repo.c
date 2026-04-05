@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "repo.h"
+
+#include <errno.h>
 #include <limits.h>
-#include <repo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,13 +32,13 @@ static const char *dirs[] = {
     "refs",    "refs/heads",   "refs/tags",
 };
 
-int repo_init(struct repo *repo, const char *path, bool bare)
+int repo_init(struct repo *repo, const char *path, bool bare, bool check)
 {
   if (!repo || !path)
     return -1;
   const char *qgit_dir = ".qgit";
   struct stat st;
-  if (stat(path, &st) == -1 || !S_ISDIR(st.st_mode))
+  if (check && (stat(path, &st) == -1 || !S_ISDIR(st.st_mode)))
     return -1;
   repo->worktree = strdup(path);
   if (!repo->worktree)
@@ -57,8 +59,15 @@ int repo_create(const struct repo *repo, const char *bname)
 {
   if (!repo || !bname)
     return -1;
-  if (mkdir(repo->qgit_dir, PERM) == -1)
+
+  int re = 0; /* reinitialize */
+  if (mkdir(repo->qgit_dir, PERM) == -1) {
+    if (errno == EEXIST) {
+      re = 1;
+      goto done;
+    }
     return -1;
+  }
 
   char buf[PATH_MAX];
   const char *dirname = repo->qgit_dir;
@@ -93,6 +102,12 @@ int repo_create(const struct repo *repo, const char *bname)
   fprintf(fp, "\tfilemode = true\n");
   fprintf(fp, "\tbare = %s\n", repo->bare ? "true" : "false");
   fclose(fp);
+
+done:
+  if (re)
+    printf("Reinitialized existing qgit repository in %s/\n", repo->qgit_dir);
+  else
+    printf("Initialized empty qgit repository in %s/\n", repo->qgit_dir);
 
   return 0;
 }

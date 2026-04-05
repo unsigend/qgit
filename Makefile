@@ -23,6 +23,7 @@ OBJ_PATH      := $(BUILD_PATH)/obj
 DEP_PATH      := $(BUILD_PATH)/dep
 BIN_PATH      := $(BUILD_PATH)/bin
 LIB_PATH      := $(BUILD_PATH)/lib
+TESTS_PATH    := $(CUR_DIR)/tests
 
 include $(CONFIG_PATH)/config.mk
 
@@ -155,6 +156,7 @@ help:
 	@echo "  make flags     - show compiler flags"
 	@echo "  make docker    - build and run development container"
 	@echo "  make install   - install executable globally"
+	@echo "  make test      - run tests"
 	@echo "  make help      - this message\n"
 
 flags:
@@ -164,6 +166,9 @@ flags:
 clang:
 	@$(MAKE) clean
 	@bear -- $(MAKE) all
+
+test: bin
+	@$(MAKE) -C $(TESTS_PATH) test
 
 format:
 	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \

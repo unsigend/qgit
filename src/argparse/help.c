@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 
-#include <argparse.h>
+#include "argparse.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>

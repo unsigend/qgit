@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include "cmd.h"
 
 int cmd_merge(int argc, char **argv)
 {

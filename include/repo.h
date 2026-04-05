@@ -27,7 +27,9 @@ struct repo {
   bool bare;
 };
 
-extern int repo_init(struct repo *repo, const char *path, bool bare);
+/* Initialize a repository. Check whether exists if check is set. */
+extern int repo_init(struct repo *repo, const char *path, bool bare,
+                     bool check);
 extern int repo_create(const struct repo *repo, const char *bname);
 extern void repo_fini(struct repo *repo);
 
