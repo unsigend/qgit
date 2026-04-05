@@ -16,15 +16,14 @@
  */
 
 #include "argparse.h"
-#include "cmd.h"
-#include "repo.h"
-#include "util.h"
+#include "error.h"
+#include "file.h"
+#include "objs/repo.h"
 
+#include <errno.h>
 #include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 int cmd_init(int argc, char **argv)
@@ -60,22 +59,30 @@ int cmd_init(int argc, char **argv)
     bname = "main"; /* TODO: get this from config file, init.defaultBranch
                        configuration */
 
-  if (argparse_getremargc(&ctx) > 0)
+  if (argparse_getremargc(&ctx) > 0) {
     path = argparse_getremargv(&ctx)[0];
-  else
+    if (mkdirp(path, PERM_DIR) == -1 && errno != EEXIST)
+      fatal();
+  } else
     path = ".";
 
   char abspath[PATH_MAX];
   if (!realpath(path, abspath))
     fatal();
 
-  struct repo repo;
-  if (repo_init(&repo, abspath, bare, false) == -1)
-    fatal();
-  if (repo_create(&repo, bname) == -1)
+  struct repo *repo = repo_create(abspath, bname, bare);
+  if (!repo)
     fatal();
 
-  repo_fini(&repo);
+  if (!quiet) {
+    if (repo->reinit)
+      printf("Reinitialized existing qgit repository in %s/\n", repo->qgit);
+    else
+      printf("Initialized empty qgit repository in %s/\n", repo->qgit);
+  }
+
+  repo_close(repo);
+
   argparse_fini(&ctx);
   return 0;
 }

@@ -15,16 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef FILE_H
+#define FILE_H
 
-#include <stddef.h>
-#include <stdnoreturn.h>
+#include <sys/stat.h>
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define PERM_DIR                                                               \
+  (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH |                 \
+   S_IXOTH) /* default directory permission */
+#define PERM_FILE                                                              \
+  (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) /* default file permission */
 
-noreturn void fatal();
-noreturn void error(const char *fmt, ...);
+extern int mkdirp(const char *path, mode_t mode);
 
 #endif

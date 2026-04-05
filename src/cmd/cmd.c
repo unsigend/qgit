@@ -16,7 +16,7 @@
  */
 
 #include "cmd.h"
-#include "util.h"
+#include "error.h"
 
 #include <stdio.h>
 #include <stdlib.h>

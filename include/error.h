@@ -15,22 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPO_H
-#define REPO_H
+#ifndef ERROR_H
+#define ERROR_H
 
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdnoreturn.h>
 
-struct repo {
-  char *worktree;
-  char *qgit_dir;
-  bool bare;
-};
-
-/* Initialize a repository. Check whether exists if check is set. */
-extern int repo_init(struct repo *repo, const char *path, bool bare,
-                     bool check);
-extern int repo_create(const struct repo *repo, const char *bname);
-extern void repo_fini(struct repo *repo);
+noreturn void fatal();
+noreturn void error(const char *fmt, ...);
 
 #endif
