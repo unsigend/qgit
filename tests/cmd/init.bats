@@ -55,7 +55,7 @@ setup() {
 }
 
 @test "init: --quiet" {
-  mkdir qquiet && cd qquiet
+  mkdir quiet && cd quiet
   run "$QGIT" init --quiet
   [ "$status" -eq 0 ]
   [ -d .qgit/objects ]

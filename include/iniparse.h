@@ -30,17 +30,23 @@
 #include <stddef.h>
 #include <stdio.h>
 
-struct iniparse_ctx {
+struct iniFILE {
   const char *filename;
   char *buf;
   size_t bufsz;
-  size_t nentries;
-  size_t nentriescap;
-  struct iniparse_entry *entries;
+  size_t nsecs;
+  size_t nsecscap;
+  struct ini_sec *secs;
 };
 
-struct iniparse_entry {
+struct ini_sec {
   const char *sec;
+  size_t nentries;
+  size_t nentriescap;
+  struct ini_entry *entries;
+};
+
+struct ini_entry {
   const char *key;
   const char *val;
 };
@@ -49,15 +55,30 @@ struct iniparse_entry {
 extern "C" {
 #endif
 
-/* Return 0 on success, -1 on error. */
-extern int iniparse_init(struct iniparse_ctx *ctx, const char *filename);
-extern int iniparse_parse(struct iniparse_ctx *ctx);
-extern void iniparse_fini(struct iniparse_ctx *ctx);
+extern struct iniFILE *iniparse_open(const char *filename);
+extern struct iniFILE *iniparse_create(const char *filename);
+extern void iniparse_close(struct iniFILE *fp);
+extern int iniparse_parse(struct iniFILE *fp);
 
-/* Return the value of the key in the section, NULL if not found or key, section
-   not exists. */
-extern const char *iniparse_getvalue(struct iniparse_ctx *ctx, const char *sec,
-                                     const char *key);
+/* Return the value of the key in the section, NULL if not found or key or
+   section not exists. */
+extern const char *iniparse_get(struct iniFILE *fp, const char *sec,
+                                const char *key);
+extern int iniparse_set(struct iniFILE *fp, const char *sec, const char *key,
+                        const char *val);
+extern int iniparse_unset(struct iniFILE *fp, const char *sec, const char *key);
+
+/* Print the INI parsed content with the format of [section].[key]=[value]
+   to the output stream or a buffer. Return the number of bytes written on
+   success, -1 on error. */
+extern int iniparse_fprint(struct iniFILE *fp, FILE *stream);
+extern int iniparse_sprint(struct iniFILE *fp, char *buf);
+extern int iniparse_snprint(struct iniFILE *fp, char *buf, size_t bufsz);
+
+/* Write the file content to the current INI file or a new file. Return 0 on
+   success, -1 on error. */
+extern int iniparse_write(struct iniFILE *fp);
+extern int iniparse_writeto(struct iniFILE *fp, const char *filename);
 
 #ifdef __cplusplus
 }

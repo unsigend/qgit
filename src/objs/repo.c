@@ -57,6 +57,16 @@ struct repo *repo_open(const char *abspath)
     repo_close(repo);
     return NULL;
   }
+
+  strcat(buf, "/config");
+  repo->config = iniparse_open(buf);
+  if (repo->config && iniparse_parse(repo->config) == -1) {
+    iniparse_close(repo->config);
+    repo_close(repo);
+    repo->config = NULL;
+    return NULL;
+  }
+
   return repo;
 }
 
@@ -137,5 +147,7 @@ void repo_close(struct repo *repo)
     free(repo->worktree);
   if (repo->qgit)
     free(repo->qgit);
+  if (repo->config)
+    iniparse_close(repo->config);
   free(repo);
 }

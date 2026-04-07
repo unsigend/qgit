@@ -28,6 +28,7 @@ const struct subcmd subcmds[] = {
     {"status", "Show the working tree status", cmd_status},
     {"commit", "Record changes to the repository", cmd_commit},
     {"log", "Show commit logs", cmd_log},
+    {"config", "Get and set repository or global options", cmd_config},
     {"cat-file",
      "Provide content or type and size information for repository objects",
      cmd_cat_file},

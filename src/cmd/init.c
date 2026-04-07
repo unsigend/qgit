@@ -50,10 +50,8 @@ int cmd_init(int argc, char **argv)
   };
 
   argparse_init(&ctx, opts, &desc);
-  if (argparse_parse(&ctx, argc, argv) == -1) {
+  if (argparse_parse(&ctx, argc, argv) == -1)
     error("qgit: %s\n", argparse_strerror(&ctx));
-    return -1;
-  }
 
   if (!bname)
     bname = "main"; /* TODO: get this from config file, init.defaultBranch

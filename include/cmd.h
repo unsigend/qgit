@@ -38,6 +38,7 @@ extern void showcmds(void);
 extern int cmd_init(int, char **);
 extern int cmd_add(int, char **);
 extern int cmd_status(int, char **);
+extern int cmd_config(int, char **);
 extern int cmd_commit(int, char **);
 extern int cmd_log(int, char **);
 extern int cmd_cat_file(int, char **);

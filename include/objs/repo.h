@@ -18,6 +18,7 @@
 #ifndef REPO_H
 #define REPO_H
 
+#include "iniparse.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -26,6 +27,7 @@ struct repo {
   char *qgit;
   bool bare;
   bool reinit;
+  struct iniFILE *config;
 };
 
 extern struct repo *repo_open(const char *abspath);
