@@ -63,7 +63,11 @@ struct iniFILE *iniparse_open(const char *filename)
   if (!fp)
     return NULL;
   memset(fp, 0, sizeof(*fp));
-  fp->filename = filename;
+  fp->filename = strdup(filename);
+  if (!fp->filename) {
+    free(fp);
+    return NULL;
+  }
 
   if ((fd = open(filename, O_RDONLY)) == -1) {
     free(fp);
@@ -100,7 +104,11 @@ struct iniFILE *iniparse_create(const char *filename)
   if (!fp)
     return NULL;
   memset(fp, 0, sizeof(*fp));
-  fp->filename = filename;
+  fp->filename = strdup(filename);
+  if (!fp->filename) {
+    free(fp);
+    return NULL;
+  }
 
   return fp;
 }
@@ -118,5 +126,7 @@ void iniparse_close(struct iniFILE *fp)
       freesec(&fp->secs[i]);
     free(fp->secs);
   }
+  if (fp->filename)
+    free((void *)fp->filename);
   free(fp);
 }

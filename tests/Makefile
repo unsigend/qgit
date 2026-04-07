@@ -31,9 +31,13 @@ export QGIT GIT
 
 .DEFAULT_GOAL := test
 
-.PHONY: test
+.PHONY: test test-%
 
 test:
 	@$(MAKE) -C $(ROOT_DIR) bin
 	@$(BATS) $(CMD_TESTS)
+
+test-%:
+	@$(MAKE) -C $(ROOT_DIR) bin
+	@$(BATS) $(CMD_TESTS)/$*.bats
 

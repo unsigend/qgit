@@ -78,7 +78,7 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
 -include $(DEPS)
 
 .DEFAULT_GOAL := help
-.PHONY: all bin lib clean help create_build_dir list info clang format docker install
+.PHONY: all bin lib clean help create_build_dir list info clang format docker install test-%
 
 create_build_dir:
 	@mkdir -p $(OBJ_PATH)
@@ -156,7 +156,8 @@ help:
 	@echo "  make flags     - show compiler flags"
 	@echo "  make docker    - build and run development container"
 	@echo "  make install   - install executable globally"
-	@echo "  make test      - run tests"
+	@echo "  make test      - run all tests"
+	@echo "  make test-NAME - run one test"
 	@echo "  make help      - this message\n"
 
 flags:
@@ -169,6 +170,9 @@ clang:
 
 test: bin
 	@$(MAKE) -C $(TESTS_PATH) test
+
+test-%: bin
+	@$(MAKE) -C $(TESTS_PATH) test-$*
 
 format:
 	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \

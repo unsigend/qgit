@@ -1,3 +1,13 @@
 {
-  "cSpell.words": ["EREPO", "gquiet", "grepo", "lcfg", "nsecscap", "qrepo"]
+  "cSpell.words": [
+    "EREPO",
+    "gcfg",
+    "gquiet",
+    "grepo",
+    "gval",
+    "lcfg",
+    "nsecscap",
+    "qrepo",
+    "wtarget"
+  ]
 }

@@ -125,16 +125,20 @@ struct repo *repo_create(const char *abspath, const char *bname, bool bare)
   fclose(fp);
 
   snprintf(buf, PATH_MAX, "%s/config", repo->qgit);
-  fp = fopen(buf, "w");
-  if (!fp) {
+  repo->config = iniparse_create(buf);
+  if (!repo->config) {
     repo_close(repo);
     return NULL;
   }
-  fprintf(fp, "[core]\n");
-  fprintf(fp, "\trepositoryformatversion = 0\n");
-  fprintf(fp, "\tfilemode = true\n");
-  fprintf(fp, "\tbare = %s\n", repo->bare ? "true" : "false");
-  fclose(fp);
+  iniparse_set(repo->config, "core", "repositoryformatversion", "0");
+  iniparse_set(repo->config, "core", "filemode", "true");
+  iniparse_set(repo->config, "core", "bare", repo->bare ? "true" : "false");
+
+  if (iniparse_write(repo->config) == -1) {
+    iniparse_close(repo->config);
+    repo_close(repo);
+    return NULL;
+  }
 
   return repo;
 }
