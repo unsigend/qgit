@@ -54,7 +54,7 @@ endif
 CC_FLAGS := -std=c11 -Wall -Wextra -Werror -Wshadow
 CC_FLAGS += -I$(INCLUDE_PATH)
 ifeq ($(HOST_OS), Linux)
-CC_FLAGS += -D_POSIX_C_SOURCE=200809L
+CC_FLAGS += -D_XOPEN_SOURCE=700
 endif
 ifeq ($(LIB_BUILD),shared)
 CC_FLAGS += -fPIC

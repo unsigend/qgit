@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     make \
     gdb \
     git \
-    bats-core \
+    bats \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 

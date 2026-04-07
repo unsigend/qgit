@@ -16,8 +16,10 @@
  */
 
 #include "argparse.h"
+#include "config.h"
 #include "error.h"
 #include "file.h"
+#include "iniparse.h"
 #include "objs/repo.h"
 
 #include <errno.h>
@@ -30,8 +32,9 @@ int cmd_init(int argc, char **argv)
 {
   bool bare = false;
   bool quiet = false;
-  char *bname = NULL;
+  const char *bname = NULL;
   char *path = NULL;
+  struct iniFILE *gcfg = NULL;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -53,9 +56,15 @@ int cmd_init(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     error("qgit: %s\n", argparse_strerror(&ctx));
 
-  if (!bname)
-    bname = "main"; /* TODO: get this from config file, init.defaultBranch
-                       configuration */
+  if (!bname) {
+    gcfg = config_global();
+    if (gcfg) {
+      bname = iniparse_get(gcfg, "init", "defaultBranch");
+      if (!bname)
+        bname = "main";
+    } else
+      bname = "main";
+  }
 
   if (argparse_getremargc(&ctx) > 0) {
     path = argparse_getremargv(&ctx)[0];
@@ -80,6 +89,7 @@ int cmd_init(int argc, char **argv)
   }
 
   repo_close(repo);
+  iniparse_close(gcfg);
 
   argparse_fini(&ctx);
   return 0;

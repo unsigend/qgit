@@ -17,6 +17,7 @@
 
 #include "objs/repo.h"
 #include "file.h"
+#include "iniparse.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -55,15 +56,6 @@ struct repo *repo_open(const char *abspath)
   repo->qgit = strdup(buf);
   if (!repo->qgit) {
     repo_close(repo);
-    return NULL;
-  }
-
-  strcat(buf, "/config");
-  repo->config = iniparse_open(buf);
-  if (repo->config && iniparse_parse(repo->config) == -1) {
-    iniparse_close(repo->config);
-    repo_close(repo);
-    repo->config = NULL;
     return NULL;
   }
 
@@ -125,20 +117,22 @@ struct repo *repo_create(const char *abspath, const char *bname, bool bare)
   fclose(fp);
 
   snprintf(buf, PATH_MAX, "%s/config", repo->qgit);
-  repo->config = iniparse_create(buf);
-  if (!repo->config) {
+  struct iniFILE *config = iniparse_create(buf);
+  if (!config) {
     repo_close(repo);
     return NULL;
   }
-  iniparse_set(repo->config, "core", "repositoryformatversion", "0");
-  iniparse_set(repo->config, "core", "filemode", "true");
-  iniparse_set(repo->config, "core", "bare", repo->bare ? "true" : "false");
+  iniparse_set(config, "core", "repositoryformatversion", "0");
+  iniparse_set(config, "core", "filemode", "true");
+  iniparse_set(config, "core", "bare", repo->bare ? "true" : "false");
 
-  if (iniparse_write(repo->config) == -1) {
-    iniparse_close(repo->config);
+  if (iniparse_write(config) == -1) {
+    iniparse_close(config);
     repo_close(repo);
     return NULL;
   }
+
+  iniparse_close(config);
 
   return repo;
 }
@@ -151,7 +145,33 @@ void repo_close(struct repo *repo)
     free(repo->worktree);
   if (repo->qgit)
     free(repo->qgit);
-  if (repo->config)
-    iniparse_close(repo->config);
   free(repo);
+}
+
+struct repo *repo_find(const char *path)
+{
+  char abspath[PATH_MAX];
+  char qgit[PATH_MAX];
+  char parent[PATH_MAX];
+  char absparent[PATH_MAX];
+  struct stat st;
+
+  if (!realpath(path, abspath))
+    return NULL;
+
+  while (1) {
+    if (snprintf(qgit, PATH_MAX, "%s/.qgit", abspath) >= PATH_MAX)
+      return NULL;
+    if (stat(qgit, &st) == 0 && S_ISDIR(st.st_mode))
+      return repo_open(abspath);
+
+    if (snprintf(parent, PATH_MAX, "%s/..", abspath) >= PATH_MAX)
+      return NULL;
+
+    if (!realpath(parent, absparent))
+      return NULL;
+    if (strcmp(absparent, "/") == 0)
+      return NULL;
+    strcpy(abspath, absparent);
+  }
 }

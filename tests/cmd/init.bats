@@ -10,22 +10,20 @@ setup() {
   mkdir empty && cd empty
   run "$QGIT" init
   st_qgit=$status
-  oq=$output
+  [[ "$output" =~ Initialized.*/.qgit/$ ]]
   run "$GIT" init
   st_git=$status
-  og=$output
-  expect_ok_norm "$og" "$oq"
+  expect_ok_norm
 }
 
 @test "init: explicit ." {
   mkdir dot && cd dot
   run "$QGIT" init .
   st_qgit=$status
-  oq=$output
+  [[ "$output" =~ Initialized.*/.qgit/$ ]]
   run "$GIT" init .
   st_git=$status
-  og=$output
-  expect_ok_norm "$og" "$oq"
+  expect_ok_norm
 }
 
 @test "init: --help exit status" {
@@ -117,6 +115,15 @@ setup() {
   run "$GIT" init "missing/parent/dir/repo2"
   [ "$status" -eq 0 ]
   [ -d "missing/parent/dir/repo2" ]
+}
+
+@test "init: defaultBranch from global config" {
+  export HOME="$BATS_TEST_TMPDIR/home"
+  mkdir -p "$HOME"
+  "$QGIT" config --set --global init.defaultBranch custom >/dev/null
+  run "$QGIT" init repo
+  [ "$status" -eq 0 ]
+  grep -q "ref: refs/heads/custom" repo/.qgit/HEAD
 }
 
 @test "init: multiple nested dir" {

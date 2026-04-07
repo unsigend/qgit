@@ -15,50 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
 #include "argparse.h"
 #include "cmd.h"
 #include "error.h"
 #include "iniparse.h"
 
-#include <limits.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-static struct iniFILE *open_global(void)
-{
-  char path[PATH_MAX];
-  char *home = getenv("HOME");
-  if (!home)
-    return NULL;
-  snprintf(path, PATH_MAX, "%s/.qgitconfig", home);
-  struct stat st;
-  if (stat(path, &st) == -1 || !S_ISREG(st.st_mode))
-    return iniparse_create(path);
-  struct iniFILE *config = iniparse_open(path);
-  if (config && iniparse_parse(config) == -1) {
-    iniparse_close(config);
-    return NULL;
-  }
-  return config;
-}
-
-static struct iniFILE *open_local(void)
-{
-  char path[PATH_MAX];
-  getcwd(path, PATH_MAX);
-  snprintf(path, PATH_MAX, "%s/.qgit/config", path);
-  struct iniFILE *config = iniparse_open(path);
-  if (config && iniparse_parse(config) == -1) {
-    iniparse_close(config);
-    return NULL;
-  }
-  return config;
-}
 
 static void splitkey(char *arg, char **sec, char **key)
 {
@@ -112,11 +78,12 @@ int cmd_config(int argc, char **argv)
   struct iniFILE *gcfg = NULL;
 
   if (local || IS_AUTO(local, global))
-    lcfg = open_local();
-  if (local && !lcfg)
+    lcfg = config_cwd();
+  if (local && !lcfg) {
     error("qgit: --local can only be used inside a qgit repository\n");
+  }
   if (global || IS_AUTO(local, global))
-    gcfg = open_global();
+    gcfg = config_global();
 
   if (list) {
     if (gcfg)
@@ -129,21 +96,21 @@ int cmd_config(int argc, char **argv)
     splitkey(argparse_getremargv(&ctx)[0], &sec, &key);
     val = argparse_getremargv(&ctx)[1];
 
-    struct iniFILE *wtarget = global ? gcfg : lcfg;
-    if (!wtarget)
+    struct iniFILE *target = global ? gcfg : lcfg;
+    if (!target)
       error("qgit: not inside a qgit repository\n");
-    iniparse_set(wtarget, sec, key, val);
-    iniparse_write(wtarget);
+    iniparse_set(target, sec, key, val);
+    iniparse_write(target);
   } else if (unset) {
     if (argparse_getremargc(&ctx) != 1)
       error("qgit: --unset requires one argument\n");
     splitkey(argparse_getremargv(&ctx)[0], &sec, &key);
 
-    struct iniFILE *wtarget = global ? gcfg : lcfg;
-    if (!wtarget)
+    struct iniFILE *target = global ? gcfg : lcfg;
+    if (!target)
       error("qgit: not inside a qgit repository\n");
-    iniparse_unset(wtarget, sec, key);
-    iniparse_write(wtarget);
+    iniparse_unset(target, sec, key);
+    iniparse_write(target);
   } else if (get) {
     if (argparse_getremargc(&ctx) != 1)
       error("qgit: --get requires one argument\n");

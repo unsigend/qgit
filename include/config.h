@@ -15,24 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPO_H
-#define REPO_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <stdbool.h>
-#include <stddef.h>
+#include "iniparse.h"
 
-struct repo {
-  char *worktree;
-  char *qgit;
-  bool bare;
-  bool reinit;
-};
+/* Return the INI file of the global configuration, if not exists, create it. */
+extern struct iniFILE *config_global(void);
 
-extern struct repo *repo_open(const char *abspath);
-extern struct repo *repo_create(const char *abspath, const char *bname,
-                                bool bare);
-extern void repo_close(struct repo *repo);
-/* find the repo in the path or its ancestors, path is relative path e.g. "." */
-extern struct repo *repo_find(const char *path);
+/* Return the INI file of the current working directory repository, or NULL if
+   not inside a qgit repository. */
+extern struct iniFILE *config_cwd(void);
 
 #endif
