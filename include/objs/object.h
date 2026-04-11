@@ -15,19 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <openssl/sha.h>
-#include <stdio.h>
+#ifndef OBJECT_H
+#define OBJECT_H
 
-unsigned char *sha1_hash(const unsigned char *data, size_t len,
-                         unsigned char *hash)
-{
-  return SHA1(data, len, hash);
-}
+#define OBJ_COMMIT 1
+#define OBJ_TREE 2
+#define OBJ_BLOB 3
+#define OBJ_TAG 4
 
-unsigned char *sha1_hex(const unsigned char hash[20], unsigned char buf[41])
-{
-  for (size_t i = 0; i < 20; i++)
-    snprintf((char *)(buf + i * 2), 3, "%02x", hash[i]);
-  buf[40] = '\0';
-  return buf;
-}
+#endif

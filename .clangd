@@ -1,0 +1,8 @@
+CompileFlags:
+  Add:
+    - "-I./include"
+    - "-Wall"
+    - "-Wextra"
+    - "-Wno-unused-function"
+  Remove:
+    - "-Werror"

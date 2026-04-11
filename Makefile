@@ -66,6 +66,24 @@ else
 CC_FLAGS += -O2
 endif
 
+LDFLAGS :=
+ifeq ($(HOST_OS),Darwin)
+OPENSSL_PREFIX ?= $(shell \
+	if [ -d /opt/homebrew/opt/openssl ]; then \
+		echo /opt/homebrew/opt/openssl; \
+	elif [ -d /usr/local/opt/openssl ]; then \
+		echo /usr/local/opt/openssl; \
+	else \
+		echo ""; \
+	fi)
+ifneq ($(strip $(OPENSSL_PREFIX)),)
+CC_FLAGS += -I$(OPENSSL_PREFIX)/include
+LDFLAGS += -L$(OPENSSL_PREFIX)/lib
+endif
+endif
+
+LDLIBS := -lssl -lcrypto -lz
+
 AR_FLAGS := -rcs
 CC_DEP := -MMD -MP -MF
 
@@ -78,7 +96,7 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
 -include $(DEPS)
 
 .DEFAULT_GOAL := help
-.PHONY: all bin lib clean help create_build_dir list info clang format docker install test-%
+.PHONY: all bin lib clean help create_build_dir list info clang format docker install test-% unit
 
 create_build_dir:
 	@mkdir -p $(OBJ_PATH)
@@ -92,7 +110,7 @@ $(BIN_PATH)/$(BIN_NAME): create_build_dir
 	@exit 1
 else
 $(BIN_PATH)/$(BIN_NAME): create_build_dir $(OBJS)
-	@$(CC) $(CC_FLAGS) -o $@ $(OBJS)
+	@$(CC) $(CC_FLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 	@echo "  + LD	$@"
 endif
 
@@ -106,7 +124,7 @@ ifeq ($(LIB_BUILD),static)
 	@$(AR) $(AR_FLAGS) $@ $(LIB_OBJS)
 	@echo "  + AR	$@"
 else
-	@$(LD) -shared -o $@ $(LIB_OBJS)
+	@$(LD) -shared $(LDFLAGS) -o $@ $(LIB_OBJS) $(LDLIBS)
 	@echo "  + LD	$@"
 endif
 endif
@@ -119,6 +137,7 @@ all: bin lib
 
 clean:
 	@rm -rf $(BUILD_PATH)
+	@$(MAKE) -C $(TESTS_PATH) clean
 
 list:
 	@echo "Sources:"
@@ -158,11 +177,17 @@ help:
 	@echo "  make install   - install executable globally"
 	@echo "  make test      - run all tests"
 	@echo "  make test-NAME - run one test"
+	@echo "  make unit      - build and run unit tests"
+	@echo "  make unit-NAME - run one unit test"
 	@echo "  make help      - this message\n"
 
 flags:
 	@echo "Compiler flags:"
 	@echo $(CC_FLAGS)
+	@echo "Linker flags:"
+	@echo $(LDFLAGS)
+	@echo "Link libraries:"
+	@echo $(LDLIBS)
 
 clang:
 	@$(MAKE) clean
@@ -173,6 +198,12 @@ test: bin
 
 test-%: bin
 	@$(MAKE) -C $(TESTS_PATH) test-$*
+
+unit: lib
+	@$(MAKE) -C $(TESTS_PATH) unit
+
+unit-%: lib
+	@$(MAKE) -C $(TESTS_PATH) unit-$*
 
 format:
 	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \
