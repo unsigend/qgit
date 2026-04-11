@@ -11,6 +11,7 @@
 #define NTHREADMAX 64
 
 extern UTEST_SUITE(hash);
+extern UTEST_SUITE(compress);
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 
   /* add test suites */
   UTEST_ADDSUITE(hash);
+  UTEST_ADDSUITE(compress);
 
   for (int i = 1; i < argc; i++) {
     if (strncmp(argv[i], "-j", 2) == 0) {

@@ -14,3 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef COMPRESS_H
+#define COMPRESS_H
+
+#include <stddef.h>
+
+/* compression library, a thin wrapper around the zlib library. Both
+   compress and decompress will write a heap allocated buffer to dest, the
+   caller is responsible for freeing the buffer. */
+
+/* Compress the data using zlib, return 0 on success, -1 on error. */
+extern int zlib_compress(const unsigned char *src, size_t srclen,
+                         unsigned char **dest, size_t *destlen);
+
+/* Decompress the data using zlib, return 0 on success, -1 on error. */
+extern int zlib_decompress(const unsigned char *src, size_t srclen,
+                           unsigned char **dest, size_t *destlen);
+
+#endif
