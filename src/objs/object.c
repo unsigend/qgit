@@ -40,6 +40,49 @@ static const char *obj_types[] = {
     [OBJ_TAG] = "tag",
 };
 
+/* Get the raw representation of the object: <type> <size>\0<payload>, return
+   the buffer in heap. */
+static char *object_raw(struct object *obj, int *sz)
+{
+  if (!obj || !sz)
+    return NULL;
+
+  *sz = 1;
+  *sz += snprintf(NULL, 0, "%s %zu", obj_types[obj->type], obj->size);
+  *sz += obj->size;
+
+  char *raw = malloc(*sz);
+  if (!raw)
+    return NULL;
+
+  char *buf = raw;
+  buf += snprintf(buf, *sz, "%s %zu", obj_types[obj->type], obj->size);
+  *buf++ = '\0';
+  memcpy(buf, obj->payload, obj->size);
+
+  return raw;
+}
+
+int object_hash(struct object *obj)
+{
+  if (!obj)
+    return -1;
+
+  int sz = 0;
+  char *raw = object_raw(obj, &sz);
+  if (!raw)
+    return -1;
+
+  unsigned char sha1[20];
+  if (!sha1_hash((unsigned char *)raw, sz, sha1)) {
+    free(raw);
+    return -1;
+  }
+  sha1_hex(sha1, (unsigned char *)obj->sha1);
+  free(raw);
+  return 0;
+}
+
 struct object *object_read(struct repo *repo, const char *sha1)
 {
   char path[PATH_MAX];
@@ -47,9 +90,9 @@ struct object *object_read(struct repo *repo, const char *sha1)
     return NULL;
 
   struct object *obj = malloc(sizeof(struct object));
-  memset(obj, 0, sizeof(struct object));
   if (!obj)
     return NULL;
+  memset(obj, 0, sizeof(struct object));
   strncpy(obj->sha1, sha1, 41);
 
   int fd = open(path, O_RDONLY);
@@ -132,29 +175,17 @@ int object_write(struct repo *repo, struct object *obj)
   if (!repo || !obj)
     return -1;
 
-  int sz = 1;
-  sz += snprintf(NULL, 0, "%s %zu", obj_types[obj->type], obj->size);
-  sz += obj->size;
+  if (obj->sha1[0] == '\0' && object_hash(obj) == -1)
+    return -1;
 
-  char *raw = malloc(sz);
+  int rawsz = 0;
+  char *raw = object_raw(obj, &rawsz);
   if (!raw)
     return -1;
 
-  char *buf = raw;
-  buf += snprintf(buf, sz, "%s %zu", obj_types[obj->type], obj->size);
-  *buf++ = '\0';
-  memcpy(buf, obj->payload, obj->size);
-
-  unsigned char sha1[20];
-  if (!sha1_hash((unsigned char *)raw, sz, sha1)) {
-    free(raw);
-    return -1;
-  }
-  sha1_hex(sha1, (unsigned char *)obj->sha1);
-
   unsigned char *dest = NULL;
   size_t destlen = 0;
-  if (zlib_compress((unsigned char *)raw, sz, &dest, &destlen) == -1) {
+  if (zlib_compress((unsigned char *)raw, rawsz, &dest, &destlen) == -1) {
     free(raw);
     return -1;
   }
@@ -193,4 +224,47 @@ int object_write(struct repo *repo, struct object *obj)
   free(dest);
 
   return 0;
+}
+
+struct object *object_open(int type, const char *filename)
+{
+  if (!filename)
+    return NULL;
+
+  struct object *obj = malloc(sizeof(struct object));
+  if (!obj)
+    return NULL;
+  memset(obj, 0, sizeof(struct object));
+  obj->type = type;
+
+  int fd = open(filename, O_RDONLY);
+  if (fd == -1) {
+    object_free(obj);
+    return NULL;
+  }
+  struct stat st;
+  if (fstat(fd, &st) == -1) {
+    close(fd);
+    object_free(obj);
+    return NULL;
+  }
+  size_t rawsz = st.st_size;
+  char *buf = mmap(NULL, rawsz, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (buf == MAP_FAILED) {
+    close(fd);
+    object_free(obj);
+    return NULL;
+  }
+  close(fd);
+
+  obj->payload = malloc(rawsz);
+  obj->size = rawsz;
+  if (!obj->payload) {
+    munmap(buf, rawsz);
+    object_free(obj);
+    return NULL;
+  }
+  memcpy(obj->payload, buf, rawsz);
+  munmap(buf, rawsz);
+  return obj;
 }
