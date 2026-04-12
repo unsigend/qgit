@@ -47,6 +47,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
     return NULL;
 
   struct object *obj = malloc(sizeof(struct object));
+  memset(obj, 0, sizeof(struct object));
   if (!obj)
     return NULL;
   strncpy(obj->sha1, sha1, 41);
