@@ -14,3 +14,182 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "objs/object.h"
+#include "compress.h"
+#include "file.h"
+#include "objs/repo.h"
+#include "sha1.h"
+
+#include <errno.h>
+#include <fcntl.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#define OBJ_TYPE_LEN 8
+
+static const char *obj_types[] = {
+    [OBJ_COMMIT] = "commit",
+    [OBJ_TREE] = "tree",
+    [OBJ_BLOB] = "blob",
+    [OBJ_TAG] = "tag",
+};
+
+struct object *object_read(struct repo *repo, const char *sha1)
+{
+  char path[PATH_MAX];
+  if (!repo_obj_path(repo, sha1, path))
+    return NULL;
+
+  struct object *obj = malloc(sizeof(struct object));
+  if (!obj)
+    return NULL;
+  strncpy(obj->sha1, sha1, 41);
+
+  int fd = open(path, O_RDONLY);
+  if (fd == -1) {
+    object_free(obj);
+    return NULL;
+  }
+
+  struct stat st;
+  if (fstat(fd, &st) == -1) {
+    close(fd);
+    object_free(obj);
+    return NULL;
+  }
+
+  size_t rawsz = st.st_size;
+  unsigned char *raw = NULL;
+  if ((raw = mmap(NULL, rawsz, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
+    close(fd);
+    object_free(obj);
+    return NULL;
+  }
+
+  close(fd);
+
+  unsigned char *dest = NULL;
+  size_t destlen = 0;
+  if (zlib_decompress(raw, rawsz, &dest, &destlen) == -1) {
+    munmap(raw, rawsz);
+    object_free(obj);
+    return NULL;
+  }
+  munmap(raw, rawsz);
+
+  char type[OBJ_TYPE_LEN];
+  sscanf((const char *)dest, "%s %zu", type, &obj->size);
+  if (strcmp(type, "commit") == 0)
+    obj->type = OBJ_COMMIT;
+  else if (strcmp(type, "tree") == 0)
+    obj->type = OBJ_TREE;
+  else if (strcmp(type, "blob") == 0)
+    obj->type = OBJ_BLOB;
+  else if (strcmp(type, "tag") == 0)
+    obj->type = OBJ_TAG;
+  else {
+    free(dest);
+    object_free(obj);
+    return NULL;
+  }
+
+  unsigned char *payload = dest;
+  while (*payload)
+    ++payload;
+  payload++;
+
+  obj->payload = malloc(obj->size);
+  if (!obj->payload) {
+    free(dest);
+    object_free(obj);
+    return NULL;
+  }
+
+  memcpy(obj->payload, payload, obj->size);
+  free(dest);
+
+  return obj;
+}
+
+void object_free(struct object *obj)
+{
+  if (!obj)
+    return;
+  if (obj->payload)
+    free(obj->payload);
+  free(obj);
+}
+
+int object_write(struct repo *repo, struct object *obj)
+{
+  if (!repo || !obj)
+    return -1;
+
+  int sz = 1;
+  sz += snprintf(NULL, 0, "%s %zu", obj_types[obj->type], obj->size);
+  sz += obj->size;
+
+  char *raw = malloc(sz);
+  if (!raw)
+    return -1;
+
+  char *buf = raw;
+  buf += snprintf(buf, sz, "%s %zu", obj_types[obj->type], obj->size);
+  *buf++ = '\0';
+  memcpy(buf, obj->payload, obj->size);
+
+  unsigned char sha1[20];
+  if (!sha1_hash((unsigned char *)raw, sz, sha1)) {
+    free(raw);
+    return -1;
+  }
+  sha1_hex(sha1, (unsigned char *)obj->sha1);
+
+  unsigned char *dest = NULL;
+  size_t destlen = 0;
+  if (zlib_compress((unsigned char *)raw, sz, &dest, &destlen) == -1) {
+    free(raw);
+    return -1;
+  }
+  free(raw);
+
+  char path[PATH_MAX];
+  if (!repo_obj_path(repo, obj->sha1, path)) {
+    free(dest);
+    return -1;
+  }
+
+  char *dir = strrchr(path, '/');
+  if (!dir) {
+    free(dest);
+    return -1;
+  }
+  *dir = '\0';
+  if (mkdirp(path, PERM_DIR) == -1 && errno != EEXIST) {
+    free(dest);
+    return -1;
+  }
+  *dir = '/';
+
+  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, PERM_FILE);
+  if (fd == -1) {
+    free(dest);
+    return -1;
+  }
+  if (write(fd, dest, destlen) != (ssize_t)destlen) {
+    close(fd);
+    free(dest);
+    return -1;
+  }
+
+  close(fd);
+  free(dest);
+
+  return 0;
+}

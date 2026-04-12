@@ -18,9 +18,23 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "repo.h"
+#include <stddef.h>
+
 #define OBJ_COMMIT 1
 #define OBJ_TREE 2
 #define OBJ_BLOB 3
 #define OBJ_TAG 4
+
+struct object {
+  int type;
+  char sha1[41];
+  unsigned char *payload;
+  size_t size;
+};
+
+extern struct object *object_read(struct repo *repo, const char *sha1);
+extern int object_write(struct repo *repo, struct object *obj);
+extern void object_free(struct object *obj);
 
 #endif

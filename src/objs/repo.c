@@ -175,3 +175,14 @@ struct repo *repo_find(const char *path)
     strcpy(abspath, absparent);
   }
 }
+
+char *repo_obj_path(struct repo *repo, const char *hash, char buf[PATH_MAX])
+{
+  if (!repo || !hash || !buf)
+    return NULL;
+
+  if (snprintf(buf, PATH_MAX, "%s/objects/%c%c/%s", repo->qgit, hash[0],
+               hash[1], hash + 2) >= PATH_MAX)
+    return NULL;
+  return buf;
+}

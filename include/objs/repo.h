@@ -18,6 +18,7 @@
 #ifndef REPO_H
 #define REPO_H
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -34,5 +35,9 @@ extern struct repo *repo_create(const char *abspath, const char *bname,
 extern void repo_close(struct repo *repo);
 /* find the repo in the path or its ancestors, path is relative path e.g. "." */
 extern struct repo *repo_find(const char *path);
+/* get the path of the object in the repository, the hash is a 41 bytes hex
+   string. */
+extern char *repo_obj_path(struct repo *repo, const char *hash,
+                           char buf[PATH_MAX]);
 
 #endif

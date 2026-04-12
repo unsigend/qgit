@@ -7,8 +7,11 @@
     "grepo",
     "gval",
     "lcfg",
+    "lcrypto",
+    "lssl",
     "nsecscap",
     "qrepo",
+    "rawsz",
     "wtarget"
   ]
 }
