@@ -17,6 +17,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "argparse.h"
 #include "cmd.h"
@@ -26,11 +27,13 @@
 int cmd_hash_object(int argc, char **argv)
 {
   bool write = false;
+  const char *type = NULL;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
       OPT_HELP(),
-      OPT_BOOL('w', NULL, "Write the object to the repository", &write),
+      OPT_BOOL('w', NULL, "write the object to the repository", &write),
+      OPT_STR('t', NULL, "object type", &type, OPT_REQUIRED),
       OPT_END(),
   };
   struct argparse_desc desc = {
@@ -52,8 +55,24 @@ int cmd_hash_object(int argc, char **argv)
     error("qgit: a file is required\n");
   }
 
-  /* Current implementation only supports blob objects */
-  struct object *obj = object_open(OBJ_BLOB, filename);
+  struct object *obj;
+  if (type) {
+    if (strcmp(type, "commit") == 0)
+      obj = object_open(OBJ_COMMIT, filename);
+    else if (strcmp(type, "tree") == 0)
+      obj = object_open(OBJ_TREE, filename);
+    else if (strcmp(type, "blob") == 0)
+      obj = object_open(OBJ_BLOB, filename);
+    else if (strcmp(type, "tag") == 0)
+      obj = object_open(OBJ_TAG, filename);
+    else {
+      argparse_fini(&ctx);
+      error("qgit: invalid object type '%s'\n", type);
+    }
+  } else
+    /* default to blob */
+    obj = object_open(OBJ_BLOB, filename);
+
   if (!obj) {
     argparse_fini(&ctx);
     fatal();
