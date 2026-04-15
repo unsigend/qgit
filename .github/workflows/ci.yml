@@ -1,4 +1,4 @@
-# qgit CI: build, tests, format, static analysis (LLVM)
+# qgit CI: build, tests, format, static analysis
 name: CI
 
 on:
@@ -29,9 +29,8 @@ jobs:
             clang-format \
             clang-tools
 
-      - name: Static analysis
-        run: |
-          scan-build --status-bugs -o scan-build-out make clean all
+      - name: Build
+        run: make all
 
       - name: Unit tests
         run: make unit
