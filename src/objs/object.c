@@ -63,7 +63,7 @@ static char *object_raw(struct object *obj, int *sz)
   return raw;
 }
 
-int object_hash(struct object *obj)
+int obj_hash(struct object *obj)
 {
   if (!obj)
     return -1;
@@ -83,7 +83,7 @@ int object_hash(struct object *obj)
   return 0;
 }
 
-struct object *object_read(struct repo *repo, const char *sha1)
+struct object *obj_read(struct repo *repo, const char *sha1)
 {
   char path[PATH_MAX];
   if (!repo_obj_path(repo, sha1, path))
@@ -97,14 +97,14 @@ struct object *object_read(struct repo *repo, const char *sha1)
 
   int fd = open(path, O_RDONLY);
   if (fd == -1) {
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
 
   struct stat st;
   if (fstat(fd, &st) == -1) {
     close(fd);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
 
@@ -112,7 +112,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
   unsigned char *raw = NULL;
   if ((raw = mmap(NULL, rawsz, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
     close(fd);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
 
@@ -122,7 +122,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
   size_t destlen = 0;
   if (zlib_decompress(raw, rawsz, &dest, &destlen) == -1) {
     munmap(raw, rawsz);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
   munmap(raw, rawsz);
@@ -139,7 +139,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
     obj->type = OBJ_TAG;
   else {
     free(dest);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
 
@@ -151,7 +151,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
   obj->payload = malloc(obj->size);
   if (!obj->payload) {
     free(dest);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
 
@@ -161,7 +161,7 @@ struct object *object_read(struct repo *repo, const char *sha1)
   return obj;
 }
 
-void object_free(struct object *obj)
+void obj_free(struct object *obj)
 {
   if (!obj)
     return;
@@ -170,12 +170,12 @@ void object_free(struct object *obj)
   free(obj);
 }
 
-int object_write(struct repo *repo, struct object *obj)
+int obj_write(struct repo *repo, struct object *obj)
 {
   if (!repo || !obj)
     return -1;
 
-  if (obj->sha1[0] == '\0' && object_hash(obj) == -1)
+  if (obj->sha1[0] == '\0' && obj_hash(obj) == -1)
     return -1;
 
   int rawsz = 0;
@@ -226,7 +226,7 @@ int object_write(struct repo *repo, struct object *obj)
   return 0;
 }
 
-struct object *object_open(int type, const char *filename)
+struct object *obj_open(int type, const char *filename)
 {
   if (!filename)
     return NULL;
@@ -239,20 +239,20 @@ struct object *object_open(int type, const char *filename)
 
   int fd = open(filename, O_RDONLY);
   if (fd == -1) {
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
   struct stat st;
   if (fstat(fd, &st) == -1) {
     close(fd);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
   size_t rawsz = st.st_size;
   char *buf = mmap(NULL, rawsz, PROT_READ, MAP_PRIVATE, fd, 0);
   if (buf == MAP_FAILED) {
     close(fd);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
   close(fd);
@@ -261,7 +261,7 @@ struct object *object_open(int type, const char *filename)
   obj->size = rawsz;
   if (!obj->payload) {
     munmap(buf, rawsz);
-    object_free(obj);
+    obj_free(obj);
     return NULL;
   }
   memcpy(obj->payload, buf, rawsz);

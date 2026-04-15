@@ -33,12 +33,12 @@ struct object {
   size_t size; /* the size of the payload */
 };
 
-extern struct object *object_open(int type, const char *filename);
-extern int object_write(struct repo *repo, struct object *obj);
-extern struct object *object_read(struct repo *repo, const char *sha1);
-extern void object_free(struct object *obj);
+extern struct object *obj_open(int type, const char *filename);
+extern int obj_write(struct repo *repo, struct object *obj);
+extern struct object *obj_read(struct repo *repo, const char *sha1);
+extern void obj_free(struct object *obj);
 
 /* Compute the hash of the object: <type> <size>\0<payload> */
-extern int object_hash(struct object *obj);
+extern int obj_hash(struct object *obj);
 
 #endif

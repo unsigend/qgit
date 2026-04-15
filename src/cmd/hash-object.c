@@ -58,28 +58,28 @@ int cmd_hash_object(int argc, char **argv)
   struct object *obj;
   if (type) {
     if (strcmp(type, "commit") == 0)
-      obj = object_open(OBJ_COMMIT, filename);
+      obj = obj_open(OBJ_COMMIT, filename);
     else if (strcmp(type, "tree") == 0)
-      obj = object_open(OBJ_TREE, filename);
+      obj = obj_open(OBJ_TREE, filename);
     else if (strcmp(type, "blob") == 0)
-      obj = object_open(OBJ_BLOB, filename);
+      obj = obj_open(OBJ_BLOB, filename);
     else if (strcmp(type, "tag") == 0)
-      obj = object_open(OBJ_TAG, filename);
+      obj = obj_open(OBJ_TAG, filename);
     else {
       argparse_fini(&ctx);
       error("qgit: invalid object type '%s'\n", type);
     }
   } else
     /* default to blob */
-    obj = object_open(OBJ_BLOB, filename);
+    obj = obj_open(OBJ_BLOB, filename);
 
   if (!obj) {
     argparse_fini(&ctx);
     fatal();
   }
 
-  if (object_hash(obj) == -1) {
-    object_free(obj);
+  if (obj_hash(obj) == -1) {
+    obj_free(obj);
     argparse_fini(&ctx);
     fatal();
   }
@@ -88,12 +88,12 @@ int cmd_hash_object(int argc, char **argv)
   if (write) {
     struct repo *repo = repo_find(".");
     if (!repo) {
-      object_free(obj);
+      obj_free(obj);
       argparse_fini(&ctx);
       fatal();
     }
-    if (object_write(repo, obj) == -1) {
-      object_free(obj);
+    if (obj_write(repo, obj) == -1) {
+      obj_free(obj);
       repo_close(repo);
       argparse_fini(&ctx);
       fatal();
@@ -101,7 +101,7 @@ int cmd_hash_object(int argc, char **argv)
     repo_close(repo);
   }
 
-  object_free(obj);
+  obj_free(obj);
   argparse_fini(&ctx);
 
   return 0;

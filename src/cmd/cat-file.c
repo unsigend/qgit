@@ -97,7 +97,7 @@ int cmd_cat_file(int argc, char **argv)
   }
 
   errno = 0;
-  struct object *obj = object_read(repo, hash);
+  struct object *obj = obj_read(repo, hash);
   if (!obj) {
     repo_close(repo);
     argparse_fini(&ctx);
@@ -115,7 +115,7 @@ int cmd_cat_file(int argc, char **argv)
     fwrite(obj->payload, 1, obj->size, stdout);
 
   fflush(stdout);
-  object_free(obj);
+  obj_free(obj);
   repo_close(repo);
   argparse_fini(&ctx);
   return 0;
