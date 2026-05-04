@@ -226,7 +226,7 @@ int obj_write(struct repo *repo, struct object *obj)
   return 0;
 }
 
-struct object *obj_open(int type, const char *filename)
+struct object *obj_init(int type, const char *filename)
 {
   if (!filename)
     return NULL;

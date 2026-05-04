@@ -29,13 +29,23 @@ struct repo {
   bool reinit;
 };
 
+/* Open an existing repository with the absolute path of the worktree. If the
+   repository is not found, return NULL. */
 extern struct repo *repo_open(const char *abspath);
+
+/* Create a new repository with the absolute path of the worktree, the name of
+   the initial branch and whether the repository is bare mode. */
 extern struct repo *repo_create(const char *abspath, const char *bname,
                                 bool bare);
+
+/* Release the resources of the repository. */
 extern void repo_close(struct repo *repo);
-/* find the repo in the path or its ancestors, path is relative path e.g. "." */
+
+/* Find the repository in the path or its ancestors, path is relative path e.g.
+   ".", NULL if not found. */
 extern struct repo *repo_find(const char *path);
-/* get the path of the object in the repository, the hash is a 41 bytes hex
+
+/* Get the path of the object in the repository, the hash is a 41 bytes hex
    string. */
 extern char *repo_obj_path(struct repo *repo, const char *hash,
                            char buf[PATH_MAX]);
