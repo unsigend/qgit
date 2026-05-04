@@ -97,7 +97,7 @@ int cmd_cat_file(int argc, char **argv)
   }
 
   errno = 0;
-  struct object *obj = obj_read(repo, hash);
+  struct object *obj = obj_init_sha1(repo, hash);
   if (!obj) {
     repo_close(repo);
     argparse_fini(&ctx);

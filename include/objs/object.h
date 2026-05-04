@@ -34,13 +34,13 @@ struct object {
 };
 
 /* Initialize an object memory instance with the type and the filename. */
-extern struct object *obj_init(int type, const char *filename);
+extern struct object *obj_init_file(int type, const char *filename);
+
+/* Initialize an object struct from the repository with the hash. */
+extern struct object *obj_init_sha1(struct repo *repo, const char *sha1);
 
 /* Compress the object and write it to the repository. */
 extern int obj_write(struct repo *repo, struct object *obj);
-
-/* Read an object from the repository with the hash and decompress it. */
-extern struct object *obj_read(struct repo *repo, const char *sha1);
 
 /* Release the resources of the object. */
 extern void obj_free(struct object *obj);

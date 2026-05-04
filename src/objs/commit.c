@@ -42,7 +42,7 @@ static char *parsekv(char *raw, char **key, char **val)
   return s + 1;
 }
 
-struct commit *commit_parse(struct object *obj)
+struct commit *commit_init(struct object *obj)
 {
   if (!obj)
     return NULL;

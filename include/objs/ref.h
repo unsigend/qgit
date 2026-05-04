@@ -15,24 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMIT_H
-#define COMMIT_H
+#ifndef REFS_H
+#define REFS_H
 
-#include "object.h"
+#include "repo.h"
 
-struct commit {
-  char tree[41];
-  char **parents;
-  int nparents;
-  char *author;
-  char *committer;
-  char *message;
-};
-
-/* Initialize a commit struct from the object payload */
-extern struct commit *commit_init(struct object *obj);
-
-/* Release the resources of the commit. */
-extern void commit_free(struct commit *commit);
+/* Resolve a ref to a SHA1. Returns heap-allocated 40-char hex string or NULL
+   if failed. */
+extern char *ref_resolve(struct repo *repo, const char *ref);
 
 #endif

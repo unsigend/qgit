@@ -83,7 +83,7 @@ int obj_hash(struct object *obj)
   return 0;
 }
 
-struct object *obj_read(struct repo *repo, const char *sha1)
+struct object *obj_init_sha1(struct repo *repo, const char *sha1)
 {
   char path[PATH_MAX];
   if (!repo_obj_path(repo, sha1, path))
@@ -226,7 +226,7 @@ int obj_write(struct repo *repo, struct object *obj)
   return 0;
 }
 
-struct object *obj_init(int type, const char *filename)
+struct object *obj_init_file(int type, const char *filename)
 {
   if (!filename)
     return NULL;
