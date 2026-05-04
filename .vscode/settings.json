@@ -10,6 +10,7 @@
     "lcrypto",
     "lssl",
     "nsecscap",
+    "parsekv",
     "qgit",
     "qrepo",
     "rawsz",
