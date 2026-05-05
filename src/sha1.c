@@ -16,7 +16,9 @@
  */
 
 #include <openssl/sha.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 unsigned char *sha1_hash(const unsigned char *data, size_t len,
                          unsigned char *buf)
@@ -24,10 +26,36 @@ unsigned char *sha1_hash(const unsigned char *data, size_t len,
   return SHA1(data, len, buf);
 }
 
-unsigned char *sha1_hex(const unsigned char hash[20], unsigned char buf[41])
+unsigned char *sha1_to_hex(const unsigned char hash[20], unsigned char buf[41])
 {
-  for (size_t i = 0; i < 20; i++)
-    snprintf((char *)(buf + i * 2), 3, "%02x", hash[i]);
+  static const char hex[] = "0123456789abcdef";
+  for (size_t i = 0; i < 20; i++) {
+    unsigned char hi = hash[i] >> 4;
+    unsigned char lo = hash[i] & 0x0f;
+    buf[i * 2] = hex[hi];
+    buf[i * 2 + 1] = hex[lo];
+  }
   buf[40] = '\0';
   return buf;
+}
+
+static unsigned hex_val(unsigned char c)
+{
+  if (c >= '0' && c <= '9')
+    return (unsigned)(c - '0');
+  if (c >= 'a' && c <= 'f')
+    return (unsigned)(c - 'a' + 10);
+  if (c >= 'A' && c <= 'F')
+    return (unsigned)(c - 'A' + 10);
+  return 0;
+}
+
+unsigned char *hex_to_sha1(const unsigned char hex[41], unsigned char sha1[20])
+{
+  for (size_t i = 0; i < 20; i++) {
+    unsigned char hi = hex[i * 2];
+    unsigned char lo = hex[i * 2 + 1];
+    sha1[i] = (hex_val(hi) << 4) | hex_val(lo);
+  }
+  return sha1;
 }

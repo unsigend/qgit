@@ -78,7 +78,7 @@ int obj_hash(struct object *obj)
     free(raw);
     return -1;
   }
-  sha1_hex(sha1, (unsigned char *)obj->sha1);
+  sha1_to_hex(sha1, (unsigned char *)obj->sha1);
   free(raw);
   return 0;
 }

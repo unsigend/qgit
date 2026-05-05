@@ -25,9 +25,12 @@
 extern unsigned char *sha1_hash(const unsigned char *data, size_t len,
                                 unsigned char *buf);
 
-/* Convert the 20 bytes raw hash to a 41 bytes hex string, the buffer is
-   guaranteed to be null-terminated. */
-extern unsigned char *sha1_hex(const unsigned char hash[20],
-                               unsigned char buf[41]);
+/* Convert the 20 bytes raw hash to a 41 bytes hex string. */
+extern unsigned char *sha1_to_hex(const unsigned char sha1[20],
+                                  unsigned char hex[41]);
+
+/* Convert the 41 bytes hex string to a 20 bytes raw hash. */
+extern unsigned char *hex_to_sha1(const unsigned char hex[41],
+                                  unsigned char sha1[20]);
 
 #endif
