@@ -14,32 +14,3 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef COMMIT_H
-#define COMMIT_H
-
-#include "object.h"
-
-struct commit {
-  char tree[41];
-  char **parents;
-  int nparents;
-  char *author;
-  char *committer;
-  char *message;
-};
-
-/* Initialize a commit struct from the object payload */
-extern struct commit *commit_init(struct object *obj);
-
-/* Release the resources of the commit. */
-extern void commit_free(struct commit *commit);
-
-typedef int (*commit_walk_cb)(struct commit *commit, const char *sha1,
-                              void *arg);
-
-/* Traverse the commit history from the given SHA1 with the first parent.*/
-extern int commit_walk_fp(struct repo *repo, const char *sha1,
-                          commit_walk_cb cb, void *arg);
-
-#endif

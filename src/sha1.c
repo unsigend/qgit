@@ -19,9 +19,9 @@
 #include <stdio.h>
 
 unsigned char *sha1_hash(const unsigned char *data, size_t len,
-                         unsigned char *hash)
+                         unsigned char *buf)
 {
-  return SHA1(data, len, hash);
+  return SHA1(data, len, buf);
 }
 
 unsigned char *sha1_hex(const unsigned char hash[20], unsigned char buf[41])

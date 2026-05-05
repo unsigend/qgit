@@ -54,7 +54,7 @@ static char *ref_read(struct repo *repo, const char *refpath)
   return strdup(buf);
 }
 
-/* Resolve a ref to a SHA1, search order
+/* Resolve a ref to a SHA1, search order under .qgit
    1. <name>
    2. refs/tags/<name>
    3. refs/heads/<name>

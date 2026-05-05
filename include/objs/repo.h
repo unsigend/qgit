@@ -38,12 +38,12 @@ extern struct repo *repo_open(const char *abspath);
 extern struct repo *repo_create(const char *abspath, const char *bname,
                                 bool bare);
 
-/* Release the resources of the repository. */
-extern void repo_close(struct repo *repo);
-
 /* Find the repository in the path or its ancestors, path is relative path e.g.
    ".", NULL if not found. */
 extern struct repo *repo_find(const char *path);
+
+/* Release the resources of the repository. */
+extern void repo_close(struct repo *repo);
 
 /* Get the path of the object in the repository, the hash is a 41 bytes hex
    string. */

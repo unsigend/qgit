@@ -121,3 +121,8 @@ void commit_free(struct commit *commit)
     free(commit->message);
   free(commit);
 }
+
+// int commit_walk_fp(struct repo *repo, const char *sha1, commit_walk_cb cb,
+//                    void *arg)
+// {
+// }

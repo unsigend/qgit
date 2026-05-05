@@ -15,11 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "argparse.h"
 #include "cmd.h"
+#include "error.h"
+
+#include <stdbool.h>
 
 int cmd_log(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  bool first_parent = false;
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_BOOL(0, "--first-parent",
+               "Show commit history of the first parent only", &first_parent),
+      OPT_END(),
+  };
+  struct argparse_desc desc = {
+      .prog = "qgit",
+      .desc = "Show commit logs",
+      .usage = "qgit log [options]",
+      .epilog = "See 'qgit log --help' for more information.",
+  };
+
+  argparse_init(&ctx, opts, &desc);
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    error("qgit: %s\n", argparse_strerror(&ctx));
+
+  argparse_fini(&ctx);
   return 0;
 }
