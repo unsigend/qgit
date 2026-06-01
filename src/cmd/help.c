@@ -15,23 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "cmd.h"
 
-int main(int argc, char *argv[])
+static inline void print_commands(const struct subcmd *subcmd)
 {
-  if (argc < 2)
-    return cmd_help(argc - 1, argv + 1);
+  if (!subcmd || !subcmd->name || !subcmd->desc)
+    return;
 
-  const char *cmd = argv[1];
-  if (exec_cmd(cmd, argc - 1, argv + 1) == -1) {
-    fprintf(stderr, "qgit: '%s' is not a qgit command. See 'qgit help'.\n",
-            cmd);
-    return -1;
-  }
+  const int lpad = 14;
+
+  fprintf(stdout, "  %-*s %s\n", lpad, subcmd->name, subcmd->desc);
+}
+
+int cmd_help(int argc, char **argv)
+{
+  /* Ignore arguments */
+  (void)argc;
+  (void)argv;
+
+  fprintf(stdout, "Usage: qgit <command> [options]\n");
+  fprintf(stdout, "Commands:\n");
+
+  for (size_t i = 0; i < nsubcmds; i++)
+    print_commands(&subcmds[i]);
 
   return 0;
 }

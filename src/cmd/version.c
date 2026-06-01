@@ -16,22 +16,16 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-#include "cmd.h"
+#include "global.h"
 
-int main(int argc, char *argv[])
+int cmd_version(int argc, char **argv)
 {
-  if (argc < 2)
-    return cmd_help(argc - 1, argv + 1);
+  /* Ignore arguments */
+  (void)argc;
+  (void)argv;
 
-  const char *cmd = argv[1];
-  if (exec_cmd(cmd, argc - 1, argv + 1) == -1) {
-    fprintf(stderr, "qgit: '%s' is not a qgit command. See 'qgit help'.\n",
-            cmd);
-    return -1;
-  }
-
+  fprintf(stdout, "qgit version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR,
+          VERSION_PATCH);
   return 0;
 }

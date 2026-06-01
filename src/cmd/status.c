@@ -15,23 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "cmd.h"
-
-int main(int argc, char *argv[])
+int cmd_status(int argc, char **argv)
 {
-  if (argc < 2)
-    return cmd_help(argc - 1, argv + 1);
-
-  const char *cmd = argv[1];
-  if (exec_cmd(cmd, argc - 1, argv + 1) == -1) {
-    fprintf(stderr, "qgit: '%s' is not a qgit command. See 'qgit help'.\n",
-            cmd);
-    return -1;
-  }
-
+  (void)argc;
+  (void)argv;
   return 0;
 }
