@@ -15,13 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef ERROR_H
+#define ERROR_H
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 0
+#include <stdnoreturn.h>
 
-#define VERSION_INT (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_PATCH)
+extern noreturn void die(const char *fmt, ...);
+extern noreturn void die_errno(void);
 
 #endif

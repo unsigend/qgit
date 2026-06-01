@@ -15,13 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdnoreturn.h>
+#include <string.h>
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 0
+noreturn void die(const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, "qgit: ", ap);
+  vfprintf(stderr, fmt, ap);
+  fputc('\n', stderr);
+  va_end(ap);
+  exit(EXIT_FAILURE);
+}
 
-#define VERSION_INT (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_PATCH)
-
-#endif
+noreturn void die_errno()
+{
+  fprintf(stderr, "qgit: %s\n", strerror(errno));
+  exit(EXIT_FAILURE);
+}

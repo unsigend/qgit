@@ -15,13 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef REPO_H
+#define REPO_H
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 0
+struct repo {
+  char *worktree;
+  char *gitdir;
+};
 
-#define VERSION_INT (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_PATCH)
+/* Initialize a repository. */
+extern struct repo *repo_init(const char *path);
+extern void repo_free(struct repo *repo);
+
+/* Create a repository. */
+extern int repo_create(struct repo *repo, const char *branch);
 
 #endif

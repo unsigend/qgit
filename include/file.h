@@ -15,13 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef FILE_H
+#define FILE_H
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 0
+#include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#define VERSION_INT (VERSION_MAJOR << 16 | VERSION_MINOR << 8 | VERSION_PATCH)
+#define FILE_PERM (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+#define DIR_PERM (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
+
+/* Check if a file or directory exists. */
+extern bool existfile(const char *path);
+extern bool existdir(const char *path);
+
+/* Atomically create a directory or file if it does not exist. */
+extern int mkdirifne(const char *path, mode_t mode);
+extern int mkfileifne(const char *path, mode_t mode);
 
 #endif
