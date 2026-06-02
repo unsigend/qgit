@@ -15,17 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-
-#include "global.h"
-
 int cmd_version(int argc, char **argv)
 {
-  /* Ignore arguments */
   (void)argc;
   (void)argv;
-
-  fprintf(stdout, "qgit version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR,
-          VERSION_PATCH);
   return 0;
 }
