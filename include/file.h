@@ -18,19 +18,20 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <stdbool.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
-#define FILE_PERM (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
-#define DIR_PERM (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
+/* File system extensions, path must be absolute path, UB if not */
 
-/* Check if a file or directory exists. */
-extern bool existfile(const char *path);
-extern bool existdir(const char *path);
+/* Check if a path exists, 0 if not exists, 1 if exists */
+extern int path_exists(const char *path);
+extern int file_exists(const char *path);
+extern int dir_exists(const char *path);
 
-/* Atomically create a directory or file if it does not exist. */
-extern int mkdirifne(const char *path, mode_t mode);
-extern int mkfileifne(const char *path, mode_t mode);
+/* Atomically create a file or dir if not exists, 0 on success, -1 on error */
+extern int mkfile_safe(const char *path, mode_t mode);
+extern int mkdir_safe(const char *path, mode_t mode);
+
+/* Create a directory and its parents if not exists, 0 on success, -1 on error */
+extern int mkdirp(const char *path, mode_t mode);
 
 #endif

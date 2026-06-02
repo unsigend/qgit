@@ -17,38 +17,49 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
+#include <limits.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-bool existfile(const char *path)
+int path_exists(const char *path)
 {
-  if (!path || !*path)
-    return false;
   struct stat st;
-  if (stat(path, &st) == -1)
-    return false;
-  return S_ISREG(st.st_mode);
+  return stat(path, &st) == 0;
 }
 
-bool existdir(const char *path)
+int file_exists(const char *path)
 {
-  if (!path || !*path)
-    return false;
   struct stat st;
-  if (stat(path, &st) == -1)
-    return false;
-  return S_ISDIR(st.st_mode);
+  return stat(path, &st) == 0 && S_ISREG(st.st_mode);
 }
 
-int mkdirifne(const char *path, mode_t mode)
+int dir_exists(const char *path)
 {
-  if (!path || !*path)
+  struct stat st;
+  return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+int mkfile_safe(const char *path, mode_t mode)
+{
+  int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, mode);
+  if (fd == -1) {
+    if (errno == EEXIST) {
+      struct stat st;
+      if (stat(path, &st) == 0 && S_ISREG(st.st_mode))
+        return 0;
+      return -1;
+    }
     return -1;
+  }
+  close(fd);
+  return 0;
+}
 
+int mkdir_safe(const char *path, mode_t mode)
+{
   if (mkdir(path, mode) == 0)
     return 0;
-
   if (errno == EEXIST) {
     struct stat st;
     if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
@@ -58,21 +69,40 @@ int mkdirifne(const char *path, mode_t mode)
   return -1;
 }
 
-int mkfileifne(const char *path, mode_t mode)
+int mkdirp(const char *path, mode_t mode)
 {
-  if (!path || !*path)
+  if (strlen(path) >= PATH_MAX)
     return -1;
-
-  /* Atomic creation */
-  int fd = open(path, O_CREAT | O_WRONLY | O_EXCL, mode);
-  if (fd != -1) {
-    close(fd);
+  if (mkdir(path, mode) == 0)
     return 0;
-  }
   if (errno == EEXIST) {
     struct stat st;
-    if (stat(path, &st) == 0 && S_ISREG(st.st_mode))
+    if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
       return 0;
+    return -1;
+  }
+  if (errno != ENOENT)
+    return -1;
+
+  char parent[PATH_MAX];
+  strncpy(parent, path, PATH_MAX - 1);
+  parent[PATH_MAX - 1] = '\0'; /* avoid buffer overflow */
+  char *slash = strrchr(parent, '/');
+  if (!slash || slash == parent)
+    return -1;
+
+  *slash = '\0';
+
+  if (mkdirp(parent, mode) == -1)
+    return -1;
+
+  if (mkdir(path, mode) == 0)
+    return 0;
+  if (errno == EEXIST) {
+    struct stat st;
+    if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
+      return 0;
+    return -1;
   }
   return -1;
 }
