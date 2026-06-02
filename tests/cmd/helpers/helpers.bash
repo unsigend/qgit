@@ -66,3 +66,39 @@ assert_output_matches() {
         return 1
     fi
 }
+
+assert_file_exists() {
+    local file="$1"
+    if [ ! -f "$file" ]; then
+        echo "Expected file to exist: $file"
+        return 1
+    fi
+}
+
+assert_dir_exists() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        echo "Expected directory to exist: $dir"
+        return 1
+    fi
+}
+
+assert_file_content_equals() {
+    local file="$1"
+    local content="$2"
+    if [ "$(cat "$file")" != "$content" ]; then
+        echo "Expected file content to be: $content"
+        echo "Actual file content: $(cat "$file")"
+        return 1
+    fi
+}
+
+assert_file_content_contains() {
+    local file="$1"
+    local content="$2"
+    if [[ ! "$(cat "$file")" =~ "$content" ]]; then
+        echo "Expected file content to contain: $content"
+        echo "Actual file content: $(cat "$file")"
+        return 1
+    fi
+}

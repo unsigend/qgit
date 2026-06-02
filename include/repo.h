@@ -27,7 +27,7 @@ struct repo {
 extern struct repo *repo_init(const char *path);
 extern void repo_free(struct repo *repo);
 
-/* Create a repository. */
+/* Create a repository Or patching an existing one. */
 extern int repo_create(struct repo *repo, const char *branch);
 
 #endif

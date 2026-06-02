@@ -15,19 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "file.h"
 #include "iniparse.h"
 #include "repo.h"
 
+#define DIR_PERM (S_IRWXU | S_IRWXG | S_IRWXO)
+
 struct repo *repo_init(const char *path)
 {
-  if (!path || !*path)
+  if (!path || !*path) {
+    errno = EINVAL;
     return NULL;
+  }
 
   struct repo *repo = calloc(1, sizeof(struct repo));
   if (!repo)
@@ -68,8 +74,15 @@ void repo_free(struct repo *repo)
   free(repo);
 }
 
-static const char *dirs[] = {"objects", "refs", "refs/heads", "refs/tags"};
+static const char *dirs[] = {"objects", "refs/heads", "refs/tags"};
 static const size_t ndirs = sizeof(dirs) / sizeof(dirs[0]);
+
+static void rollback(struct repo *repo)
+{
+  if (!repo || !repo->worktree || !repo->gitdir)
+    return;
+  rmrf(repo->gitdir);
+}
 
 int repo_create(struct repo *repo, const char *branch)
 {
@@ -78,18 +91,18 @@ int repo_create(struct repo *repo, const char *branch)
   if (!branch || !*branch)
     return -1;
 
-  if (mkdirifne(repo->worktree, DIR_PERM) == -1)
-    return -1;
-  if (mkdirifne(repo->gitdir, DIR_PERM) == -1)
-    return -1;
+  if (mkdirp(repo->worktree, DIR_PERM) == -1)
+    goto rollback;
+  if (mkdirp(repo->gitdir, DIR_PERM) == -1)
+    goto rollback;
 
   for (size_t i = 0; i < ndirs; i++) {
     char dir[PATH_MAX];
     if (snprintf(dir, sizeof(dir), "%s/%s", repo->gitdir, dirs[i]) >= PATH_MAX)
-      return -1;
+      goto rollback;
 
-    if (mkdirifne(dir, DIR_PERM) == -1)
-      return -1;
+    if (mkdirp(dir, DIR_PERM) == -1)
+      goto rollback;
   }
 
   char filename[PATH_MAX];
@@ -97,59 +110,63 @@ int repo_create(struct repo *repo, const char *branch)
 
   /* HEAD */
   if (snprintf(filename, PATH_MAX, "%s/HEAD", repo->gitdir) >= PATH_MAX)
-    return -1;
-  if (!existfile(filename)) {
+    goto rollback;
+  if (!file_exists(filename)) {
     fp = fopen(filename, "w");
     if (!fp)
-      return -1;
-    if (fprintf(fp, "ref: refs/heads/%s\n", branch) == -1) {
+      goto rollback;
+    if (fprintf(fp, "ref: refs/heads/%s\n", branch) < 0) {
       fclose(fp);
-      return -1;
+      goto rollback;
     }
     fclose(fp);
   }
 
   /* description */
   if (snprintf(filename, PATH_MAX, "%s/description", repo->gitdir) >= PATH_MAX)
-    return -1;
+    goto rollback;
 
-  if (!existfile(filename)) {
+  if (!file_exists(filename)) {
     fp = fopen(filename, "w");
     if (!fp)
-      return -1;
+      goto rollback;
     if (fprintf(fp,
                 "Unnamed repository; edit this file 'description' to name the "
-                "repository.\n") == -1) {
+                "repository.\n") < 0) {
       fclose(fp);
-      return -1;
+      goto rollback;
     }
     fclose(fp);
   }
 
   /* config */
   if (snprintf(filename, PATH_MAX, "%s/config", repo->gitdir) >= PATH_MAX)
-    return -1;
+    goto rollback;
 
-  if (!existfile(filename)) {
+  if (!file_exists(filename)) {
     struct iniFILE *config = iniparse_create(filename);
     if (!config)
-      return -1;
+      goto rollback;
 
     int ret = 0;
     ret |= iniparse_set(config, "core", "repositoryformatversion", "0");
-    ret |= iniparse_set(config, "core", "filemode", "false");
+    ret |= iniparse_set(config, "core", "filemode", "true");
     ret |= iniparse_set(config, "core", "bare", "false");
     if (ret != 0) {
       iniparse_close(config);
-      return -1;
+      goto rollback;
     }
 
     if (iniparse_write(config) == -1) {
       iniparse_close(config);
-      return -1;
+      goto rollback;
     }
 
     iniparse_close(config);
   }
   return 0;
+
+rollback:
+  rollback(repo);
+  return -1;
 }

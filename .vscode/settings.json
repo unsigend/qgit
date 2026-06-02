@@ -6,6 +6,7 @@
         "existfile",
         "ifnexist",
         "mkdirifne",
-        "mkfileifne"
+        "mkfileifne",
+        "rmrf"
     ]
 }

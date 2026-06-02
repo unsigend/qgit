@@ -18,6 +18,7 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stddef.h>
 #include <sys/stat.h>
 
 /* File system extensions, path must be absolute path, UB if not */
@@ -31,7 +32,15 @@ extern int dir_exists(const char *path);
 extern int mkfile_safe(const char *path, mode_t mode);
 extern int mkdir_safe(const char *path, mode_t mode);
 
-/* Create a directory and its parents if not exists, 0 on success, -1 on error */
+/* Create a directory and its parents if not exists, 0 on success, -1 on error
+ */
 extern int mkdirp(const char *path, mode_t mode);
+
+/* Recursively remove a directory or file, 0 on success, -1 on error. Equivalent
+   to rm -rf. */
+extern int rmrf(const char *path);
+
+/* Get the absolute path of a path, 0 on success, -1 on error */
+extern int abspath(const char *path, char *abspath);
 
 #endif

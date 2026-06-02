@@ -19,12 +19,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "argparse.h"
 #include "error.h"
 #include "file.h"
 #include "repo.h"
-#include "string.h"
 
 int cmd_init(int argc, char **argv)
 {
@@ -59,20 +59,17 @@ int cmd_init(int argc, char **argv)
   if (argparse_getremargc(&parse) > 0)
     path = argparse_getremargv(&parse)[0];
 
-  char abspath[PATH_MAX];
-  // TODO: fix the realpath path fall back check
-  if (!realpath(path, abspath)) {
-    if (strlen(path) >= PATH_MAX)
-      die("Path too long");
-    strcpy(abspath, path);
-  }
+  char abs_path[PATH_MAX];
+  if (abspath(path, abs_path) == -1)
+    die_errno();
 
-  struct repo *repo = repo_init(abspath);
   bool reinit = false;
+  struct repo *repo = repo_init(abs_path);
+
   if (!repo)
     die_errno();
 
-  if (existdir(repo->gitdir))
+  if (dir_exists(repo->gitdir))
     reinit = true;
 
   if (repo_create(repo, branch) == -1)

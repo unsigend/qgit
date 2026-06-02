@@ -24,10 +24,10 @@
 int main(int argc, char *argv[])
 {
   if (argc < 2)
-    return cmd_help(argc - 1, argv + 1);
+    return cmd_help(argc - 2, argv + 2);
 
   const char *cmd = argv[1];
-  if (exec_cmd(cmd, argc - 1, argv + 1) == -1) {
+  if (exec_cmd(cmd, argc - 2, argv + 2) == -1) {
     fprintf(stderr, "qgit: '%s' is not a qgit command. See 'qgit help'.\n",
             cmd);
     return -1;
