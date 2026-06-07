@@ -1,4 +1,4 @@
-/* qgit - A simplified git like version control system
+/* miniutils - A minimal GNU coreutils implementation
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-int main(int argc, char *argv[])
+int abspath(const char *path, char *buf)
 {
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
+  if (realpath(path, buf))
+    return 0;
+  if (errno != ENOENT)
+    return -1;
+
+  if (*path == '/') {
+    if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
+      errno = ENAMETOOLONG;
+      return -1;
+    }
+    return 0;
+  }
+
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, PATH_MAX) == NULL)
+    return -1;
+
+  if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+  return 0;
 }

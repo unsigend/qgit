@@ -15,11 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <die.h>
+#include <errno.h>
+#include <global.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main(int argc, char *argv[])
+void die(const char *fmt, ...)
 {
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  va_end(ap);
+  exit(EXIT_FAILURE);
+}
+
+void die_errno(void)
+{
+  fprintf(stderr, "%s: %s\n", PROG_NAME, strerror(errno));
+  exit(EXIT_FAILURE);
 }

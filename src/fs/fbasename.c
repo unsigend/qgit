@@ -1,4 +1,4 @@
-/* qgit - A simplified git like version control system
+/* miniutils - A minimal GNU coreutils implementation
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <libgen.h>
+#include <limits.h>
+#include <string.h>
 
-int main(int argc, char *argv[])
+#if defined(__APPLE__) || defined(__FreeBSD__)
+char *fbasename(const char *path, char *buf) { return basename_r(path, buf); }
+#else
+char *fbasename(const char *path, char *buf)
 {
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
+  strncpy(buf, path, PATH_MAX - 1);
+  buf[PATH_MAX - 1] = '\0';
+  return basename(buf);
 }
+#endif

@@ -15,11 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#ifndef DIE_H
+#define DIE_H
 
-int main(int argc, char *argv[])
-{
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
-}
+#include <stdnoreturn.h>
+
+extern noreturn void die(const char *fmt, ...)
+    __attribute__((format(printf, 1, 2)));
+
+extern noreturn void die_errno(void);
+
+#endif

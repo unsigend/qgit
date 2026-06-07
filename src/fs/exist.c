@@ -1,4 +1,4 @@
-/* qgit - A simplified git like version control system
+/* miniutils - A minimal GNU coreutils implementation
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-int main(int argc, char *argv[])
+int path_exists(const char *path)
 {
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
+  struct stat st;
+  return stat(path, &st) == 0;
+}
+
+int file_exists(const char *path)
+{
+  struct stat st;
+  if (stat(path, &st) == -1)
+    return 0;
+  return S_ISREG(st.st_mode);
+}
+
+int dir_exists(const char *path)
+{
+  struct stat st;
+  if (stat(path, &st) == -1)
+    return 0;
+  return S_ISDIR(st.st_mode);
 }

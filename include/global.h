@@ -15,11 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
-int main(int argc, char *argv[])
-{
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
-}
+#define QGIT_MAJOR 0
+#define QGIT_MINOR 1
+#define QGIT_PATCH 0
+
+#define PROG_NAME "qgit"
+#define PROG_VERSION ((QGIT_MAJOR) * 10000 + (QGIT_MINOR) * 100 + (QGIT_PATCH))
+#define PROG_REPO "https://github.com/unsigend/qgit"
+
+#endif
