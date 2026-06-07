@@ -1,4 +1,4 @@
-/* miniutils - A minimal GNU coreutils implementation
+/* qgit - A simplified git like version control system
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,35 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
+#ifndef REPO_H
+#define REPO_H
+
 #include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
-int fabspath(const char *path, char *buf)
-{
-  if (realpath(path, buf))
-    return 0;
-  if (errno != ENOENT)
-    return -1;
+struct repo {
+  char worktree[PATH_MAX];
+  char gitdir[PATH_MAX];
+};
 
-  if (*path == '/') {
-    if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
-      errno = ENAMETOOLONG;
-      return -1;
-    }
-    return 0;
-  }
+/* Initialize a repository at the given path. Return the repository on success,
+   NULL on error and set errno. For the repository format only support .qgit dir
+   under the worktree. */
+extern struct repo *repo_init(const char *path);
 
-  char cwd[PATH_MAX];
-  if (getcwd(cwd, PATH_MAX) == NULL)
-    return -1;
+extern void repo_free(struct repo *repo);
 
-  if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
-    errno = ENAMETOOLONG;
-    return -1;
-  }
-  return 0;
-}
+/* Create a repository or re-initialize an existing one. Return 0 on success,
+   -1 on error and set errno. */
+extern int repo_create(struct repo *repo, const char *branch);
+
+#endif

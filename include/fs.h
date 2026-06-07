@@ -54,7 +54,7 @@ extern int rmdirr(const char *path);
 /* Resolve the absolute path of a given path. Wrap on top of realpath(), but
    accept non-existing paths. Assume the buf is large enough to hold the
    PATH_MAX. Return 0 on success, -1 on error and set errno. */
-extern int abspath(const char *path, char *buf);
+extern int fabspath(const char *path, char *buf);
 
 /* Get the basename of a given path. Return the basename on success, NULL on
    error and set errno. Compatible with POSIX and BSD. */

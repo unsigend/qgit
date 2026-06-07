@@ -5,8 +5,10 @@
         "existf",
         "existfile",
         "ifnexist",
+        "inifp",
         "mkdirifne",
         "mkfileifne",
+        "reinit",
         "rmrf"
     ]
 }

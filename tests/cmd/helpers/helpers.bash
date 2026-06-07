@@ -102,3 +102,28 @@ assert_file_content_contains() {
         return 1
     fi
 }
+
+assert_qgit_repo_layout() {
+    local root="${1:-.}"
+
+    assert_dir_exists "$root/.qgit"
+    assert_file_exists "$root/.qgit/HEAD"
+    assert_file_exists "$root/.qgit/config"
+    assert_file_exists "$root/.qgit/description"
+    assert_dir_exists "$root/.qgit/objects"
+    assert_dir_exists "$root/.qgit/refs/heads"
+    assert_dir_exists "$root/.qgit/refs/tags"
+
+    [ -s "$root/.qgit/HEAD" ] || {
+        echo "Expected non-empty HEAD"
+        return 1
+    }
+    [ -s "$root/.qgit/config" ] || {
+        echo "Expected non-empty config"
+        return 1
+    }
+    [ -s "$root/.qgit/description" ] || {
+        echo "Expected non-empty description"
+        return 1
+    }
+}

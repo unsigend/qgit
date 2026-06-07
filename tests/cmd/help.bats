@@ -22,3 +22,13 @@ load "helpers/globals.bash"
     assert_output_contains "init"
     assert_output_contains "version"
 }
+
+@test "qgit help: same output as qgit" {
+    run "$QGIT_BIN"
+    assert_success
+    expected="$output"
+
+    run "$QGIT_BIN" help
+    assert_success
+    assert_output_equals "$expected"
+}
