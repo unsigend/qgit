@@ -1,0 +1,49 @@
+---
+description: BATS test authoring for qgit — spec-driven, never modify implementation
+globs: tests/**/*
+alwaysApply: false
+---
+
+# qgit BATS Test Authoring
+
+When writing or extending command tests under `tests/`, follow the **test spec** the user provides. Do not read or depend on `.c`/`.h` implementation details.
+
+## Hard rules
+
+1. **Never modify `.c` or `.h` files** — even if the implementation is wrong, incomplete, or causes tests to fail.
+2. **Do not run tests** unless the user explicitly asks. Write tests from the spec alone.
+3. **Do not read implementation** (`src/`, `include/`) to infer behavior. The spec is the source of truth.
+4. **Only fix test code** when the test itself is wrong (bad assertion, wrong setup, typo, missing helper load, etc.).
+5. **Report implementation bugs honestly** — if a test would fail because of implementation issues, say so clearly. Failing tests are expected until the implementation is fixed by the user.
+
+## What to write
+
+- Test files: `tests/cmd/<command>.bats`
+- Load shared helpers at the top:
+
+```bash
+load "helpers/setup.bash"
+load "helpers/helpers.bash"
+load "helpers/globals.bash"
+```
+
+- Name tests: `qgit <command> [flags]: <description>` (e.g. `qgit init -q: no output`)
+- Use helpers from `tests/cmd/helpers/helpers.bash` (`assert_success`, `assert_failure`, `assert_output_contains`, `assert_file_content_contains`, `assert_qgit_repo_layout`, etc.)
+- Override `setup()` when needed (e.g. isolate `HOME` for config tests)
+
+## When tests fail (if user asks you to investigate)
+
+| Situation | Action |
+|-----------|--------|
+| Test assertion/setup is wrong | Fix the `.bats` or helper only |
+| Implementation does not match spec | **Report the gap** — file, expected vs actual behavior. **No `.c`/`.h` changes** |
+| You previously changed implementation to make tests pass | Revert it; that violates this rule |
+
+## Reporting implementation issues
+
+Be specific:
+
+- Which test and spec requirement failed
+- What the implementation actually does (from test output, not from reading source unless user asks)
+- Which file/function is likely responsible (only if obvious from error messages)
+- Do **not** offer or apply implementation fixes unless the user explicitly requests them

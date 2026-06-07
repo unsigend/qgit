@@ -23,10 +23,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "global.h"
+
 void die(const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
+  fprintf(stderr, "%s: ", PROG_NAME);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   va_end(ap);

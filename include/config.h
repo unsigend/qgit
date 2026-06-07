@@ -15,29 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPO_H
-#define REPO_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <limits.h>
+#include "iniparse.h"
 
-struct repo {
-  char worktree[PATH_MAX];
-  char gitdir[PATH_MAX];
-};
+/* Write the global config path string to a given buffer, assume the size of the
+   buffer is at least PATH_MAX. Return 0 on success, -1 on error. */
+extern int config_global_path(char *path);
 
-/* Initialize a repository at the given path. Return the repository on success,
-   NULL on error and set errno. For the repository format only support .qgit dir
-   under the worktree. */
-extern struct repo *repo_init(const char *path);
+/* Return the global config file. NULL if not exists. */
+extern struct iniFILE *config_global(void);
 
-extern void repo_free(struct repo *repo);
-
-/* Create a repository or re-initialize an existing one. Return 0 on success,
-   -1 on error and set errno. */
-extern int repo_create(struct repo *repo, const char *branch);
-
-/* From a given path, find the repository and return the repository on success,
-   NULL if not found. */
-extern struct repo *repo_find(const char *path);
+/* Return the config file of the current working directory and recursively up to
+   the root. NULL if not exists.*/
+extern struct iniFILE *config_cwd(void);
 
 #endif

@@ -181,3 +181,38 @@ int repo_create(struct repo *repo, const char *branch)
 
   return 0;
 }
+
+struct repo *repo_find(const char *path)
+{
+  if (!path)
+    return NULL;
+
+  char buf[PATH_MAX];
+  char qgit[PATH_MAX];
+
+  if (snprintf(buf, sizeof(buf), "%s", path) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  while (1) {
+    if (snprintf(qgit, sizeof(qgit), "%s/.qgit", buf) >= PATH_MAX) {
+      errno = ENAMETOOLONG;
+      return NULL;
+    }
+    if (dir_exists(qgit))
+      break;
+    char *slash = strrchr(buf, '/');
+    *slash = '\0';
+    if (slash == buf) {
+      errno = ENOENT;
+      return NULL;
+    }
+  }
+
+  struct repo *repo = repo_init(buf);
+  if (!repo)
+    return NULL;
+
+  return repo;
+}

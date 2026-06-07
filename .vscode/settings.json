@@ -4,10 +4,13 @@
         "existdir",
         "existf",
         "existfile",
+        "gcfg",
         "ifnexist",
         "inifp",
+        "lcfg",
         "mkdirifne",
         "mkfileifne",
+        "mktemp",
         "reinit",
         "rmrf"
     ]

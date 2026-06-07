@@ -15,9 +15,191 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "argparse.h"
+#include "config.h"
+#include "die.h"
+#include "iniparse.h"
+
+#define IS_AUTO(g, l) (!(l) && !(g))
+
+static int parse(char *parm, char **sec, char **key)
+{
+  if (!parm)
+    return -1;
+
+  char *dot = strchr(parm, '.');
+  if (!dot)
+    return -1;
+
+  *dot = '\0';
+  *sec = parm;
+  *key = dot + 1;
+  while (**key && isspace(**key))
+    (*key)++;
+  return 0;
+}
+
+/*
+  qgit config behaviour:
+    --list: if --global or --local is specified, list the global or local config
+            file, if auto, list global first then local config.
+    --get:  if --global or --local is specified, get the value of the key from
+            the global or local config file, if auto, get the value from local
+            config first, then from global config if not found.
+    --set:  if --global or --local is specified, set the value of the key in the
+            global or local config file, if auto, set the value in local config.
+    --unset: if --global or --local is specified, unset the value of the key in
+            the global or local config file, if auto, unset the value in local
+            config.
+*/
 int cmd_config(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
-  return 0;
+  bool global = false, local = false;
+  bool list = false, get = false, set = false, unset = false;
+  struct iniFILE *gcfg = NULL, *lcfg = NULL;
+  char *sec = NULL, *key = NULL, *value = NULL;
+  int ret = EXIT_SUCCESS;
+
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_GROUP("Scope"),
+      OPT_BOOL(0, "global", "use global config file", &global),
+      OPT_BOOL(0, "local", "use local config file", &local),
+      OPT_GROUP_END(),
+      OPT_GROUP("Action"),
+      OPT_BOOL('l', "list", "list all options", &list),
+      OPT_BOOL('g', "get", "get the value of an key", &get),
+      OPT_BOOL('s', "set", "set the value of an key", &set),
+      OPT_BOOL('u', "unset", "unset the value of an key", &unset),
+      OPT_GROUP_END(),
+      OPT_HELP(),
+      OPT_END(),
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit config",
+      .desc = "Get and set repository or global options",
+      .usage = "qgit config [options]",
+      .epilog = "See 'qgit config --help' for more information.",
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die_errno();
+
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die_errno();
+
+  if (local && global)
+    die("--local and --global cannot be used together");
+
+  if (local || IS_AUTO(global, local))
+    lcfg = config_cwd();
+  if (local && !lcfg) /* Explicit --local but no local config file */
+    die("--local can only be used inside a qgit repository");
+  if (global || IS_AUTO(global, local))
+    gcfg = config_global();
+
+  if (list) {
+    if (IS_AUTO(global, local)) {
+      if (gcfg)
+        iniparse_fprint(gcfg, stdout);
+      if (lcfg)
+        iniparse_fprint(lcfg, stdout);
+    } else if (global) {
+      if (gcfg)
+        iniparse_fprint(gcfg, stdout);
+    } else if (local) {
+      if (lcfg)
+        iniparse_fprint(lcfg, stdout);
+    }
+  } else if (get) {
+    if (argparse_getremargc(&ctx) < 1)
+      die("--get requires a key");
+    if (parse(argparse_getremargv(&ctx)[0], &sec, &key) == -1)
+      die("invalid key format");
+
+    if (local) {
+      if (lcfg)
+        value = (char *)iniparse_get(lcfg, sec, key);
+    } else if (global) {
+      if (gcfg)
+        value = (char *)iniparse_get(gcfg, sec, key);
+    } else {
+      if (lcfg)
+        value = (char *)iniparse_get(lcfg, sec, key);
+      if (!value && gcfg)
+        value = (char *)iniparse_get(gcfg, sec, key);
+    }
+
+    if (value)
+      printf("%s\n", value);
+    else
+      ret = EXIT_FAILURE;
+
+  } else if (set) {
+    if (argparse_getremargc(&ctx) < 2)
+      die("--set requires a key and a value");
+    if (parse(argparse_getremargv(&ctx)[0], &sec, &key) == -1)
+      die("invalid key format");
+
+    value = argparse_getremargv(&ctx)[1];
+    if (global) {
+      if (!gcfg) {
+        char path[PATH_MAX];
+        if (config_global_path(path) == -1)
+          die_errno();
+        gcfg = iniparse_create(path);
+        if (!gcfg)
+          die_errno();
+      }
+      if (iniparse_set(gcfg, sec, key, value) == -1)
+        die_errno();
+      if (iniparse_write(gcfg) == -1)
+        die_errno();
+    } else {
+      /* local config file must exist here */
+      if (!lcfg)
+        die("qgit repository may broken");
+      if (iniparse_set(lcfg, sec, key, value) == -1)
+        die_errno();
+      if (iniparse_write(lcfg) == -1)
+        die_errno();
+    }
+
+  } else if (unset) {
+    if (argparse_getremargc(&ctx) < 1)
+      die("--unset requires a key");
+    if (parse(argparse_getremargv(&ctx)[0], &sec, &key) == -1)
+      die("invalid key format");
+
+    if (global) {
+      if (gcfg) {
+        if (iniparse_unset(gcfg, sec, key) == -1)
+          ret = EXIT_FAILURE;
+        else if (iniparse_write(gcfg) == -1)
+          die_errno();
+      }
+    } else {
+      if (lcfg) {
+        if (iniparse_unset(lcfg, sec, key) == -1)
+          ret = EXIT_FAILURE;
+        else if (iniparse_write(lcfg) == -1)
+          die_errno();
+      }
+    }
+  } else
+    die("no action specified");
+
+  iniparse_close(gcfg);
+  iniparse_close(lcfg);
+  argparse_fini(&ctx);
+  return ret;
 }

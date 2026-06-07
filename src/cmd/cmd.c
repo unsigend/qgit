@@ -65,6 +65,6 @@ int exec_cmd(int argc, char **argv)
     }
   }
 
-  die("%s: '%s' is not a qgit command. See '%s help' for available commands.",
-      PROG_NAME, cmd, PROG_NAME);
+  die("'%s' is not a qgit command. See '%s help' for available commands.", cmd,
+      PROG_NAME);
 }

@@ -103,6 +103,16 @@ assert_file_content_contains() {
     fi
 }
 
+assert_file_content_not_contains() {
+    local file="$1"
+    local content="$2"
+    if [[ "$(cat "$file")" =~ "$content" ]]; then
+        echo "Expected file content to not contain: $content"
+        echo "Actual file content: $(cat "$file")"
+        return 1
+    fi
+}
+
 assert_qgit_repo_layout() {
     local root="${1:-.}"
 
