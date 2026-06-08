@@ -19,7 +19,7 @@
 
 #include "sha1.h"
 
-int sha1(const void *data, size_t len, unsigned char *out)
+int sha1(const void *data, size_t len, unsigned char out[SHA1_DIGEST_LENGTH])
 {
   EVP_MD_CTX *ctx = EVP_MD_CTX_new();
   if (!ctx)

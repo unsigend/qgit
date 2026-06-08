@@ -67,6 +67,7 @@ UNIT_CC_FLAGS += -I$(EXTERNAL_PATH)/includes
 UNIT_CC_FLAGS += $(addprefix -I,$(shell find $(UNIT_PATH) -type d 2>/dev/null))
 ifeq ($(HOST_OS), Linux)
 UNIT_CC_FLAGS += -D_XOPEN_SOURCE=700
+UNIT_CC_FLAGS += -Wno-address
 endif
 ifeq ($(DEBUG), 1)
 UNIT_CC_FLAGS += -g -O0
