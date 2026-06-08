@@ -40,8 +40,8 @@ UTEST_CASE(zlib_decompress)
     size_t compressed_len = 0;
     size_t decompressed_len = 0;
 
-    EXPECT_EQ_INT(zlib_compress(inputs[i], srclen, &compressed, &compressed_len),
-                 0);
+    EXPECT_EQ_INT(
+        zlib_compress(inputs[i], srclen, &compressed, &compressed_len), 0);
     EXPECT_EQ_INT(zlib_decompress(compressed, compressed_len, &decompressed,
                                   &decompressed_len),
                   0);
@@ -59,7 +59,7 @@ UTEST_CASE(zlib_decompress)
     size_t decompressed_len = 0;
 
     EXPECT_EQ_INT(zlib_compress(large, LARGE_LEN, &compressed, &compressed_len),
-                 0);
+                  0);
     EXPECT_EQ_INT(zlib_decompress(compressed, compressed_len, &decompressed,
                                   &decompressed_len),
                   0);
