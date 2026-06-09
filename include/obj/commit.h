@@ -18,7 +18,20 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
+#include "sha1.h"
+#include "slist.h"
+
+struct obj;
+
 struct commit {
+  unsigned char tree[SHA1_DIGEST_LENGTH];
+  struct slist *parents;
+  const char *author;
+  const char *committer;
+  const char *message;
 };
+
+extern int commit_parse(struct obj *obj);
+extern void commit_free(struct commit *commit);
 
 #endif

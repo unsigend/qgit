@@ -99,18 +99,10 @@ struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1)
     return NULL;
   }
 
-  if (strcmp(rawbuf, "blob") == 0)
-    obj->type = OBJ_BLOB;
-  else if (strcmp(rawbuf, "commit") == 0)
-    obj->type = OBJ_COMMIT;
-  else if (strcmp(rawbuf, "tree") == 0)
-    obj->type = OBJ_TREE;
-  else if (strcmp(rawbuf, "tag") == 0)
-    obj->type = OBJ_TAG;
-  else {
-    errno = EINVAL;
-    obj_close(obj);
+  obj->type = obj_type_from_str((char *)rawbuf);
+  if (obj->type == OBJ_NONE) {
     free(rawbuf);
+    obj_close(obj);
     return NULL;
   }
 
@@ -133,13 +125,14 @@ struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1)
     return NULL;
   }
 
-  obj->payload = malloc(obj->payloadsz);
+  obj->payload = malloc(obj->payloadsz + 1);
   if (!obj->payload) {
     free(rawbuf);
     obj_close(obj);
     return NULL;
   }
   memcpy(obj->payload, cursor, obj->payloadsz);
+  ((char *)obj->payload)[obj->payloadsz] = '\0';
   memcpy(obj->sha1, sha1, SHA1_DIGEST_LENGTH);
   free(rawbuf);
   return obj;
@@ -182,13 +175,14 @@ struct obj *obj_open_file(const char *path, obj_type_t type)
     }
     close(fd);
 
-    obj->payload = malloc(st.st_size);
+    obj->payload = malloc(st.st_size + 1);
     if (!obj->payload) {
       munmap(buf, st.st_size);
       obj_close(obj);
       return NULL;
     }
     memcpy(obj->payload, buf, st.st_size);
+    ((char *)obj->payload)[st.st_size] = '\0';
     munmap(buf, st.st_size);
   } else {
     obj->payload = NULL;
@@ -202,6 +196,22 @@ void obj_close(struct obj *obj)
   if (!obj)
     return;
 
+  switch (obj->type) {
+  case OBJ_BLOB:
+    blob_free(&obj->blob);
+    break;
+  case OBJ_COMMIT:
+    commit_free(&obj->commit);
+    break;
+  case OBJ_TREE:
+    tree_free(&obj->tree);
+    break;
+  case OBJ_TAG:
+    tag_free(&obj->tag);
+    break;
+  default:
+    break;
+  }
   if (obj->payload)
     free(obj->payload);
   free(obj);
@@ -375,4 +385,26 @@ const char *str_from_obj_type(obj_type_t type)
     errno = EINVAL;
     return NULL;
   }
+}
+
+int obj_parse(struct obj *obj)
+{
+  if (!obj) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  switch (obj->type) {
+  case OBJ_BLOB:
+    return blob_parse(obj);
+  case OBJ_COMMIT:
+    return commit_parse(obj);
+  case OBJ_TREE:
+    return tree_parse(obj);
+  case OBJ_TAG:
+    return tag_parse(obj);
+  default:
+    break;
+  }
+  return -1;
 }

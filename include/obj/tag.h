@@ -18,7 +18,12 @@
 #ifndef TAG_H
 #define TAG_H
 
+struct obj;
+
 struct tag {
 };
+
+extern int tag_parse(struct obj *obj);
+extern void tag_free(struct tag *tag);
 
 #endif

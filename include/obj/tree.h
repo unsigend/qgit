@@ -18,7 +18,12 @@
 #ifndef TREE_H
 #define TREE_H
 
+struct obj;
+
 struct tree {
 };
+
+extern int tree_parse(struct obj *obj);
+extern void tree_free(struct tree *tree);
 
 #endif

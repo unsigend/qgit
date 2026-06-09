@@ -15,4 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+
 #include "obj/tag.h"
+
+int tag_parse(struct obj *obj)
+{
+  if (!obj) {
+    errno = EINVAL;
+    return -1;
+  }
+  return 0;
+}
+
+void tag_free(struct tag *tag)
+{
+  if (!tag)
+    return;
+}

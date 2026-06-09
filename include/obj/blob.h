@@ -18,7 +18,13 @@
 #ifndef BLOB_H
 #define BLOB_H
 
+struct obj;
+
 struct blob {
 };
+
+/* Blob parse no-op, return 0 on success. */
+extern int blob_parse(struct obj *obj);
+extern void blob_free(struct blob *blob);
 
 #endif

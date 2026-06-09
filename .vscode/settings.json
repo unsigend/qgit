@@ -12,6 +12,7 @@
         "mkfileifne",
         "mktemp",
         "reinit",
+        "removen",
         "rmrf"
     ]
 }
