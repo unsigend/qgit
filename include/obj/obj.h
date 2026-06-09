@@ -31,6 +31,7 @@ typedef enum {
   OBJ_COMMIT,
   OBJ_TREE,
   OBJ_TAG,
+  OBJ_NONE = -1
 } obj_type_t;
 
 /* qgit object model, the obj struct is the central structure delegate the
@@ -49,12 +50,25 @@ struct obj {
   };
 };
 
-/* Open an object from the repository by its sha1, return object on success,
-   NULL on error and set errno. */
-extern struct obj *obj_open(struct repo *repo, const unsigned char *sha1);
+/* qgit object storage:
+  sha1 hash: "<type> <payloadsz>\0<payload>" uncompressed
+  file on disk: "<type> <payloadsz>\0<payload>" compressed */
 
-/* Write an object to the repository, return 0 on success, -1 on error and set
-   errno. */
+/* Open an object from the repository by its sha1, and fill the sha1 field.
+   Return object on success, NULL on error and set errno. */
+extern struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1);
+
+/* Open an object from a file, return object on success, NULL on error and set
+   errno. This function will consider the raw file content as payload, no data
+   or type validation is performed. */
+extern struct obj *obj_open_file(const char *path, obj_type_t type);
+
+/* Compute the SHA1 of the object, fill the sha1 field with the result.
+   Return 0 on success, -1 on error and set errno. */
+extern int obj_sha1(struct obj *obj);
+
+/* Write an object to the repository, assume the sha1 is already computed,
+   return 0 on success, -1 on error and set errno. */
 extern int obj_write(struct repo *repo, struct obj *obj);
 
 /* Free object resources */

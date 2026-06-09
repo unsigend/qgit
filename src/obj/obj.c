@@ -31,7 +31,14 @@
 #include "obj/obj.h"
 #include "sha1.h"
 
-struct obj *obj_open(struct repo *repo, const unsigned char *sha1)
+/* Build the raw buffer "<type> <payloadsz>\0<payload>" for the object. Return
+   the buffer on heap and set the buflen to the length of the buffer. */
+static void *build_rawbuf(struct obj *obj, size_t *buflen);
+
+/* Obj string representation */
+static const char *obj_type_str(obj_type_t type);
+
+struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1)
 {
   if (!repo || !sha1) {
     errno = EINVAL;
@@ -141,6 +148,58 @@ struct obj *obj_open(struct repo *repo, const unsigned char *sha1)
   return obj;
 }
 
+struct obj *obj_open_file(const char *path, obj_type_t type)
+{
+  if (!path) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  struct stat st;
+  if (stat(path, &st) == -1)
+    return NULL;
+  if (!S_ISREG(st.st_mode)) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  int fd = open(path, O_RDONLY);
+  if (fd == -1)
+    return NULL;
+
+  struct obj *obj = calloc(1, sizeof(struct obj));
+  if (!obj) {
+    close(fd);
+    return NULL;
+  }
+
+  obj->type = type;
+  obj->payloadsz = st.st_size;
+
+  if (obj->payloadsz > 0) {
+    void *buf = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (buf == MAP_FAILED) {
+      close(fd);
+      obj_close(obj);
+      return NULL;
+    }
+    close(fd);
+
+    obj->payload = malloc(st.st_size);
+    if (!obj->payload) {
+      munmap(buf, st.st_size);
+      obj_close(obj);
+      return NULL;
+    }
+    memcpy(obj->payload, buf, st.st_size);
+    munmap(buf, st.st_size);
+  } else {
+    obj->payload = NULL;
+    close(fd);
+  }
+  return obj;
+}
+
 void obj_close(struct obj *obj)
 {
   if (!obj)
@@ -151,21 +210,25 @@ void obj_close(struct obj *obj)
   free(obj);
 }
 
-static const char *obj_type_str(obj_type_t type)
+int obj_sha1(struct obj *obj)
 {
-  switch (type) {
-  case OBJ_BLOB:
-    return "blob";
-  case OBJ_COMMIT:
-    return "commit";
-  case OBJ_TREE:
-    return "tree";
-  case OBJ_TAG:
-    return "tag";
-  default:
+  if (!obj) {
     errno = EINVAL;
-    return NULL;
+    return -1;
   }
+
+  size_t rawbuflen;
+  void *rawbuf = build_rawbuf(obj, &rawbuflen);
+  if (!rawbuf)
+    return -1;
+
+  if (sha1(rawbuf, rawbuflen, obj->sha1) == -1) {
+    free(rawbuf);
+    return -1;
+  }
+
+  free(rawbuf);
+  return 0;
 }
 
 int obj_write(struct repo *repo, struct obj *obj)
@@ -196,30 +259,10 @@ int obj_write(struct repo *repo, struct obj *obj)
     return -1;
   }
 
-  const char *type = obj_type_str(obj->type);
-  if (!type)
-    return -1;
-  int nw = 0;
-  nw = snprintf(NULL, 0, "%zu", obj->payloadsz);
-  if (nw < 0) {
-    errno = EINVAL;
-    return -1;
-  }
-  /* obj format: <type> <payloadsz>\0<payload> */
-  size_t rawbuflen = strlen(type) + 2 + nw + obj->payloadsz;
-  void *rawbuf = malloc(rawbuflen);
+  size_t rawbuflen;
+  void *rawbuf = build_rawbuf(obj, &rawbuflen);
   if (!rawbuf)
     return -1;
-  unsigned char *cursor = (unsigned char *)rawbuf;
-
-  if ((nw = snprintf(rawbuf, rawbuflen, "%s %zu", type, obj->payloadsz)) < 0) {
-    free(rawbuf);
-    return -1;
-  }
-  cursor += nw;
-  *cursor++ = '\0';
-  if (obj->payloadsz > 0)
-    memcpy(cursor, obj->payload, obj->payloadsz);
 
   void *buf;
   size_t buflen;
@@ -245,4 +288,57 @@ int obj_write(struct repo *repo, struct obj *obj)
   close(fd);
   free(buf);
   return 0;
+}
+
+static void *build_rawbuf(struct obj *obj, size_t *buflen)
+{
+  if (!obj || !buflen) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  const char *type = obj_type_str(obj->type);
+  if (!type)
+    return NULL;
+  int nw = 0;
+  nw = snprintf(NULL, 0, "%zu", obj->payloadsz);
+  if (nw < 0) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  *buflen = strlen(type) + 2 + nw + obj->payloadsz;
+  void *buf = malloc(*buflen);
+  if (!buf)
+    return NULL;
+
+  /* obj format: <type> <payloadsz>\0<payload> */
+  unsigned char *cursor = (unsigned char *)buf;
+  if ((nw = snprintf(buf, *buflen, "%s %zu", type, obj->payloadsz)) < 0) {
+    free(buf);
+    return NULL;
+  }
+  cursor += nw;
+  *cursor++ = '\0';
+  if (obj->payloadsz > 0)
+    memcpy(cursor, obj->payload, obj->payloadsz);
+
+  return buf;
+}
+
+static const char *obj_type_str(obj_type_t type)
+{
+  switch (type) {
+  case OBJ_BLOB:
+    return "blob";
+  case OBJ_COMMIT:
+    return "commit";
+  case OBJ_TREE:
+    return "tree";
+  case OBJ_TAG:
+    return "tag";
+  default:
+    errno = EINVAL;
+    return NULL;
+  }
 }
