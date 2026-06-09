@@ -35,9 +35,6 @@
    the buffer on heap and set the buflen to the length of the buffer. */
 static void *build_rawbuf(struct obj *obj, size_t *buflen);
 
-/* Obj string representation */
-static const char *obj_type_str(obj_type_t type);
-
 struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1)
 {
   if (!repo || !sha1) {
@@ -297,7 +294,7 @@ static void *build_rawbuf(struct obj *obj, size_t *buflen)
     return NULL;
   }
 
-  const char *type = obj_type_str(obj->type);
+  const char *type = str_from_obj_type(obj->type);
   if (!type)
     return NULL;
   int nw = 0;
@@ -326,18 +323,55 @@ static void *build_rawbuf(struct obj *obj, size_t *buflen)
   return buf;
 }
 
-static const char *obj_type_str(obj_type_t type)
+int obj_resolve(struct repo *repo, const char *name, unsigned char *sha1)
 {
-  switch (type) {
-  case OBJ_BLOB:
+  if (!repo || !name || !sha1) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (strlen(name) == SHA1_HEX_LENGTH - 1) {
+    if (hex_to_sha1((unsigned char *)name, sha1) == -1)
+      return -1;
+    return 0;
+  }
+
+  /* TODO: resolve tag, short hash */
+  return -1;
+}
+
+obj_type_t obj_type_from_str(const char *str)
+{
+  if (!str) {
+    errno = EINVAL;
+    return OBJ_NONE;
+  }
+
+  if (strcmp(str, "blob") == 0)
+    return OBJ_BLOB;
+  else if (strcmp(str, "commit") == 0)
+    return OBJ_COMMIT;
+  else if (strcmp(str, "tree") == 0)
+    return OBJ_TREE;
+  else if (strcmp(str, "tag") == 0)
+    return OBJ_TAG;
+  else {
+    errno = EINVAL;
+    return OBJ_NONE;
+  }
+}
+
+const char *str_from_obj_type(obj_type_t type)
+{
+  if (type == OBJ_BLOB)
     return "blob";
-  case OBJ_COMMIT:
+  else if (type == OBJ_COMMIT)
     return "commit";
-  case OBJ_TREE:
+  else if (type == OBJ_TREE)
     return "tree";
-  case OBJ_TAG:
+  else if (type == OBJ_TAG)
     return "tag";
-  default:
+  else {
     errno = EINVAL;
     return NULL;
   }

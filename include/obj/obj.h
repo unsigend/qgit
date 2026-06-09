@@ -54,6 +54,15 @@ struct obj {
   sha1 hash: "<type> <payloadsz>\0<payload>" uncompressed
   file on disk: "<type> <payloadsz>\0<payload>" compressed */
 
+/* Resolve a full hash, short hash or tag name to sha1. Return 0 on success, -1
+ * on error and set errno. */
+extern int obj_resolve(struct repo *repo, const char *name,
+                       unsigned char *sha1);
+
+/* Convert between object type and string. */
+extern obj_type_t obj_type_from_str(const char *str);
+extern const char *str_from_obj_type(obj_type_t type);
+
 /* Open an object from the repository by its sha1, and fill the sha1 field.
    Return object on success, NULL on error and set errno. */
 extern struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1);
