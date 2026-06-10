@@ -89,4 +89,10 @@ extern int obj_resolve(struct repo *repo, const char *name,
 extern obj_type_t obj_type_from_str(const char *str);
 extern const char *str_from_obj_type(obj_type_t type);
 
+/* Internal functions */
+
+/* Build the raw buffer "<type> <payloadsz>\0<payload>" for the object. Return
+   the buffer on heap and set the buflen to the length of the buffer. */
+extern void *obj_build_rawbuf(struct obj *obj, size_t *buflen);
+
 #endif
