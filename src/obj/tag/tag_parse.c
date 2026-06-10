@@ -15,30 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TREE_H
-#define TREE_H
+#include <errno.h>
 
-#include "collection/vector.h"
-#include "sha1.h"
+#include "obj/tag.h"
 
-struct obj;
-
-struct tree_entry {
-  const char *mode;
-  const char *path;
-  unsigned char sha1[SHA1_DIGEST_LENGTH];
-};
-
-struct tree {
-  struct vector entries;
-};
-
-/* Raw payload format for tree:
-     <mode> <path>\0<sha1-20>
-     ...
-     <mode> <path>\0<sha1-20>
-*/
-extern int tree_parse(struct obj *obj);
-extern void tree_free(struct tree *tree);
-
-#endif
+int tag_parse(struct obj *obj)
+{
+  if (!obj) {
+    errno = EINVAL;
+    return -1;
+  }
+  return 0;
+}

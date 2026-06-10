@@ -19,6 +19,7 @@
 
 #include "obj/blob.h"
 
+/* No-op, return 0 on success. */
 int blob_parse(struct obj *obj)
 {
   if (!obj) {
@@ -26,10 +27,4 @@ int blob_parse(struct obj *obj)
     return -1;
   }
   return 0;
-}
-
-void blob_free(struct blob *blob)
-{
-  if (!blob)
-    return;
 }

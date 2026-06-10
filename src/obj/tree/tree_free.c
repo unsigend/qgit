@@ -15,21 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
+#include "obj/tree.h"
 
-#include "obj/tag.h"
-
-int tag_parse(struct obj *obj)
+void tree_free(struct tree *tree)
 {
-  if (!obj) {
-    errno = EINVAL;
-    return -1;
-  }
-  return 0;
-}
-
-void tag_free(struct tag *tag)
-{
-  if (!tag)
+  if (!tree)
     return;
+
+  vec_fini(&tree->entries);
 }

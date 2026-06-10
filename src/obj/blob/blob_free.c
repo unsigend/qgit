@@ -15,21 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
+#include "obj/blob.h"
 
-#include "obj/tree.h"
-
-int tree_parse(struct obj *obj)
+/* No-op, do nothing. */
+void blob_free(struct blob *blob)
 {
-  if (!obj) {
-    errno = EINVAL;
-    return -1;
-  }
-  return 0;
-}
-
-void tree_free(struct tree *tree)
-{
-  if (!tree)
+  if (!blob)
     return;
 }

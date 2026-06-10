@@ -32,7 +32,14 @@ struct commit {
   const char *message;
 };
 
-/* Internal functions delegate by obj */
+/* Raw payload format for commit:
+     tree <sha1-40>\n
+     parent <sha1-40>\n (optional)
+     author <name> <email> <timestamp> <timezone>\n
+     committer <name> <email> <timestamp> <timezone>\n
+     \n
+     <message>
+*/
 extern int commit_parse(struct obj *obj);
 extern void commit_free(struct commit *commit);
 

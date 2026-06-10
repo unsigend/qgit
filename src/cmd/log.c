@@ -33,6 +33,8 @@
 #define ASCII_COLOR_YELLOW "\033[33m"
 #define ASCII_COLOR_RESET "\033[0m"
 
+#define UNLIMITED -1
+
 struct log_ctx {
   int oneline;
   int n;
@@ -98,7 +100,7 @@ static int log_cb(struct obj *obj, void *arg)
     free(buf);
   }
 
-  if (lctx->n != -1)
+  if (lctx->n != UNLIMITED)
     lctx->n--;
 
   return 0;
@@ -108,7 +110,7 @@ int cmd_log(int argc, char **argv)
 {
   struct log_ctx lctx = {
       .oneline = 0,
-      .n = -1, /* unlimited */
+      .n = UNLIMITED, /* unlimited */
   };
   int first_parent = 0;
   const char *head = "HEAD";
