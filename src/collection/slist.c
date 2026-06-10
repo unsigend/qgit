@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <slist.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "collection/slist.h"
 
 static struct slist_node *create_node(void *data)
 {

@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -25,7 +24,7 @@
 #include "repo.h"
 #include "sha1.h"
 
-static void printcheck(bool p, bool s, bool t)
+static void printcheck(int p, int s, int t)
 {
   if (p && s)
     die("options -p and -s cannot be used together");
@@ -37,8 +36,8 @@ static void printcheck(bool p, bool s, bool t)
 
 int cmd_cat_file(int argc, char **argv)
 {
-  bool p, t, s;
-  p = t = s = false;
+  int p, t, s;
+  p = t = s = 0;
   const char *type = NULL;
   const char *name = NULL;
 
@@ -58,15 +57,15 @@ int cmd_cat_file(int argc, char **argv)
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
   if (argparse_parse(&ctx, argc, argv) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
   printcheck(p, s, t);
 
-  bool has_flag = p || s || t;
-  if (has_flag) {
+  int any = p || s || t;
+  if (any) {
     if (argparse_getremargc(&ctx) < 1)
       die("requires an <object> argument");
     name = argparse_getremargv(&ctx)[0];

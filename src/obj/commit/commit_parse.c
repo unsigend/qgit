@@ -19,10 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "collection/slist.h"
 #include "obj/commit.h"
 #include "obj/obj.h"
 #include "sha1.h"
-#include "slist.h"
 
 static char *parsekv(char *buf, char *end, char **key, char **val)
 {
@@ -107,14 +107,4 @@ int commit_parse(struct obj *obj)
   }
   obj->commit.message = cursor;
   return 0;
-}
-
-void commit_free(struct commit *commit)
-{
-  if (!commit)
-    return;
-  if (commit->parents) {
-    slist_fini(commit->parents);
-    free(commit->parents);
-  }
 }

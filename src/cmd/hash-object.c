@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -32,7 +31,7 @@ int cmd_hash_object(int argc, char **argv)
 
   const char *type = "blob";
   const char *file = NULL;
-  bool w = false;
+  int w = 0;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -50,10 +49,10 @@ int cmd_hash_object(int argc, char **argv)
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
   if (argparse_parse(&ctx, argc, argv) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
   if (argparse_getremargc(&ctx) > 0)
     file = argparse_getremargv(&ctx)[0];

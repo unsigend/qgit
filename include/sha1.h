@@ -26,16 +26,21 @@
 /* Compute the SHA1 digest of the given data. Return 0 on success, -1 on error
  */
 extern int sha1(const void *data, size_t len,
-                unsigned char out[SHA1_DIGEST_LENGTH]);
+                unsigned char sha1[SHA1_DIGEST_LENGTH]);
 
 /* Convert a SHA1 digest to a hexadecimal string. Return 0 on success, -1 on
    error. */
-extern int sha1_to_hex(const unsigned char *in,
-                       unsigned char out[SHA1_HEX_LENGTH]);
+extern int sha1_to_hex(const unsigned char *sha1,
+                       unsigned char hex[SHA1_HEX_LENGTH]);
 
 /* Convert a hexadecimal string to a SHA1 digest. Return 0 on success, -1 on
    error. */
 extern int hex_to_sha1(const unsigned char *hex,
-                       unsigned char out[SHA1_DIGEST_LENGTH]);
+                       unsigned char sha1[SHA1_DIGEST_LENGTH]);
+
+/* Copy a SHA1 digest to a buffer. Return the buffer on success, NULL on error.
+ */
+extern const unsigned char *sha1_copy(const unsigned char *sha1,
+                                      unsigned char *buf);
 
 #endif

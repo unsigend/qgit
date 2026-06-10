@@ -18,7 +18,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -62,8 +61,9 @@ static int parse(char *parm, char **sec, char **key)
 */
 int cmd_config(int argc, char **argv)
 {
-  bool global = false, local = false;
-  bool list = false, get = false, set = false, unset = false;
+  int g, l;
+  int list, get, set, unset;
+  g = l = list = get = set = unset = 0;
   struct iniFILE *gcfg = NULL, *lcfg = NULL;
   char *sec = NULL, *key = NULL, *value = NULL;
   int ret = EXIT_SUCCESS;
@@ -71,8 +71,8 @@ int cmd_config(int argc, char **argv)
   struct argparse ctx;
   struct argparse_opt opts[] = {
       OPT_GROUP("Scope"),
-      OPT_BOOL(0, "global", "use global config file", &global),
-      OPT_BOOL(0, "local", "use local config file", &local),
+      OPT_BOOL(0, "global", "use global config file", &g),
+      OPT_BOOL(0, "local", "use local config file", &l),
       OPT_GROUP_END(),
       OPT_GROUP("Action"),
       OPT_BOOL('l', "list", "list all options", &list),
@@ -92,31 +92,31 @@ int cmd_config(int argc, char **argv)
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
   if (argparse_parse(&ctx, argc, argv) == -1)
-    die_errno();
+    die("%s", ctx.errstr);
 
-  if (local && global)
+  if (l && g)
     die("--local and --global cannot be used together");
 
-  if (local || IS_AUTO(global, local))
+  if (l || IS_AUTO(g, l))
     lcfg = config_cwd();
-  if (local && !lcfg) /* Explicit --local but no local config file */
+  if (l && !lcfg) /* Explicit --local but no local config file */
     die("--local can only be used inside a qgit repository");
-  if (global || IS_AUTO(global, local))
+  if (g || IS_AUTO(g, l))
     gcfg = config_global();
 
   if (list) {
-    if (IS_AUTO(global, local)) {
+    if (IS_AUTO(g, l)) {
       if (gcfg)
         iniparse_fprint(gcfg, stdout);
       if (lcfg)
         iniparse_fprint(lcfg, stdout);
-    } else if (global) {
+    } else if (g) {
       if (gcfg)
         iniparse_fprint(gcfg, stdout);
-    } else if (local) {
+    } else if (l) {
       if (lcfg)
         iniparse_fprint(lcfg, stdout);
     }
@@ -126,10 +126,10 @@ int cmd_config(int argc, char **argv)
     if (parse(argparse_getremargv(&ctx)[0], &sec, &key) == -1)
       die("invalid key format");
 
-    if (local) {
+    if (l) {
       if (lcfg)
         value = (char *)iniparse_get(lcfg, sec, key);
-    } else if (global) {
+    } else if (g) {
       if (gcfg)
         value = (char *)iniparse_get(gcfg, sec, key);
     } else {
@@ -151,7 +151,7 @@ int cmd_config(int argc, char **argv)
       die("invalid key format");
 
     value = argparse_getremargv(&ctx)[1];
-    if (global) {
+    if (g) {
       if (!gcfg) {
         char path[PATH_MAX];
         if (config_global_path(path) == -1)
@@ -180,7 +180,7 @@ int cmd_config(int argc, char **argv)
     if (parse(argparse_getremargv(&ctx)[0], &sec, &key) == -1)
       die("invalid key format");
 
-    if (global) {
+    if (g) {
       if (gcfg) {
         if (iniparse_unset(gcfg, sec, key) == -1)
           ret = EXIT_FAILURE;

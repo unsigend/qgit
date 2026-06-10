@@ -18,8 +18,9 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
+#include "collection/slist.h"
+#include "repo.h"
 #include "sha1.h"
-#include "slist.h"
 
 struct obj;
 
@@ -31,7 +32,21 @@ struct commit {
   const char *message;
 };
 
+/* Internal functions delegate by obj */
 extern int commit_parse(struct obj *obj);
 extern void commit_free(struct commit *commit);
+
+typedef enum {
+  COMMITWK_FIRST,
+  COMMITWK_ALL,
+} commit_walk_type_t;
+
+/* Callback function, return -1 for errno, 0 for continue, 1 for stop */
+typedef int (*commit_walk_cb)(struct obj *obj, void *arg);
+
+/* Walk through the commit history from the given commit, exit when callback
+   return -1 or 1, return 0 on success, -1 on error and set errno. */
+extern int commit_walk(struct obj *obj, commit_walk_type_t type,
+                       struct repo *repo, commit_walk_cb cb, void *arg);
 
 #endif
