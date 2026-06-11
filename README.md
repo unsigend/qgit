@@ -1,3 +1,195 @@
 # qgit
 
-qgit is a simplified git like version control system.
+qgit is a simplified Git like version control system written in C. It is rebuilt based on Git v1.0.0 with a reduced implementation aimed at exploring Git core internals. It supports common repository workflows and stays compatible with Git repositories.
+
+## Table of Contents
+
+1. [Build](#build)
+2. [Commands](#commands)
+   * [add](#add)
+   * [cat-file](#cat-file)
+   * [check-ignore](#check-ignore)
+   * [checkout](#checkout)
+   * [commit](#commit)
+   * [config](#config)
+   * [hash-object](#hash-object)
+   * [help](#help)
+   * [init](#init)
+   * [log](#log)
+   * [ls-files](#ls-files)
+   * [ls-tree](#ls-tree)
+   * [rev-parse](#rev-parse)
+   * [rm](#rm)
+   * [show-ref](#show-ref)
+   * [status](#status)
+   * [tag](#tag)
+   * [version](#version)
+3. [Contribution](#contribution)
+
+## Build
+
+Requires a C11 compiler, OpenSSL, and zlib.
+
+```bash
+make bin
+```
+
+The executable is placed at `build/bin/qgit`.
+
+Available make targets:
+
+```
+make all       build executable and library
+make bin       build executable
+make lib       build library
+make clean     clean build directory
+make list      list source files
+make info      show build configuration
+make clang     generate compile_commands.json
+make format    format .c and .h
+make flags     show compiler flags
+make docker    build and run development container
+make install   install executable globally
+make test      run all tests
+make test-NAME run one test
+make unit      build and run unit tests
+make unit-NAME run one unit test
+make help      show usage message
+```
+
+## Commands
+
+Command documentation is in progress. Each entry below matches Git usage at a high level.
+
+### add
+
+Add file contents to the index.
+
+### cat-file
+
+Provide contents or details of repository objects.
+
+### check-ignore
+
+Debug gitignore and exclude files.
+
+### checkout
+
+Switch branches or restore working tree files.
+
+### commit
+
+Record changes to the repository.
+
+### config
+
+Get and set repository or global options.
+
+### hash-object
+
+Compute object ID and optionally create a blob from a file.
+
+### help
+
+Display help information about Git.
+
+#### Synopsis
+
+```
+qgit help
+```
+
+#### Description
+
+Prints usage and a list of available qgit subcommands with brief descriptions. Running `qgit` with no subcommand shows the same output.
+
+Extra arguments are ignored.
+
+### init
+
+Create an empty Git repository or reinitialize an existing one.
+
+The default initial branch is `main`.
+
+#### Synopsis
+
+```
+qgit init [-q | --quiet] [-b <branch-name> | --initial-branch=<branch-name>] [<directory>]
+```
+
+#### Description
+
+Creates an empty repository with a `.qgit` directory and an initial branch with no commits. Running `qgit init` in an existing repository is safe and will not overwrite existing data.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-q`
+`--quiet`
+
+Only print error and warning messages. All other output is suppressed.
+
+`-b` `<branch-name>`
+`--initial-branch=` `<branch-name>`
+
+Use `<branch-name>` for the initial branch in the newly created repository. Defaults to `main`.
+
+`<directory>`
+
+Create the repository in `<directory>`. Defaults to the current directory.
+
+### log
+
+Show commit logs.
+
+### ls-files
+
+Show information about files in the index and working tree.
+
+### ls-tree
+
+List the contents of a tree object.
+
+### rev-parse
+
+Pick out and massage parameters.
+
+### rm
+
+Remove files from the working tree and from the index.
+
+### show-ref
+
+List references in a local repository.
+
+### status
+
+Show the working tree status.
+
+### tag
+
+Create, list, delete or verify a tag object signed with GPG.
+
+### version
+
+Show the version.
+
+#### Synopsis
+
+```
+qgit version
+```
+
+#### Description
+
+Prints the qgit version as `qgit version <major>.<minor>.<patch>`.
+
+Extra arguments are ignored.
+
+## Contribution
+
+Issues and pull requests are welcome. Please keep changes focused and run `make test` before submitting. This project is licensed under GPLv3. See [LICENSE](LICENSE) for details.

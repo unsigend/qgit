@@ -113,27 +113,65 @@ assert_file_content_not_contains() {
     fi
 }
 
+qgit_meta_dir() {
+    local root="${1:-.}"
+    if [ "$root" = "." ]; then
+        printf '%s\n' "$QGIT_META_DIR"
+    else
+        printf '%s/%s\n' "$root" "$QGIT_META_DIR"
+    fi
+}
+
+assert_qgit_absent() {
+    local root="${1:-.}"
+    local meta
+    meta=$(qgit_meta_dir "$root")
+    if [ -e "$meta" ]; then
+        echo "Expected no qgit meta dir: $meta"
+        return 1
+    fi
+}
+
+assert_qgit_head() {
+    local branch="$1"
+    local root="${2:-.}"
+    assert_file_content_contains "$(qgit_meta_dir "$root")/HEAD" \
+        "ref: refs/heads/$branch"
+}
+
+assert_qgit_config_defaults() {
+    local root="${1:-.}"
+    local config
+    config="$(qgit_meta_dir "$root")/config"
+    assert_file_content_contains "$config" "$QGIT_CONFIG_SECTION"
+    local entry
+    for entry in "${QGIT_CONFIG_ENTRIES[@]}"; do
+        assert_file_content_contains "$config" "$entry"
+    done
+}
+
+assert_qgit_description() {
+    local root="${1:-.}"
+    assert_file_content_contains "$(qgit_meta_dir "$root")/description" \
+        "$QGIT_DESCRIPTION_LINE"
+}
+
 assert_qgit_repo_layout() {
     local root="${1:-.}"
+    local meta
+    meta=$(qgit_meta_dir "$root")
 
-    assert_dir_exists "$root/.qgit"
-    assert_file_exists "$root/.qgit/HEAD"
-    assert_file_exists "$root/.qgit/config"
-    assert_file_exists "$root/.qgit/description"
-    assert_dir_exists "$root/.qgit/objects"
-    assert_dir_exists "$root/.qgit/refs/heads"
-    assert_dir_exists "$root/.qgit/refs/tags"
+    assert_dir_exists "$meta"
 
-    [ -s "$root/.qgit/HEAD" ] || {
-        echo "Expected non-empty HEAD"
-        return 1
-    }
-    [ -s "$root/.qgit/config" ] || {
-        echo "Expected non-empty config"
-        return 1
-    }
-    [ -s "$root/.qgit/description" ] || {
-        echo "Expected non-empty description"
-        return 1
-    }
+    local entry
+    for entry in "${QGIT_REPO_DIRS[@]}"; do
+        assert_dir_exists "$meta/$entry"
+    done
+    for entry in "${QGIT_REPO_FILES[@]}"; do
+        assert_file_exists "$meta/$entry"
+        [ -s "$meta/$entry" ] || {
+            echo "Expected non-empty $meta/$entry"
+            return 1
+        }
+    done
 }

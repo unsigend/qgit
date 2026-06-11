@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,7 +36,7 @@
     }                                                                          \
   } while (0) /* Check if the size is overflow */
 
-static void destroy(struct vector *vec, size_t start, size_t end);
+static void destroy_r(struct vector *vec, size_t start, size_t end);
 
 int vec_init(struct vector *vec, size_t elesz, void (*destroy)(void *))
 {
@@ -67,7 +68,7 @@ void vec_clear(struct vector *vec)
 {
   if (!vec)
     return;
-  destroy(vec, 0, vec->sz);
+  destroy_r(vec, 0, vec->sz);
   vec->sz = 0;
 }
 
@@ -92,7 +93,7 @@ int vec_resize(struct vector *vec, size_t newsz)
       return 0;
     }
   } else {
-    destroy(vec, newsz, vec->sz);
+    destroy_r(vec, newsz, vec->sz);
     vec->sz = newsz;
     return 0;
   }
@@ -189,7 +190,7 @@ int vec_remove(struct vector *vec, size_t idx, void *dest)
   return 0;
 }
 
-static void destroy(struct vector *vec, size_t start, size_t end)
+static void destroy_r(struct vector *vec, size_t start, size_t end)
 {
   if (!vec || start >= end || start >= vec->sz)
     return;

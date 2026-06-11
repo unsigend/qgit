@@ -69,7 +69,7 @@ static int print_tree(struct tree *tree)
     unsigned char hex[SHA1_HEX_LENGTH];
     if (sha1_to_hex(entry->sha1, hex) == -1)
       return -1;
-    if (printf("%06.6lo %s %s\t%s\n", m, t, (char *)hex, entry->path) < 0)
+    if (printf("%6.6lo %s %s\t%s\n", m, t, (char *)hex, entry->path) < 0)
       return -1;
   }
   return 0;

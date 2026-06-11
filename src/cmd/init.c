@@ -25,21 +25,21 @@
 
 int cmd_init(int argc, char **argv)
 {
-  const char *b = "main";
+  const char *bname = "main";
   const char *path = ".";
-  int q = 0;
+  int quiet = 0;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
       OPT_HELP(),
-      OPT_STR('b', "initial-branch", "override the name of initial branch", &b,
-              OPT_REQUIRED),
-      OPT_BOOL('q', "quiet", "suppress non-error messages", &q), OPT_END()};
+      OPT_STR('b', "initial-branch", "override the name of initial branch",
+              &bname, OPT_REQUIRED),
+      OPT_BOOL('q', "quiet", "suppress non-error messages", &quiet), OPT_END()};
 
   struct argparse_desc desc = {
       .prog = "qgit init",
       .desc = "Create an empty Git repository or reinitialize an existing one",
-      .usage = "qgit init [options]",
+      .usage = "qgit init [options] [path]",
       .epilog = "See 'qgit init --help' for more information.",
   };
 
@@ -64,13 +64,13 @@ int cmd_init(int argc, char **argv)
   if (dir_exists(repo->gitdir))
     reinit = 1;
 
-  if (repo_create(repo, b) == -1) {
+  if (repo_create(repo, bname) == -1) {
     if (errno == EINVAL)
-      die("invalid branch name: %s", b);
+      die("invalid branch name: %s", bname);
     die_errno();
   }
 
-  if (!q) {
+  if (!quiet) {
     if (reinit)
       printf("Reinitialized existing qgit repository in %s\n", abspath);
     else

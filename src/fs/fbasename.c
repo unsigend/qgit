@@ -20,6 +20,8 @@
 #if defined(__APPLE__) || defined(__FreeBSD__)
 char *fbasename(const char *path, char *buf) { return basename_r(path, buf); }
 #else
+#include <limits.h>
+#include <string.h>
 char *fbasename(const char *path, char *buf)
 {
   strncpy(buf, path, PATH_MAX - 1);

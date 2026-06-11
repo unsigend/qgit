@@ -1,0 +1,98 @@
+---
+description: README command documentation for qgit — git-scm sourced, read src/cmd, README.md only
+globs: README.md
+alwaysApply: false
+---
+
+# qgit README Command Documentation
+
+When writing or updating command docs in `README.md`, follow this workflow. The goal is Git compatible wording with qgit accurate scope.
+
+## Hard rules
+
+1. **Only edit `README.md`** — never modify `src/`, `include/`, tests, or any other file while documenting a command.
+2. **Read the command source first** — open `src/cmd/<command>.c` and treat it as the source of truth for supported flags, arguments, defaults, synopsis, and qgit specific behavior.
+3. **Use Git docs for wording** — fetch the matching page from [git-scm.com/docs](https://git-scm.com/docs) (`git-<command>`) and adapt NAME, DESCRIPTION, and OPTIONS text. Do not invent flag descriptions.
+4. **Document only what qgit implements** — omit Git flags that are not defined in the command source. Do not document `--bare`, plumbing flags, or config keys qgit does not support.
+5. **Keep other command sections unchanged** — edit only the target `### <command>` subsection unless the user asks for broader README changes.
+
+## Wording
+
+- Concise and brief. Prefer short sentences.
+- Match Git manual tone. Adapt `git` to `qgit` in synopsis and prose where the command name appears.
+- No semicolons in prose.
+- Avoid em dashes and double hyphens in prose. Flag spellings like `-q` and `--quiet` are fine.
+- Use parentheses sparingly.
+- Call the program `qgit`, not `git`, when describing what qgit does.
+
+## Format
+
+Each documented command uses this structure under `## Commands`:
+
+```markdown
+### <command>
+
+<One line summary from Git NAME section.>
+
+<Optional qgit specific notes, e.g. default branch or paths.>
+
+#### Synopsis
+
+```
+qgit <command> [options] ...
+```
+
+#### Description
+
+<Adapted from Git DESCRIPTION. Only describe behavior qgit implements.>
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`<flag>`
+`<long-flag>`
+
+<Adapted from Git OPTIONS. One blank line between option names and description.>
+```
+
+### Synopsis
+
+- Copy usage shape from `argparse_desc.usage` in the command source when present.
+- Replace `git` with `qgit`.
+- List only flags present in the source `argparse_opt` table.
+
+### Options
+
+- Include `-h` / `--help` when `OPT_HELP()` is used.
+- Group short and long forms on separate lines, Git manual style.
+- Use `<placeholder>` for arguments, e.g. `<branch-name>`, `<directory>`.
+- Note qgit defaults when they differ from Git, e.g. initial branch `main`.
+
+### Table of contents
+
+Command subsections are already linked under `## Table of Contents`. Do not renumber top level entries. Do not add TOC entries for Synopsis, Description, or Options.
+
+### Undocumented commands
+
+Commands without a full write up keep a single placeholder line:
+
+```markdown
+### <command>
+
+<One line summary from subcmds table or Git NAME section.>
+```
+
+## Workflow
+
+1. Read `src/cmd/<command>.c` — flags, defaults, usage string, epilog.
+2. Fetch `https://git-scm.com/docs/git-<command>` for NAME, DESCRIPTION, and OPTIONS wording.
+3. Update the `### <command>` block in `README.md` using the format above.
+4. Verify every documented flag exists in the source and every source flag is documented.
+
+## Reference
+
+See `### init` in `README.md` for a completed example.
