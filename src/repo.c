@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "fs.h"
 #include "iniparse.h"
@@ -215,4 +216,12 @@ struct repo *repo_find(const char *path)
     return NULL;
 
   return repo;
+}
+
+struct repo *repo_cwd(void)
+{
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, sizeof(cwd)) == NULL)
+    return NULL;
+  return repo_find(cwd);
 }

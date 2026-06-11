@@ -40,4 +40,8 @@ extern int repo_create(struct repo *repo, const char *branch);
    NULL if not found. */
 extern struct repo *repo_find(const char *path);
 
+/* Return the repository of the current working directory. And recursively up to
+   the root. NULL if not found. */
+extern struct repo *repo_cwd(void);
+
 #endif

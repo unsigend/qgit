@@ -140,11 +140,7 @@ int cmd_log(int argc, char **argv)
   if (argparse_getremargc(&ctx) > 0)
     head = argparse_getremargv(&ctx)[0];
 
-  char cwd[PATH_MAX];
-  if (getcwd(cwd, sizeof(cwd)) == NULL)
-    die_errno();
-
-  struct repo *repo = repo_find(cwd);
+  struct repo *repo = repo_cwd();
   if (!repo)
     die("not inside a qgit repository");
 
