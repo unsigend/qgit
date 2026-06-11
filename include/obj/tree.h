@@ -18,6 +18,9 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include <stddef.h>
+#include <stdio.h>
+
 #include "collection/vector.h"
 #include "sha1.h"
 
@@ -40,5 +43,9 @@ struct tree {
 */
 extern int tree_parse(struct obj *obj);
 extern void tree_free(struct tree *tree);
+
+/* Pretty print the tree to a stream or buffer. Return the number of bytes
+   written on success, -1 on error. */
+extern int tree_fprintf(FILE *stream, struct obj *obj);
 
 #endif

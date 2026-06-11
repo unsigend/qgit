@@ -65,29 +65,152 @@ Command documentation is in progress. Each entry below matches Git usage at a hi
 
 Add file contents to the index.
 
+---
+
 ### cat-file
 
 Provide contents or details of repository objects.
+
+qgit cat-file works in two modes.
+
+#### Synopsis
+
+```
+qgit cat-file (-p | -t | -s) <object>
+qgit cat-file <type> <object>
+```
+
+#### Description
+
+**Auto mode** takes one object name and a single inspection flag. qgit reads the object and prints the requested detail.
+
+**Raw mode** takes a type and an object name. qgit checks that the object type matches, then prints the raw payload bytes.
+
+Only one of `-p`, `-t`, or `-s` may be used at a time. The command must be run inside a qgit repository.
+
+Supported types: `blob`, `commit`, `tree`, `tag`.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-p`
+
+Pretty-print the object contents.
+
+`-t`
+
+Print the object type.
+
+`-s`
+
+Print the object size in bytes.
+
+`<type>`
+
+Object type for raw mode.
+
+`<object>`
+
+Object name, usually a SHA-1 hash.
+
+---
 
 ### check-ignore
 
 Debug gitignore and exclude files.
 
+---
+
 ### checkout
 
 Switch branches or restore working tree files.
+
+---
 
 ### commit
 
 Record changes to the repository.
 
+---
+
 ### config
 
 Get and set repository or global options.
 
+Keys use the form `<section>.<name>`.
+
+#### Synopsis
+
+```
+qgit config [<scope>] --list
+qgit config [<scope>] --get <key>
+qgit config [<scope>] --set <key> <value>
+qgit config [<scope>] --unset <key>
+```
+
+`<scope>` is optional. Use `--global` or `--local` to target one file. With no scope, qgit uses both files where the action allows.
+
+#### Description
+
+Reads and writes qgit configuration. The global file lives in the user home directory. The local file belongs to the current repository.
+
+With no scope:
+
+* `--list` prints global entries first, then local entries
+* `--get` reads local first, then falls back to global
+* `--set` writes to the local repository config
+* `--unset` removes the key from the local repository config
+
+`--local` requires a qgit repository in the current directory or above. `--set` without scope also requires a repository.
+
+A missing key makes `--get` exit with status 1. A missing key makes `--unset` exit with status 1 when the selected config file is present.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`--global`
+
+Use the global config file only.
+
+`--local`
+
+Use the local repository config file only.
+
+`-l`
+`--list`
+
+List all variables for the selected scope.
+
+`-g`
+`--get`
+
+Print the value of `<key>`.
+
+`-s`
+`--set`
+
+Set `<key>` to `<value>`.
+
+`-u`
+`--unset`
+
+Remove `<key>`.
+
+---
+
 ### hash-object
 
 Compute object ID and optionally create a blob from a file.
+
+---
 
 ### help
 
@@ -104,6 +227,8 @@ qgit help
 Prints usage and a list of available qgit subcommands with brief descriptions. Running `qgit` with no subcommand shows the same output.
 
 Extra arguments are ignored.
+
+---
 
 ### init
 
@@ -142,37 +267,55 @@ Use `<branch-name>` for the initial branch in the newly created repository. Defa
 
 Create the repository in `<directory>`. Defaults to the current directory.
 
+---
+
 ### log
 
 Show commit logs.
+
+---
 
 ### ls-files
 
 Show information about files in the index and working tree.
 
+---
+
 ### ls-tree
 
 List the contents of a tree object.
+
+---
 
 ### rev-parse
 
 Pick out and massage parameters.
 
+---
+
 ### rm
 
 Remove files from the working tree and from the index.
+
+---
 
 ### show-ref
 
 List references in a local repository.
 
+---
+
 ### status
 
 Show the working tree status.
 
+---
+
 ### tag
 
 Create, list, delete or verify a tag object signed with GPG.
+
+---
 
 ### version
 

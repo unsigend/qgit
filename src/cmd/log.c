@@ -121,10 +121,15 @@ int cmd_log(int argc, char **argv)
               OPT_REQUIRED),
       OPT_END(),
   };
+  static const char *usages[] = {
+      "qgit log [--oneline] [--first-parent] [-n <num>] [<commit>]",
+  };
+
   struct argparse_desc desc = {
-      .prog = "log",
+      .prog = "qgit log",
       .desc = "Show commit logs",
-      .usage = "qgit log [options]",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)

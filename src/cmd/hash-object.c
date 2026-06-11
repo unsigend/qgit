@@ -39,10 +39,15 @@ int cmd_hash_object(int argc, char **argv)
       OPT_END(),
   };
 
+  static const char *usages[] = {
+      "qgit hash-object [-t <type>] [-w | --write] <file>",
+  };
+
   struct argparse_desc desc = {
       .prog = "qgit hash-object",
       .desc = "Compute object ID and optionally create a blob from a file",
-      .usage = "qgit hash-object [options] <file>",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#include "argparse.h"
-
+#include <argparse.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -186,8 +186,10 @@ void argparse_cb_help(struct argparse *ctx, struct argparse_opt *opt)
       fputc('\n', stdout);
     }
 
-    if (desc->usage) {
-      fprintf(stdout, "USAGE: %s\n", desc->usage);
+    if (desc->usages && desc->nusages) {
+      fprintf(stdout, "USAGE: %s\n", desc->usages[0]);
+      for (size_t i = 1; i < desc->nusages; i++)
+        fprintf(stdout, "       %s\n", desc->usages[i]);
       fputc('\n', stdout);
     }
 

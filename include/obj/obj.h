@@ -18,10 +18,13 @@
 #ifndef OBJ_H
 #define OBJ_H
 
+#include <stdio.h>
+
 #include "obj/blob.h"
 #include "obj/commit.h"
 #include "obj/tag.h"
 #include "obj/tree.h"
+#include <stddef.h>
 
 typedef enum {
   OBJ_BLOB,
@@ -91,5 +94,10 @@ extern const char *str_from_obj_type(obj_type_t type);
 /* Build the raw buffer "<type> <payloadsz>\0<payload>" for the object. Return
    the buffer on heap and set the buflen to the length of the buffer. */
 extern void *obj_build_rawbuf(struct obj *obj, size_t *buflen);
+
+/* Pretty print the object to a stream or buffer. Return the number of bytes
+   written on success, -1 on error. */
+extern int obj_fprintf(FILE *stream, struct obj *obj);
+extern int obj_printf(struct obj *obj);
 
 #endif

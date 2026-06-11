@@ -15,22 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BLOB_H
-#define BLOB_H
+#include <errno.h>
 
-#include <stdio.h>
+#include "obj/blob.h"
+#include "obj/obj.h"
 
-struct obj;
-
-struct blob {
-};
-
-/* Blob parse no-op, return 0 on success. */
-extern int blob_parse(struct obj *obj);
-extern void blob_free(struct blob *blob);
-
-/* Pretty print the blob to a stream or buffer. Return the number of bytes
-   written on success, -1 on error. */
-extern int blob_fprintf(FILE *stream, struct obj *obj);
-
-#endif
+int blob_fprintf(FILE *stream, struct obj *obj)
+{
+  if (!stream || !obj) {
+    errno = EINVAL;
+    return -1;
+  }
+  return fwrite(obj->payload, 1, obj->payloadsz, stream);
+}

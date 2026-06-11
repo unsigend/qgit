@@ -18,6 +18,8 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
+#include <stdio.h>
+
 #include "repo.h"
 #include "sha1.h"
 
@@ -41,6 +43,10 @@ struct commit {
 */
 extern int commit_parse(struct obj *obj);
 extern void commit_free(struct commit *commit);
+
+/* Pretty print the commit to a stream or buffer. Return the number of bytes
+   written on success, -1 on error. */
+extern int commit_fprintf(FILE *stream, struct obj *obj);
 
 typedef enum {
   COMMITWK_FIRST,

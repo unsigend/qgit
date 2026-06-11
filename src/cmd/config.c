@@ -48,11 +48,14 @@ static int parse(char *parm, char **sec, char **key)
   qgit config behaviour:
     --list: if --global or --local is specified, list the global or local config
             file, if auto, list global first then local config.
+
     --get:  if --global or --local is specified, get the value of the key from
             the global or local config file, if auto, get the value from local
             config first, then from global config if not found.
+
     --set:  if --global or --local is specified, set the value of the key in the
             global or local config file, if auto, set the value in local config.
+
     --unset: if --global or --local is specified, unset the value of the key in
             the global or local config file, if auto, unset the value in local
             config.
@@ -68,6 +71,7 @@ int cmd_config(int argc, char **argv)
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
+      OPT_HELP(),
       OPT_GROUP("Scope"),
       OPT_BOOL(0, "global", "use global config file", &g),
       OPT_BOOL(0, "local", "use local config file", &l),
@@ -78,14 +82,21 @@ int cmd_config(int argc, char **argv)
       OPT_BOOL('s', "set", "set the value of an key", &set),
       OPT_BOOL('u', "unset", "unset the value of an key", &unset),
       OPT_GROUP_END(),
-      OPT_HELP(),
       OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit config [<scope>] --list",
+      "qgit config [<scope>] --get <key>",
+      "qgit config [<scope>] --set <key> <value>",
+      "qgit config [<scope>] --unset <key>",
   };
 
   struct argparse_desc desc = {
       .prog = "qgit config",
       .desc = "Get and set repository or global options",
-      .usage = "qgit config [options]",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
       .epilog = "See 'qgit config --help' for more information.",
   };
 

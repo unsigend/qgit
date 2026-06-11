@@ -61,7 +61,7 @@ Show help message and exit.
 
 ### Synopsis
 
-- Copy usage shape from `argparse_desc.usage` in the command source when present.
+- Copy usage lines from `argparse_desc.usages` in the command source when present.
 - Replace `git` with `qgit`.
 - List only flags present in the source `argparse_opt` table.
 

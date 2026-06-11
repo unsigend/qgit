@@ -36,10 +36,16 @@ int cmd_init(int argc, char **argv)
               &bname, OPT_REQUIRED),
       OPT_BOOL('q', "quiet", "suppress non-error messages", &quiet), OPT_END()};
 
+  static const char *usages[] = {
+      "qgit init [-q | --quiet] [-b <branch-name> | "
+      "--initial-branch=<branch-name>] [<directory>]",
+  };
+
   struct argparse_desc desc = {
       .prog = "qgit init",
       .desc = "Create an empty Git repository or reinitialize an existing one",
-      .usage = "qgit init [options] [path]",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
       .epilog = "See 'qgit init --help' for more information.",
   };
 

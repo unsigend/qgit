@@ -86,10 +86,15 @@ int cmd_ls_tree(int argc, char **argv)
       OPT_END(),
   };
 
+  static const char *usages[] = {
+      "qgit ls-tree [-r] [<tree-ish>]",
+  };
+
   struct argparse_desc desc = {
       .prog = "qgit ls-tree",
       .desc = "List the contents of a tree object",
-      .usage = "qgit ls-tree [options] <path>",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)

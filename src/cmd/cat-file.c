@@ -22,7 +22,7 @@
 #include "die.h"
 #include "obj/obj.h"
 
-static void printcheck(int p, int s, int t)
+static void mutex_check(int p, int s, int t)
 {
   if (p && s)
     die("options -p and -s cannot be used together");
@@ -48,10 +48,16 @@ int cmd_cat_file(int argc, char **argv)
       OPT_END(),
   };
 
+  static const char *usages[] = {
+      "qgit cat-file (-p | -t | -s) <object>",
+      "qgit cat-file <type> <object>",
+  };
+
   struct argparse_desc desc = {
       .prog = "qgit cat-file",
       .desc = "Provide contents or details of repository objects",
-      .usage = "qgit cat-file [options] <object>",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)
@@ -60,27 +66,23 @@ int cmd_cat_file(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", ctx.errstr);
 
-  printcheck(p, s, t);
+  mutex_check(p, s, t);
 
   int any = p || s || t;
   if (any) {
     if (argparse_getremargc(&ctx) < 1)
-      die("requires an <object> argument");
+      die("auto mode requires an <object> argument");
     name = argparse_getremargv(&ctx)[0];
   } else {
     if (argparse_getremargc(&ctx) < 2)
-      die("requires 2 arguments in <type> <object>");
+      die("raw mode requires 2 arguments in <type> <object>");
     type = argparse_getremargv(&ctx)[0];
     name = argparse_getremargv(&ctx)[1];
     if (obj_type_from_str(type) == OBJ_NONE)
       die("invalid object type: %s", type);
   }
 
-  char cwd[PATH_MAX];
-  if (getcwd(cwd, sizeof(cwd)) == NULL)
-    die_errno();
-
-  struct repo *repo = repo_find(cwd);
+  struct repo *repo = repo_cwd();
   if (!repo)
     die("not inside a qgit repository");
 
@@ -92,16 +94,17 @@ int cmd_cat_file(int argc, char **argv)
   if (!obj)
     die_errno();
 
-  if (p)
-    fwrite(obj->payload, 1, obj->payloadsz, stdout);
-  else if (s)
+  if (p) {
+    if (obj_fprintf(stdout, obj) == -1)
+      die_errno();
+  } else if (s)
     printf("%zu\n", obj->payloadsz);
   else if (t) {
     const char *str = str_from_obj_type(obj->type);
     if (!str)
       die("broken object file");
     printf("%s\n", str);
-  } else {
+  } else { /* raw mode */
     obj_type_t expected = obj_type_from_str(type);
     if (obj->type != expected)
       die("object %s is a %s, not a %s", name, str_from_obj_type(obj->type),
