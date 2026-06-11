@@ -17,30 +17,11 @@
 
 #include <stdlib.h>
 
-#include "obj/obj.h"
+#include "repo.h"
 
-void obj_close(struct obj *obj)
+void repo_free(struct repo *repo)
 {
-  if (!obj)
+  if (!repo)
     return;
-
-  switch (obj->type) {
-  case OBJ_BLOB:
-    blob_free(&obj->blob);
-    break;
-  case OBJ_COMMIT:
-    commit_free(&obj->commit);
-    break;
-  case OBJ_TREE:
-    tree_free(&obj->tree);
-    break;
-  case OBJ_TAG:
-    tag_free(&obj->tag);
-    break;
-  default:
-    break;
-  }
-  if (obj->payload)
-    free(obj->payload);
-  free(obj);
+  free(repo);
 }

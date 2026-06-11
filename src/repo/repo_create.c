@@ -16,51 +16,11 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "fs.h"
 #include "iniparse.h"
 #include "repo.h"
-
-struct repo *repo_init(const char *path)
-{
-  if (!path) {
-    errno = EINVAL;
-    return NULL;
-  }
-  struct repo *repo = malloc(sizeof(*repo));
-  if (!repo)
-    return NULL;
-  memset(repo, 0, sizeof(*repo));
-
-  if (snprintf(repo->worktree, PATH_MAX, "%s", path) >= PATH_MAX) {
-    repo_free(repo);
-    errno = ENAMETOOLONG;
-    return NULL;
-  }
-
-  if (snprintf(repo->gitdir, PATH_MAX, "%s/.qgit", repo->worktree) >=
-      PATH_MAX) {
-    repo_free(repo);
-    errno = ENAMETOOLONG;
-    return NULL;
-  }
-
-  return repo;
-}
-
-void repo_free(struct repo *repo)
-{
-  if (!repo)
-    return;
-  free(repo);
-}
 
 static const char *dirs[] = {"objects", "refs/heads", "refs/tags"};
 
@@ -181,47 +141,4 @@ int repo_create(struct repo *repo, const char *branch)
   }
 
   return 0;
-}
-
-struct repo *repo_find(const char *path)
-{
-  if (!path)
-    return NULL;
-
-  char buf[PATH_MAX];
-  char qgit[PATH_MAX];
-
-  if (snprintf(buf, sizeof(buf), "%s", path) >= PATH_MAX) {
-    errno = ENAMETOOLONG;
-    return NULL;
-  }
-
-  while (1) {
-    if (snprintf(qgit, sizeof(qgit), "%s/.qgit", buf) >= PATH_MAX) {
-      errno = ENAMETOOLONG;
-      return NULL;
-    }
-    if (dir_exists(qgit))
-      break;
-    char *slash = strrchr(buf, '/');
-    *slash = '\0';
-    if (slash == buf) {
-      errno = ENOENT;
-      return NULL;
-    }
-  }
-
-  struct repo *repo = repo_init(buf);
-  if (!repo)
-    return NULL;
-
-  return repo;
-}
-
-struct repo *repo_cwd(void)
-{
-  char cwd[PATH_MAX];
-  if (getcwd(cwd, sizeof(cwd)) == NULL)
-    return NULL;
-  return repo_find(cwd);
 }

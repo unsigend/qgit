@@ -20,9 +20,7 @@
 #include <string.h>
 
 #include "collection/slist.h"
-#include "obj/commit.h"
 #include "obj/obj.h"
-#include "sha1.h"
 
 static char *parsekv(char *buf, char *end, char **key, char **val)
 {

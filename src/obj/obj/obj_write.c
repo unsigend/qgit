@@ -17,7 +17,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -25,7 +24,6 @@
 #include "compress.h"
 #include "fs.h"
 #include "obj/obj.h"
-#include "sha1.h"
 
 int obj_write(struct repo *repo, struct obj *obj)
 {

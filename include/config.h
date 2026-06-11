@@ -18,8 +18,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "iniparse.h"
-
 /* Write the global config path string to a given buffer, assume the size of the
    buffer is at least PATH_MAX. Return 0 on success, -1 on error. */
 extern int config_global_path(char *path);

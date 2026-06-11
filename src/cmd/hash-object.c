@@ -16,15 +16,12 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "argparse.h"
 #include "die.h"
 #include "fs.h"
 #include "obj/obj.h"
-#include "repo.h"
-#include "sha1.h"
 
 int cmd_hash_object(int argc, char **argv)
 {

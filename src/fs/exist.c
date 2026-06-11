@@ -16,7 +16,6 @@
  */
 
 #include <sys/stat.h>
-#include <unistd.h>
 
 int path_exists(const char *path)
 {

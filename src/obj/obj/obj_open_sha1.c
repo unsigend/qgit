@@ -17,7 +17,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,8 +26,6 @@
 
 #include "compress.h"
 #include "obj/obj.h"
-#include "repo.h"
-#include "sha1.h"
 
 struct obj *obj_open_sha1(struct repo *repo, const unsigned char *sha1)
 {

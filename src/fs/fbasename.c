@@ -16,8 +16,6 @@
  */
 
 #include <libgen.h>
-#include <limits.h>
-#include <string.h>
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 char *fbasename(const char *path, char *buf) { return basename_r(path, buf); }

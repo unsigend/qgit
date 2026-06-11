@@ -19,7 +19,6 @@
 #include <stdlib.h>
 
 #include "obj/obj.h"
-#include "sha1.h"
 
 int obj_sha1(struct obj *obj)
 {

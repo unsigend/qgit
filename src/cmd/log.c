@@ -16,7 +16,6 @@
  */
 
 #include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,10 +24,7 @@
 
 #include "argparse.h"
 #include "die.h"
-#include "obj/commit.h"
 #include "obj/obj.h"
-#include "repo.h"
-#include "sha1.h"
 
 #define ASCII_COLOR_YELLOW "\033[33m"
 #define ASCII_COLOR_RESET "\033[0m"

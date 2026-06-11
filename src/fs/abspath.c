@@ -19,7 +19,6 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 int fabspath(const char *path, char *buf)

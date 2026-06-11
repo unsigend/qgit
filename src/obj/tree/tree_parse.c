@@ -16,12 +16,9 @@
  */
 
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "collection/vector.h"
 #include "obj/obj.h"
-#include "obj/tree.h"
 
 static char *parse_entry(char *cur, char *end, struct tree_entry *entry)
 {

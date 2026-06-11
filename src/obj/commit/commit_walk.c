@@ -18,7 +18,6 @@
 #include <errno.h>
 
 #include "collection/slist.h"
-#include "obj/commit.h"
 #include "obj/obj.h"
 
 static int walk_first(struct obj *obj, struct repo *repo, commit_walk_cb cb,

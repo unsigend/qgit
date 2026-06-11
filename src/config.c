@@ -16,13 +16,10 @@
  */
 
 #include <errno.h>
-#include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-#include "config.h"
+#include "iniparse.h"
 #include "repo.h"
 
 int config_global_path(char *path)

@@ -18,7 +18,6 @@
 #ifndef COL_QUEUE_H
 #define COL_QUEUE_H
 
-#include <stddef.h>
 
 #include "collection/deque.h"
 

@@ -16,18 +16,13 @@
  */
 
 #include <errno.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 
 #include "argparse.h"
-#include "cmd.h"
 #include "die.h"
 #include "obj/obj.h"
-#include "repo.h"
-#include "sha1.h"
 
 static const char *mode_to_str(const char *mode, unsigned long *m)
 {

@@ -15,32 +15,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "obj/obj.h"
+#include "repo.h"
 
-void obj_close(struct obj *obj)
+struct repo *repo_init(const char *path)
 {
-  if (!obj)
-    return;
-
-  switch (obj->type) {
-  case OBJ_BLOB:
-    blob_free(&obj->blob);
-    break;
-  case OBJ_COMMIT:
-    commit_free(&obj->commit);
-    break;
-  case OBJ_TREE:
-    tree_free(&obj->tree);
-    break;
-  case OBJ_TAG:
-    tag_free(&obj->tag);
-    break;
-  default:
-    break;
+  if (!path) {
+    errno = EINVAL;
+    return NULL;
   }
-  if (obj->payload)
-    free(obj->payload);
-  free(obj);
+  struct repo *repo = malloc(sizeof(*repo));
+  if (!repo)
+    return NULL;
+  memset(repo, 0, sizeof(*repo));
+
+  if (snprintf(repo->worktree, PATH_MAX, "%s", path) >= PATH_MAX) {
+    repo_free(repo);
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  if (snprintf(repo->gitdir, PATH_MAX, "%s/.qgit", repo->worktree) >=
+      PATH_MAX) {
+    repo_free(repo);
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  return repo;
 }

@@ -17,11 +17,7 @@
 
 #include <errno.h>
 
-#include "obj/blob.h"
-#include "obj/commit.h"
 #include "obj/obj.h"
-#include "obj/tag.h"
-#include "obj/tree.h"
 
 int obj_parse(struct obj *obj)
 {

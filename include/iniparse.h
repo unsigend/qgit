@@ -26,8 +26,6 @@
 #define INIPARSE_H
 
 /* INI file parser library. */
-
-#include <stddef.h>
 #include <stdio.h>
 
 struct iniFILE {

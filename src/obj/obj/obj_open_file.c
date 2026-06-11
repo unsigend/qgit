@@ -17,15 +17,12 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "fs.h"
 #include "obj/obj.h"
 
 struct obj *obj_open_file(const char *path, obj_type_t type)

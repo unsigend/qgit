@@ -15,9 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <die.h>
 #include <errno.h>
-#include <global.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

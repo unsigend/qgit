@@ -16,7 +16,6 @@
  */
 
 #include "collection/queue.h"
-#include "collection/deque.h"
 
 int queue_init(struct queue *queue, size_t elesz, void (*destroy)(void *))
 {

@@ -18,7 +18,6 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
-#include "collection/slist.h"
 #include "repo.h"
 #include "sha1.h"
 

@@ -18,7 +18,6 @@
 #ifndef FS_H
 #define FS_H
 
-#include <stddef.h>
 #include <sys/types.h>
 
 /* Read or Write all data from/to a file descriptor. Retry on EINTR or EAGAIN.

@@ -21,8 +21,6 @@
 #include "argparse.h"
 #include "die.h"
 #include "obj/obj.h"
-#include "repo.h"
-#include "sha1.h"
 
 static void printcheck(int p, int s, int t)
 {

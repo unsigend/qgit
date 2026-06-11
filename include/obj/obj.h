@@ -18,13 +18,10 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include <stddef.h>
-
 #include "obj/blob.h"
 #include "obj/commit.h"
 #include "obj/tag.h"
 #include "obj/tree.h"
-#include "repo.h"
 
 typedef enum {
   OBJ_BLOB,

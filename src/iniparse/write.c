@@ -22,12 +22,9 @@
  * SOFTWARE.
  */
 
-#include <fcntl.h>
 #include <iniparse.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <unistd.h>
 
 int iniparse_fprint(struct iniFILE *fp, FILE *stream)

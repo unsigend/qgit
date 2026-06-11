@@ -15,32 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
+#include <unistd.h>
 
-#include "obj/obj.h"
+#include "repo.h"
 
-void obj_close(struct obj *obj)
+struct repo *repo_cwd(void)
 {
-  if (!obj)
-    return;
-
-  switch (obj->type) {
-  case OBJ_BLOB:
-    blob_free(&obj->blob);
-    break;
-  case OBJ_COMMIT:
-    commit_free(&obj->commit);
-    break;
-  case OBJ_TREE:
-    tree_free(&obj->tree);
-    break;
-  case OBJ_TAG:
-    tag_free(&obj->tag);
-    break;
-  default:
-    break;
-  }
-  if (obj->payload)
-    free(obj->payload);
-  free(obj);
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, sizeof(cwd)) == NULL)
+    return NULL;
+  return repo_find(cwd);
 }
