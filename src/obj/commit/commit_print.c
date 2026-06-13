@@ -51,6 +51,7 @@ int commit_fprintf(FILE *stream, struct obj *obj)
   fprintf(stream, "committer %s %ld %s\n", obj->commit.committer,
           obj->commit.ctime, obj->commit.czone);
   fputc('\n', stream);
-  fprintf(stream, "%s", obj->commit.msg);
+  if (obj->commit.msg)
+    fprintf(stream, "%s", obj->commit.msg);
   return 0;
 }

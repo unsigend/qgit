@@ -95,8 +95,8 @@ extern const char *str_from_obj_type(obj_type_t type);
    the buffer on heap and set the buflen to the length of the buffer. */
 extern void *obj_build_rawbuf(struct obj *obj, size_t *buflen);
 
-/* Pretty print the object to a stream or buffer. Return the number of bytes
-   written on success, -1 on error. */
+/* Pretty print the object to a stream or buffer. Return 0 on success, -1 on
+   error. */
 extern int obj_fprintf(FILE *stream, struct obj *obj);
 extern int obj_printf(struct obj *obj);
 

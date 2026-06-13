@@ -15,109 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-
 #include "argparse.h"
 #include "die.h"
+#include "obj/commit.h"
 #include "obj/obj.h"
-
-#define ASCII_COLOR_YELLOW "\033[33m"
-#define ASCII_COLOR_RESET "\033[0m"
-
-#define UNLIMITED -1
-
-struct log_ctx {
-  int oneline;
-  int n;
-};
-
-static int log_cb(struct obj *obj, void *arg)
-{
-  struct log_ctx *lctx = (struct log_ctx *)arg;
-  if (!lctx) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  unsigned char hex[SHA1_HEX_LENGTH];
-  int interactive = isatty(fileno(stdout));
-
-  if (lctx->n == 0)
-    return 1;
-
-  if (lctx->oneline) {
-    if (sha1_to_hex(obj->sha1, hex) == -1)
-      return -1;
-    printf("%s%.7s%s %s", interactive ? ASCII_COLOR_YELLOW : "", (char *)hex,
-           interactive ? ASCII_COLOR_RESET : "", obj->commit.msg);
-  } else {
-    if (sha1_to_hex(obj->sha1, hex) == -1)
-      return -1;
-
-    char *zone = NULL;
-    char *timestamp = NULL;
-    /* Copy the author to heap and modify inplace */
-    char *buf = strdup(obj->commit.author);
-    if (!buf)
-      return -1;
-    char *cursor = buf + strlen(buf) - 1;
-    while (cursor > buf && *cursor != ' ')
-      cursor--;
-    *cursor = '\0';
-    zone = cursor + 1;
-    while (cursor > buf && *cursor != ' ')
-      cursor--;
-    *cursor = '\0';
-    timestamp = cursor + 1;
-
-    char *endptr = NULL;
-    errno = 0;
-    time_t t = (time_t)strtol(timestamp, &endptr, 10);
-    if (*endptr != '\0' || errno != 0) {
-      free(buf);
-      return -1;
-    }
-    struct tm tm = {0};
-    localtime_r(&t, &tm);
-    char datebuf[64];
-    strftime(datebuf, sizeof(datebuf), "%a %b %e %H:%M:%S %Y", &tm);
-    printf("%scommit %s%s\n", interactive ? ASCII_COLOR_YELLOW : "",
-           (char *)hex, interactive ? ASCII_COLOR_RESET : "");
-    printf("Author: %s\n", buf);
-    printf("Date:   %s %s\n\n", datebuf, zone);
-    printf("    %s", obj->commit.msg);
-    if (lctx->n != 1)
-      printf("\n");
-    free(buf);
-  }
-
-  if (lctx->n != UNLIMITED)
-    lctx->n--;
-
-  return 0;
-}
+#include "repo.h"
 
 int cmd_log(int argc, char **argv)
 {
-  struct log_ctx lctx = {
-      .oneline = 0,
-      .n = UNLIMITED, /* unlimited */
-  };
   int first_parent = 0;
+  int oneline = 0;
+  int n = -1; /* unlimited, ignore negative values */
   const char *head = "HEAD";
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
       OPT_HELP(),
-      OPT_BOOL(0, "oneline", "show commit logs in one line", &lctx.oneline),
+      OPT_BOOL(0, "oneline", "show commit logs in one line", &oneline),
       OPT_BOOL(0, "first-parent", "show only the first parent of each commit",
                &first_parent),
-      OPT_INT('n', NULL, "limit the number of commits to show", &lctx.n,
+      OPT_INT('n', NULL, "limit the number of commits to show", &n,
               OPT_REQUIRED),
       OPT_END(),
   };
@@ -156,14 +73,28 @@ int cmd_log(int argc, char **argv)
   if (obj->type != OBJ_COMMIT)
     die("%s not a commit", head);
 
-  if (obj_parse(obj) == -1)
+  if (n <= -1)
+    n = -1; /* unlimited */
+
+  struct commit_iter iter;
+  commit_style_t style = oneline ? COMMIT_STYLE_ONELINE : COMMIT_STYLE_DEFAULT;
+  commit_walk_type_t type = first_parent ? COMMIT_WALK_FIRST : COMMIT_WALK_ALL;
+
+  if (commit_iter_init(&iter, obj, repo, type) == -1)
     die_errno();
 
-  commit_walk_type_t type = first_parent ? COMMITWK_FIRST : COMMITWK_ALL;
-  if (commit_walk(obj, type, repo, log_cb, &lctx) == -1)
-    die_errno();
+  struct obj *cur;
+  while ((cur = commit_iter_get(&iter)) && (n == -1 || n-- > 0)) {
+    if (commit_fprintf_style(stdout, cur, style) == -1)
+      die_errno();
+    int ret = commit_iter_inc(&iter);
+    if (ret == -1)
+      die_errno();
+    if (ret == 1)
+      break;
+  }
 
-  obj_close(obj);
+  commit_iter_fini(&iter);
   repo_free(repo);
   argparse_fini(&ctx);
   return 0;

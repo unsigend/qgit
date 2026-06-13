@@ -273,6 +273,41 @@ Create the repository in `<directory>`. Defaults to the current directory.
 
 Show commit logs.
 
+#### Synopsis
+
+```
+qgit log [--oneline] [--first-parent] [-n <num>] [<commit>]
+```
+
+#### Description
+
+List commits reachable from `<commit>`, or from `HEAD` when omitted, by following parent links. The command must be run inside a qgit repository.
+
+By default, qgit prints one entry per commit with author, date, and message. Merge commits with more than one parent include a `Merge:` line listing abbreviated parent hashes.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`--oneline`
+
+Show each commit on a single line with an abbreviated hash and the first line of the commit message.
+
+`--first-parent`
+
+When walking history, follow only the first parent of a merge commit.
+
+`-n` `<num>`
+
+Limit the number of commits shown.
+
+`<commit>`
+
+Start listing from this commit. Defaults to `HEAD`.
+
 ---
 
 ### ls-files

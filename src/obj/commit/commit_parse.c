@@ -30,11 +30,20 @@ static char *parse_author(char *cur, char *end, const char **author,
   *author = cur;
   while (cur < end && *cur != '>')
     cur++;
+  if (cur >= end)
+    return NULL;
   *(++cur) = '\0';
+  if (cur >= end)
+    return NULL;
+
   const char *s = ++cur;
   while (cur < end && *cur != ' ')
     cur++;
+  if (cur >= end)
+    return NULL;
   *cur++ = '\0';
+  if (cur >= end)
+    return NULL;
   *zone = cur;
   while (cur < end && *cur != '\n')
     cur++;
@@ -47,31 +56,19 @@ static char *parse_author(char *cur, char *end, const char **author,
   return cur;
 }
 
-/* Assume the raw payload is valid layout, since only qgit and git can create
-   commit objects */
-int commit_parse(struct obj *obj)
+static int parse_head(char *cur, char *end, struct commit *commit)
 {
-  if (!obj) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  struct commit *commit = &obj->commit;
-  memset(commit, 0, sizeof(struct commit));
-
-  char *cur = obj->payload;
-  char *end = cur + obj->payloadsz;
-
   while (cur < end) {
     if (*cur == '\n') {
       cur++;
       continue;
     }
+
     if (strncmp(cur, "tree", 4) == 0) {
       cur += 5;
       if (hex_to_sha1((unsigned char *)cur, commit->tree) == -1)
         return -1;
-      cur += SHA1_HEX_LENGTH;
+      cur += SHA1_HEX_LENGTH - 1;
     } else if (strncmp(cur, "parent", 6) == 0) {
       if (!commit->parents) { /* first allocation */
         commit->parents = calloc(1, sizeof(struct slist));
@@ -95,20 +92,49 @@ int commit_parse(struct obj *obj)
         free(sha1);
         return -1;
       }
-      cur += SHA1_HEX_LENGTH;
+      cur += SHA1_HEX_LENGTH - 1;
     } else if (strncmp(cur, "author", 6) == 0) {
+      if (commit->author)
+        return -1;
       cur += 7;
       cur = parse_author(cur, end, &commit->author, &commit->atime,
                          &commit->azone);
+      if (!cur)
+        return -1;
     } else if (strncmp(cur, "committer", 9) == 0) {
+      if (commit->committer)
+        return -1;
       cur += 10;
       cur = parse_author(cur, end, &commit->committer, &commit->ctime,
                          &commit->czone);
-    } else {
-      commit->msg = cur;
-      break;
+      if (!cur)
+        return -1;
     }
   }
+  return 0;
+}
+
+/* Assume the raw payload is valid layout, since only qgit and git can create
+   commit objects */
+int commit_parse(struct obj *obj)
+{
+  if (!obj) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  struct commit *commit = &obj->commit;
+  memset(commit, 0, sizeof(struct commit));
+
+  char *cur = obj->payload;
+  char *body = strstr(cur, "\n\n");
+  if (body)
+    commit->msg = body + 2;
+  else
+    body = cur + obj->payloadsz;
+
+  if (parse_head(cur, body, commit) == -1)
+    return -1;
 
   return 0;
 }

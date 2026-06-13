@@ -29,8 +29,8 @@ struct blob {
 extern int blob_parse(struct obj *obj);
 extern void blob_free(struct blob *blob);
 
-/* Pretty print the blob to a stream or buffer. Return the number of bytes
-   written on success, -1 on error. */
+/* Pretty print the blob to a stream or buffer. Return 0 on success, -1 on
+   error. */
 extern int blob_fprintf(FILE *stream, struct obj *obj);
 
 #endif

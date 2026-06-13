@@ -29,8 +29,8 @@ struct tag {
 extern int tag_parse(struct obj *obj);
 extern void tag_free(struct tag *tag);
 
-/* Pretty print the tag to a stream or buffer. Return the number of bytes
-   written on success, -1 on error. */
+/* Pretty print the tag to a stream or buffer. Return 0 on success, -1 on error.
+ */
 extern int tag_fprintf(FILE *stream, struct obj *obj);
 
 #endif

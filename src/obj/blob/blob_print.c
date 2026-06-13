@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <stddef.h>
 
 #include "obj/blob.h"
 #include "obj/obj.h"
@@ -26,5 +27,6 @@ int blob_fprintf(FILE *stream, struct obj *obj)
     errno = EINVAL;
     return -1;
   }
-  return fwrite(obj->payload, 1, obj->payloadsz, stream);
+  size_t nw = fwrite(obj->payload, 1, obj->payloadsz, stream);
+  return nw == obj->payloadsz ? 0 : -1;
 }

@@ -175,3 +175,32 @@ assert_qgit_repo_layout() {
         }
     done
 }
+
+# Normalize log output for rough comparison with git: collapse whitespace runs,
+# trim each line, and drop blank lines. Newline count and spacing may differ.
+normalize_log_output() {
+    local text="$1"
+    local line normalized
+    while IFS= read -r line || [ -n "$line" ]; do
+        normalized=$(printf '%s' "$line" | tr -s '[:space:]' ' ')
+        normalized="${normalized# }"
+        normalized="${normalized% }"
+        if [ -n "$normalized" ]; then
+            printf '%s\n' "$normalized"
+        fi
+    done <<< "$text"
+}
+
+assert_output_matches_normalized() {
+    local expected="$1"
+    local expected_norm actual_norm
+    expected_norm=$(normalize_log_output "$expected")
+    actual_norm=$(normalize_log_output "$output")
+    if [ "$expected_norm" != "$actual_norm" ]; then
+        echo "Expected (normalized):"
+        echo "$expected_norm"
+        echo "Actual (normalized):"
+        echo "$actual_norm"
+        return 1
+    fi
+}

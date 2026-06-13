@@ -15,37 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TREE_H
-#define TREE_H
+#include <errno.h>
 
-#include <stddef.h>
-#include <stdio.h>
+#include "obj/commit.h"
 
-#include "collection/vector.h"
-#include "sha1.h"
+struct obj *commit_iter_get(struct commit_iter *iter)
+{
+  if (!iter)
+    return NULL;
 
-struct obj;
-
-struct tree_entry {
-  const char *mode;
-  const char *path;
-  unsigned char sha1[SHA1_DIGEST_LENGTH];
-};
-
-struct tree {
-  struct vector entries;
-};
-
-/* Raw payload format for tree:
-     <mode> <path>\0<sha1-20>
-     ...
-     <mode> <path>\0<sha1-20>
-*/
-extern int tree_parse(struct obj *obj);
-extern void tree_free(struct tree *tree);
-
-/* Pretty print the tree to a stream or buffer. Return 0 on success, -1 on
-   error. */
-extern int tree_fprintf(FILE *stream, struct obj *obj);
-
-#endif
+  return iter->cur;
+}

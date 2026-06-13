@@ -18,6 +18,7 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -32,11 +33,17 @@ struct commit {
   const char *author;
   const char *committer;
   const char *msg;
-  time_t ctime;
-  time_t atime;
-  const char *czone;
-  const char *azone;
+  time_t ctime;      /* committer timestamp */
+  time_t atime;      /* author timestamp */
+  const char *czone; /* committer timezone */
+  const char *azone; /* author timezone */
 };
+
+typedef enum {
+  COMMIT_STYLE_DEFAULT,
+  COMMIT_STYLE_ONELINE,
+  COMMIT_STYLE_RAW,
+} commit_style_t;
 
 /* Raw payload format for commit:
      tree <sha1-40>\n
@@ -49,21 +56,41 @@ struct commit {
 extern int commit_parse(struct obj *obj);
 extern void commit_free(struct commit *commit);
 
-/* Pretty print the commit to a stream or buffer. Return the number of bytes
-   written on success, -1 on error. */
+/* Pretty print the commit to a stream or buffer. Return 0 on success, -1 on
+   error. */
 extern int commit_fprintf(FILE *stream, struct obj *obj);
 
+/* Pretty print the commit to a stream or buffer with a specific style. Return
+   0 on success, -1 on error. */
+extern int commit_fprintf_style(FILE *stream, struct obj *obj,
+                                commit_style_t style);
+
 typedef enum {
-  COMMITWK_FIRST,
-  COMMITWK_ALL,
+  COMMIT_WALK_FIRST,
+  COMMIT_WALK_ALL,
 } commit_walk_type_t;
 
-/* Callback function, return -1 for errno, 0 for continue, 1 for stop */
-typedef int (*commit_walk_cb)(struct obj *obj, void *arg);
+struct commit_iter {
+  struct obj *cur;
+  struct repo *repo;
+  commit_walk_type_t type;
+};
 
-/* Walk through the commit history from the given commit, exit when callback
-   return -1 or 1, return 0 on success, -1 on error and set errno. */
-extern int commit_walk(struct obj *obj, commit_walk_type_t type,
-                       struct repo *repo, commit_walk_cb cb, void *arg);
+/* Initialize a commit iterator based on the start commit and the repository.
+   Return 0 on success, -1 on error and set errno. The obj ownership is
+   transferred to the iterator, the caller should not free the obj. And the
+   init will parse the start object. */
+extern int commit_iter_init(struct commit_iter *iter, struct obj *start,
+                            struct repo *repo, commit_walk_type_t type);
+
+/* Increment the iterator to the next commit. Return 0 on success, 1 when there
+   is no next commit. -1 on error and set errno.*/
+extern int commit_iter_inc(struct commit_iter *iter);
+
+/* Get the current commit in the iterator. Return the current commit on success,
+   NULL on error and set errno or exhausted. */
+extern struct obj *commit_iter_get(struct commit_iter *iter);
+
+extern void commit_iter_fini(struct commit_iter *iter);
 
 #endif
