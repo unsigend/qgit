@@ -15,28 +15,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COL_QUEUE_H
-#define COL_QUEUE_H
+#ifndef COL_HEAP_H
+#define COL_HEAP_H
 
+#include "collection/vector.h"
 
-#include "collection/deque.h"
+#include <stddef.h>
 
-struct queue;
+struct heap;
 
-#define queue_empty(queue)                                                     \
-  deq_empty(&(queue)->deq) /* Check if the queue is empty */
-#define queue_size(queue)                                                      \
-  deq_size(&(queue)->deq) /* Get the size of the queue */
+#define heap_empty(heap)                                                       \
+  vec_empty(&(heap)->vec)                      /* Check if the heap is empty */
+#define heap_size(heap) vec_size(&(heap)->vec) /* Get the size of the heap */
 
-int queue_init(struct queue *queue, size_t elesz, void (*destroy)(void *));
-void queue_fini(struct queue *queue);
-int queue_enq(struct queue *queue, void *ele);
-int queue_deq(struct queue *queue, void *dest);
-void *queue_peek(struct queue *queue);
-void queue_clear(struct queue *queue);
+int heap_init(struct heap *heap, size_t elesz, int (*cmp)(void *, void *),
+              void (*destroy)(void *));
+void heap_fini(struct heap *heap);
 
-struct queue {
-  struct deque deq;
+int heap_push(struct heap *heap, void *ele);
+int heap_pop(struct heap *heap, void *dest);
+void *heap_peek(struct heap *heap);
+void heap_clear(struct heap *heap);
+
+struct heap {
+  struct vector vec;
+  int (*cmp)(void *, void *);
 };
 
 #endif

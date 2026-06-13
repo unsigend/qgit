@@ -24,8 +24,5 @@ void commit_free(struct commit *commit)
 {
   if (!commit)
     return;
-  if (commit->parents) {
-    slist_fini(commit->parents);
-    free(commit->parents);
-  }
+  slist_fini(&commit->parents);
 }

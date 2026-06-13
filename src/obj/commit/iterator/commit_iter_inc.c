@@ -27,10 +27,10 @@ static int iter_inc_first(struct commit_iter *iter)
   struct commit *commit = &iter->cur->commit;
   unsigned char *sha1;
 
-  if (!commit->parents || slist_empty(commit->parents))
+  if (slist_empty(&commit->parents))
     return 1;
 
-  sha1 = slist_front(commit->parents);
+  sha1 = slist_front(&commit->parents);
   next = obj_open_sha1(iter->repo, sha1);
   if (!next)
     return -1;

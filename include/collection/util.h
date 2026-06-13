@@ -1,5 +1,5 @@
-/* qgit - A simplified git like version control system
- * Copyright (C) 2025 - 2026 Qiu Yixiang
+/* collection - A generic data structure and algorithms library
+ * Copyright (C) 2025 Yixiang Qiu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "obj/commit.h"
-#include "obj/obj.h"
+#ifndef COL_UTIL_H
+#define COL_UTIL_H
 
-void commit_iter_fini(struct commit_iter *iter)
-{
-  if (!iter)
-    return;
+#include <stddef.h>
 
-  if (iter->cur) {
-    obj_close(iter->cur);
-    iter->cur = NULL;
-  }
+void swap(void *l, void *r, size_t sz);
 
-  iter->repo = NULL;
-  if (iter->type == COMMIT_WALK_ALL) {
-    set_fini(&iter->visited);
-    heap_fini(&iter->pq);
-  }
-}
+#endif

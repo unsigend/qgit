@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "collection/heap.h"
+#include "collection/set.h"
+#include "collection/slist.h"
 #include "repo.h"
 #include "sha1.h"
 
@@ -29,7 +32,7 @@ struct obj;
 
 struct commit {
   unsigned char tree[SHA1_DIGEST_LENGTH];
-  struct slist *parents;
+  struct slist parents;
   const char *author;
   const char *committer;
   const char *msg;
@@ -74,6 +77,9 @@ struct commit_iter {
   struct obj *cur;
   struct repo *repo;
   commit_walk_type_t type;
+  struct set visited;
+  struct set_fns set_fns;
+  struct heap pq; /* priority queue */
 };
 
 /* Initialize a commit iterator based on the start commit and the repository.

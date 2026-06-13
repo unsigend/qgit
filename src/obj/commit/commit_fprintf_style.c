@@ -16,7 +16,6 @@
  */
 
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "collection/slist.h"
@@ -48,10 +47,10 @@ static int print_default(FILE *stream, struct obj *obj)
 
   fprintf(stream, "%scommit %s%s\n", istty ? ASCII_COLOR_YELLOW : "",
           (char *)hex, istty ? ASCII_COLOR_RESET : "");
-  if (obj->commit.parents && slist_size(obj->commit.parents) > 1) {
+  if (slist_size(&obj->commit.parents) > 1) {
     fprintf(stream, "Merge: ");
     struct slist_iter iter;
-    if (slist_iter_init(&iter, obj->commit.parents) == -1)
+    if (slist_iter_init(&iter, &obj->commit.parents) == -1)
       return -1;
     while (slist_iter_get(&iter)) {
       unsigned char *sha1 = slist_iter_get(&iter);
@@ -64,7 +63,7 @@ static int print_default(FILE *stream, struct obj *obj)
   }
   fprintf(stream, "Author: %s\n", obj->commit.author);
   fprintf(stream, "Date:   %s %s\n\n", datebuf, zone);
-  if (obj->commit.msg)
+  if (obj->commit.msg) /* TODO: add indentation for each line */
     fprintf(stream, "    %s\n", obj->commit.msg);
   return 0;
 }
@@ -79,6 +78,7 @@ static int print_oneline(FILE *stream, struct obj *obj)
   const char *cur = obj->commit.msg;
   fprintf(stream, "%s%.7s %s", istty ? ASCII_COLOR_YELLOW : "", (char *)hex,
           istty ? ASCII_COLOR_RESET : "");
+  /* print first line of the message */
   while (cur && *cur != '\n') {
     fputc(*cur, stream);
     cur++;

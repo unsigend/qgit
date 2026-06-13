@@ -11,6 +11,8 @@
         "mkdirifne",
         "mkfileifne",
         "mktemp",
+        "objlhs",
+        "objrhs",
         "reinit",
         "removen",
         "rmrf"

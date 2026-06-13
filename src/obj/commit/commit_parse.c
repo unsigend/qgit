@@ -63,23 +63,12 @@ static int parse_head(char *cur, char *end, struct commit *commit)
       cur++;
       continue;
     }
-
     if (strncmp(cur, "tree", 4) == 0) {
       cur += 5;
       if (hex_to_sha1((unsigned char *)cur, commit->tree) == -1)
         return -1;
       cur += SHA1_HEX_LENGTH - 1;
     } else if (strncmp(cur, "parent", 6) == 0) {
-      if (!commit->parents) { /* first allocation */
-        commit->parents = calloc(1, sizeof(struct slist));
-        if (!commit->parents)
-          return -1;
-        if (slist_init(commit->parents, free) == -1) {
-          free(commit->parents);
-          commit->parents = NULL;
-          return -1;
-        }
-      }
       cur += 7;
       unsigned char *sha1 = malloc(SHA1_DIGEST_LENGTH);
       if (!sha1)
@@ -88,7 +77,7 @@ static int parse_head(char *cur, char *end, struct commit *commit)
         free(sha1);
         return -1;
       }
-      if (slist_pushback(commit->parents, sha1) == -1) {
+      if (slist_pushback(&commit->parents, sha1) == -1) {
         free(sha1);
         return -1;
       }
@@ -126,6 +115,9 @@ int commit_parse(struct obj *obj)
   struct commit *commit = &obj->commit;
   memset(commit, 0, sizeof(struct commit));
 
+  if (slist_init(&commit->parents, free) == -1)
+    return -1;
+
   char *cur = obj->payload;
   char *body = strstr(cur, "\n\n");
   if (body)
@@ -133,8 +125,10 @@ int commit_parse(struct obj *obj)
   else
     body = cur + obj->payloadsz;
 
-  if (parse_head(cur, body, commit) == -1)
+  if (parse_head(cur, body, commit) == -1) {
+    slist_fini(&commit->parents);
     return -1;
+  }
 
   return 0;
 }

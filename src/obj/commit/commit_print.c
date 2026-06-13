@@ -34,10 +34,9 @@ int commit_fprintf(FILE *stream, struct obj *obj)
     return -1;
   fprintf(stream, "tree %s\n", hex);
 
-  if (obj->commit.parents) {
-    struct slist *parents = obj->commit.parents;
+  if (!slist_empty(&obj->commit.parents)) {
     struct slist_iter iter;
-    if (slist_iter_init(&iter, parents) == -1)
+    if (slist_iter_init(&iter, &obj->commit.parents) == -1)
       return -1;
     while (slist_iter_get(&iter)) {
       if (sha1_to_hex(slist_iter_get(&iter), hex) == -1)

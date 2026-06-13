@@ -16,9 +16,33 @@
  */
 
 #include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "obj/commit.h"
 #include "obj/obj.h"
+#include "sha1.h"
+
+static uint32_t commit_hash(void *sha1) { return *(uint32_t *)sha1; }
+static int sha1_cmp(void *lhs, void *rhs)
+{
+  return memcmp(lhs, rhs, SHA1_DIGEST_LENGTH);
+}
+
+static int timestamp_cmp(void *lhs, void *rhs)
+{
+  struct obj *objlhs = *(struct obj **)lhs;
+  struct obj *objrhs = *(struct obj **)rhs;
+  if (objlhs->commit.atime > objrhs->commit.atime)
+    return -1;
+  else if (objlhs->commit.atime < objrhs->commit.atime)
+    return 1;
+  else
+    return 0;
+}
+
+static void destroy(void *obj) { obj_close(*(struct obj **)obj); }
 
 int commit_iter_init(struct commit_iter *iter, struct obj *start,
                      struct repo *repo, commit_walk_type_t type)
@@ -33,6 +57,22 @@ int commit_iter_init(struct commit_iter *iter, struct obj *start,
     return -1;
   iter->repo = repo;
   iter->type = type;
+
+  if (type == COMMIT_WALK_ALL) {
+
+    iter->set_fns.hash = commit_hash;
+    iter->set_fns.cmp = sha1_cmp;
+    iter->set_fns.destroy = free;
+
+    if (set_init(&iter->visited, &iter->set_fns) == -1)
+      return -1;
+
+    if (heap_init(&iter->pq, sizeof(struct obj *), timestamp_cmp, destroy) ==
+        -1) {
+      set_fini(&iter->visited);
+      return -1;
+    }
+  }
 
   return 0;
 }
