@@ -17,6 +17,7 @@
 
 #include <errno.h>
 
+#include "collection/slist.h"
 #include "obj/commit.h"
 #include "obj/obj.h"
 
@@ -27,6 +28,29 @@ int commit_fprintf(FILE *stream, struct obj *obj)
     return -1;
   }
 
-  /* TODO: implement */
+  unsigned char hex[SHA1_HEX_LENGTH];
+
+  if (sha1_to_hex(obj->commit.tree, hex) == -1)
+    return -1;
+  fprintf(stream, "tree %s\n", hex);
+
+  if (obj->commit.parents) {
+    struct slist *parents = obj->commit.parents;
+    struct slist_iter iter;
+    if (slist_iter_init(&iter, parents) == -1)
+      return -1;
+    while (slist_iter_get(&iter)) {
+      if (sha1_to_hex(slist_iter_get(&iter), hex) == -1)
+        return -1;
+      fprintf(stream, "parent %s\n", hex);
+      slist_iter_inc(&iter);
+    }
+  }
+  fprintf(stream, "author %s %ld %s\n", obj->commit.author, obj->commit.atime,
+          obj->commit.azone);
+  fprintf(stream, "committer %s %ld %s\n", obj->commit.committer,
+          obj->commit.ctime, obj->commit.czone);
+  fputc('\n', stream);
+  fprintf(stream, "%s", obj->commit.msg);
   return 0;
 }

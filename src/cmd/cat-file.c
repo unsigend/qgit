@@ -95,6 +95,8 @@ int cmd_cat_file(int argc, char **argv)
     die_errno();
 
   if (p) {
+    if (obj_parse(obj) == -1) /* parse the object */
+      die_errno();
     if (obj_fprintf(stdout, obj) == -1)
       die_errno();
   } else if (s)

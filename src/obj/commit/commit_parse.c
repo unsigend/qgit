@@ -20,28 +20,35 @@
 #include <string.h>
 
 #include "collection/slist.h"
+#include "obj/commit.h"
 #include "obj/obj.h"
+#include "sha1.h"
 
-static char *parsekv(char *buf, char *end, char **key, char **val)
+static char *parse_author(char *cur, char *end, const char **author,
+                          time_t *time, const char **zone)
 {
-  if (!buf || !end || !key || !val) {
-    errno = EINVAL;
-    return buf;
-  }
-
-  *key = buf;
-  while (buf < end && *buf != ' ')
-    buf++;
-  if (buf < end)
-    *buf++ = '\0';
-  *val = buf;
-  while (buf < end && *buf != '\n')
-    buf++;
-  if (buf < end)
-    *buf++ = '\0';
-  return buf;
+  *author = cur;
+  while (cur < end && *cur != '>')
+    cur++;
+  *(++cur) = '\0';
+  const char *s = ++cur;
+  while (cur < end && *cur != ' ')
+    cur++;
+  *cur++ = '\0';
+  *zone = cur;
+  while (cur < end && *cur != '\n')
+    cur++;
+  *cur++ = '\0';
+  char *e = NULL;
+  errno = 0;
+  *time = (time_t)strtol(s, &e, 10);
+  if (*e != '\0' || errno != 0)
+    *time = 0;
+  return cur;
 }
 
+/* Assume the raw payload is valid layout, since only qgit and git can create
+   commit objects */
 int commit_parse(struct obj *obj)
 {
   if (!obj) {
@@ -49,60 +56,59 @@ int commit_parse(struct obj *obj)
     return -1;
   }
 
-  memset(&obj->commit, 0, sizeof(obj->commit));
+  struct commit *commit = &obj->commit;
+  memset(commit, 0, sizeof(struct commit));
 
-  char *cursor = obj->payload;
-  char *end = cursor + obj->payloadsz;
+  char *cur = obj->payload;
+  char *end = cur + obj->payloadsz;
 
-  while (cursor < end) {
-    char *key = NULL, *val = NULL;
-    if (*cursor == '\n') {
-      cursor++;
-      break;
+  while (cur < end) {
+    if (*cur == '\n') {
+      cur++;
+      continue;
     }
-    cursor = parsekv(cursor, end, &key, &val);
-    if (strcmp(key, "tree") == 0) {
-      if (hex_to_sha1((unsigned char *)val, obj->commit.tree) == -1) {
-        commit_free(&obj->commit);
+    if (strncmp(cur, "tree", 4) == 0) {
+      cur += 5;
+      if (hex_to_sha1((unsigned char *)cur, commit->tree) == -1)
         return -1;
-      }
-    } else if (strcmp(key, "parent") == 0) {
-      if (!obj->commit.parents) {
-        obj->commit.parents = calloc(1, sizeof(struct slist));
-        if (!obj->commit.parents)
+      cur += SHA1_HEX_LENGTH;
+    } else if (strncmp(cur, "parent", 6) == 0) {
+      if (!commit->parents) { /* first allocation */
+        commit->parents = calloc(1, sizeof(struct slist));
+        if (!commit->parents)
           return -1;
-        if (slist_init(obj->commit.parents, free) == -1) {
-          free(obj->commit.parents);
-          obj->commit.parents = NULL;
+        if (slist_init(commit->parents, free) == -1) {
+          free(commit->parents);
+          commit->parents = NULL;
           return -1;
         }
       }
-      void *parent = malloc(SHA1_DIGEST_LENGTH);
-      if (!parent) {
-        commit_free(&obj->commit);
+      cur += 7;
+      unsigned char *sha1 = malloc(SHA1_DIGEST_LENGTH);
+      if (!sha1)
+        return -1;
+      if (hex_to_sha1((unsigned char *)cur, sha1) == -1) {
+        free(sha1);
         return -1;
       }
-      if (hex_to_sha1((unsigned char *)val, (unsigned char *)parent) == -1) {
-        free(parent);
-        commit_free(&obj->commit);
+      if (slist_pushback(commit->parents, sha1) == -1) {
+        free(sha1);
         return -1;
       }
-      if (slist_pushback(obj->commit.parents, parent) == -1) {
-        free(parent);
-        commit_free(&obj->commit);
-        return -1;
-      }
-    } else if (strcmp(key, "author") == 0)
-      obj->commit.author = val;
-    else if (strcmp(key, "committer") == 0)
-      obj->commit.committer = val;
+      cur += SHA1_HEX_LENGTH;
+    } else if (strncmp(cur, "author", 6) == 0) {
+      cur += 7;
+      cur = parse_author(cur, end, &commit->author, &commit->atime,
+                         &commit->azone);
+    } else if (strncmp(cur, "committer", 9) == 0) {
+      cur += 10;
+      cur = parse_author(cur, end, &commit->committer, &commit->ctime,
+                         &commit->czone);
+    } else {
+      commit->msg = cur;
+      break;
+    }
   }
 
-  if (cursor >= end) {
-    commit_free(&obj->commit);
-    errno = EINVAL;
-    return -1;
-  }
-  obj->commit.message = cursor;
   return 0;
 }

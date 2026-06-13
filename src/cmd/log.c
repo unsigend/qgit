@@ -54,7 +54,7 @@ static int log_cb(struct obj *obj, void *arg)
     if (sha1_to_hex(obj->sha1, hex) == -1)
       return -1;
     printf("%s%.7s%s %s", interactive ? ASCII_COLOR_YELLOW : "", (char *)hex,
-           interactive ? ASCII_COLOR_RESET : "", obj->commit.message);
+           interactive ? ASCII_COLOR_RESET : "", obj->commit.msg);
   } else {
     if (sha1_to_hex(obj->sha1, hex) == -1)
       return -1;
@@ -90,7 +90,7 @@ static int log_cb(struct obj *obj, void *arg)
            (char *)hex, interactive ? ASCII_COLOR_RESET : "");
     printf("Author: %s\n", buf);
     printf("Date:   %s %s\n\n", datebuf, zone);
-    printf("    %s", obj->commit.message);
+    printf("    %s", obj->commit.msg);
     if (lctx->n != 1)
       printf("\n");
     free(buf);

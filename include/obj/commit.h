@@ -19,6 +19,7 @@
 #define COMMIT_H
 
 #include <stdio.h>
+#include <time.h>
 
 #include "repo.h"
 #include "sha1.h"
@@ -30,7 +31,11 @@ struct commit {
   struct slist *parents;
   const char *author;
   const char *committer;
-  const char *message;
+  const char *msg;
+  time_t ctime;
+  time_t atime;
+  const char *czone;
+  const char *azone;
 };
 
 /* Raw payload format for commit:
