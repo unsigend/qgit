@@ -16,57 +16,11 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
-#include "fs.h"
 #include "obj/obj.h"
-
-/* Resolve a branch name to a sha1. Return 0 on success, -1 on error and set
-   errno. Write the resolved sha1 to the sha1 buffer. */
-static int resolve_branch(struct repo *repo, const char *bname,
-                          unsigned char *sha1)
-{
-  if (!repo || !bname || !sha1) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  char path[PATH_MAX];
-  int fd = -1;
-  char buf[SHA1_HEX_LENGTH];
-  ssize_t n = 0;
-
-  if (snprintf(path, PATH_MAX, "%s/refs/heads/%s", repo->gitdir, bname) >=
-      PATH_MAX) {
-    errno = ENAMETOOLONG;
-    return -1;
-  }
-
-  if (!file_exists(path)) {
-    errno = ENOENT;
-    return -1;
-  }
-
-  fd = open(path, O_RDONLY);
-  if (fd == -1)
-    return -1;
-
-  if ((n = read_all(fd, buf, SHA1_HEX_LENGTH - 1)) < SHA1_HEX_LENGTH - 1) {
-    close(fd);
-    return -1;
-  }
-
-  buf[SHA1_HEX_LENGTH - 1] = '\0';
-  close(fd);
-
-  if (hex_to_sha1((unsigned char *)buf, sha1) == -1)
-    return -1;
-
-  return 0;
-}
+#include "ref.h"
 
 int obj_resolve(struct repo *repo, const char *name, unsigned char *sha1)
 {
@@ -83,50 +37,26 @@ int obj_resolve(struct repo *repo, const char *name, unsigned char *sha1)
   }
 
   /* HEAD reference */
-  if (strcmp(name, "HEAD") == 0) {
-    char path[PATH_MAX];
-    int fd = -1;
-    char buf[1024];
-    ssize_t n = 0;
-    char bname[64];
+  if (strcmp(name, "HEAD") == 0)
+    return ref_read(repo, name, sha1);
 
-    if (snprintf(path, PATH_MAX, "%s/HEAD", repo->gitdir) >= PATH_MAX) {
-      errno = ENAMETOOLONG;
-      return -1;
-    }
-
-    if (!file_exists(path)) {
-      errno = ENOENT;
-      return -1;
-    }
-
-    fd = open(path, O_RDONLY);
-    if (fd == -1)
-      return -1;
-
-    if ((n = read_all(fd, buf, sizeof(buf) - 1)) < 0) {
-      close(fd);
-      return -1;
-    }
-
-    buf[n] = '\0';
-    close(fd);
-
-    if (sscanf(buf, "ref: refs/heads/%63s", bname) != 1) {
-      errno = EINVAL;
-      return -1;
-    }
-
-    if (resolve_branch(repo, bname, sha1) == -1)
-      return -1;
-    return 0;
-  }
+  char buf[PATH_MAX];
 
   /* branch name */
-  if (resolve_branch(repo, name, sha1) != -1)
+  if (snprintf(buf, sizeof(buf), "refs/heads/%s", name) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+  if (!ref_read(repo, buf, sha1))
     return 0;
 
   /* tag name */
+  if (snprintf(buf, sizeof(buf), "refs/tags/%s", name) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+  if (!ref_read(repo, buf, sha1))
+    return 0;
 
   /* short sha1 hash */
 
