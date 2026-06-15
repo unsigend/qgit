@@ -24,6 +24,8 @@
 #include "fs.h"
 #include "obj/obj.h"
 
+/* Resolve a branch name to a sha1. Return 0 on success, -1 on error and set
+   errno. Write the resolved sha1 to the sha1 buffer. */
 static int resolve_branch(struct repo *repo, const char *bname,
                           unsigned char *sha1)
 {
@@ -119,6 +121,14 @@ int obj_resolve(struct repo *repo, const char *name, unsigned char *sha1)
       return -1;
     return 0;
   }
+
+  /* branch name */
+  if (resolve_branch(repo, name, sha1) != -1)
+    return 0;
+
+  /* tag name */
+
+  /* short sha1 hash */
 
   return -1;
 }

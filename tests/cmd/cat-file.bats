@@ -359,6 +359,93 @@ EOF
     echo "$merge_sha"
 }
 
+CAT_FILE_EMPTY_TREE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+commit_tree_sha() {
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" rev-parse "$1^{tree}"
+}
+
+setup_single_file_tree() {
+    local tree_sha
+
+    init_mock_git
+    printf 'hello\n' > blob-single.txt
+    tree_sha=$(write_tree_for_blob blob-single.txt single.txt)
+    sync_git_to_qgit
+    echo "$tree_sha"
+}
+
+setup_multi_entry_tree() {
+    local blob_a blob_b blob_c tree_sha
+
+    init_mock_git
+    printf 'alpha\n' > blob-alpha.txt
+    printf 'beta\n' > blob-beta.txt
+    printf 'gamma\n' > blob-gamma.txt
+    blob_a=$(git_write_blob blob-alpha.txt)
+    blob_b=$(git_write_blob blob-beta.txt)
+    blob_c=$(git_write_blob blob-gamma.txt)
+    tree_sha=$(
+        {
+            printf '100644 blob %s\talpha.txt\n' "$blob_a"
+            printf '100644 blob %s\tbeta.txt\n' "$blob_b"
+            printf '100644 blob %s\tgamma.txt\n' "$blob_c"
+        } | git_write_tree
+    )
+    sync_git_to_qgit
+    echo "$tree_sha"
+}
+
+setup_nested_tree() {
+    local inner_blob inner_tree root_blob tree_sha
+
+    init_mock_git
+    printf 'inner\n' > blob-inner.txt
+    inner_blob=$(git_write_blob blob-inner.txt)
+    inner_tree=$(printf '100644 blob %s\tinner.txt\n' "$inner_blob" | git_write_tree)
+
+    printf 'root\n' > blob-root.txt
+    root_blob=$(git_write_blob blob-root.txt)
+    tree_sha=$(
+        {
+            printf '100644 blob %s\troot.txt\n' "$root_blob"
+            printf '040000 tree %s\tsubdir\n' "$inner_tree"
+        } | git_write_tree
+    )
+    sync_git_to_qgit
+    echo "$tree_sha"
+}
+
+setup_mixed_mode_tree() {
+    local blob_reg blob_exec blob_link inner_tree tree_sha
+
+    init_mock_git
+    printf 'regular\n' > blob-regular.txt
+    printf 'executable\n' > blob-executable.txt
+    blob_reg=$(git_write_blob blob-regular.txt)
+    blob_exec=$(git_write_blob blob-executable.txt)
+    blob_link=$(git_write_blob blob-regular.txt)
+    inner_tree=$(printf '100644 blob %s\tinner.txt\n' "$blob_reg" | git_write_tree)
+
+    tree_sha=$(
+        {
+            printf '100644 blob %s\tregular.txt\n' "$blob_reg"
+            printf '100755 blob %s\texecutable.sh\n' "$blob_exec"
+            printf '120000 blob %s\tlink.txt\n' "$blob_link"
+            printf '040000 tree %s\tdirectory\n' "$inner_tree"
+        } | git_write_tree
+    )
+    sync_git_to_qgit
+    echo "$tree_sha"
+}
+
+setup_empty_tree() {
+    init_mock_git
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" mktree < /dev/null >/dev/null
+    sync_git_to_qgit
+    echo "$CAT_FILE_EMPTY_TREE"
+}
+
 # blob -p
 
 @test "qgit cat-file -p: text blob matches git" {
@@ -696,6 +783,239 @@ EOF
     local hash
     hash=$(setup_root_commit)
     run_cat_file tag "$hash"
+    assert_failure
+}
+
+# tree -p
+
+@test "qgit cat-file -p: single-entry tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: multi-entry tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_multi_entry_tree)
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: nested tree lists top level only" {
+    local tree_sha
+    tree_sha=$(setup_nested_tree)
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: mixed mode tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_mixed_mode_tree)
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: empty tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_empty_tree)
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: tree from commit tip matches git" {
+    local commit_sha tree_sha
+    commit_sha=$(setup_root_commit)
+    tree_sha=$(commit_tree_sha "$commit_sha")
+    assert_matches_git_cat -p "$tree_sha"
+}
+
+@test "qgit cat-file -p: commit sha shows commit not tree" {
+    local commit_sha tree_sha
+    commit_sha=$(setup_root_commit)
+    tree_sha=$(commit_tree_sha "$commit_sha")
+    assert_matches_git_cat -p "$commit_sha"
+    run_cat_file -p "$commit_sha"
+    assert_success
+    assert_output_not_equals "$(git_cat -p "$tree_sha")"
+}
+
+# tree -t
+
+@test "qgit cat-file -t: single-entry tree type matches git" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    assert_matches_git_cat -t "$tree_sha"
+}
+
+@test "qgit cat-file -t: multi-entry tree type matches git" {
+    local tree_sha
+    tree_sha=$(setup_multi_entry_tree)
+    assert_matches_git_cat -t "$tree_sha"
+}
+
+@test "qgit cat-file -t: nested tree type matches git" {
+    local tree_sha
+    tree_sha=$(setup_nested_tree)
+    assert_matches_git_cat -t "$tree_sha"
+}
+
+@test "qgit cat-file -t: mixed mode tree type matches git" {
+    local tree_sha
+    tree_sha=$(setup_mixed_mode_tree)
+    assert_matches_git_cat -t "$tree_sha"
+}
+
+@test "qgit cat-file -t: empty tree type matches git" {
+    local tree_sha
+    tree_sha=$(setup_empty_tree)
+    assert_matches_git_cat -t "$tree_sha"
+}
+
+# tree -s
+
+@test "qgit cat-file -s: single-entry tree size matches git" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    assert_matches_git_cat -s "$tree_sha"
+}
+
+@test "qgit cat-file -s: multi-entry tree size matches git" {
+    local tree_sha
+    tree_sha=$(setup_multi_entry_tree)
+    assert_matches_git_cat -s "$tree_sha"
+}
+
+@test "qgit cat-file -s: nested tree size matches git" {
+    local tree_sha
+    tree_sha=$(setup_nested_tree)
+    assert_matches_git_cat -s "$tree_sha"
+}
+
+@test "qgit cat-file -s: mixed mode tree size matches git" {
+    local tree_sha
+    tree_sha=$(setup_mixed_mode_tree)
+    assert_matches_git_cat -s "$tree_sha"
+}
+
+@test "qgit cat-file -s: empty tree size matches git" {
+    local tree_sha
+    tree_sha=$(setup_empty_tree)
+    assert_matches_git_cat -s "$tree_sha"
+}
+
+# tree raw
+
+@test "qgit cat-file tree: single-entry tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    assert_matches_git_cat tree "$tree_sha"
+}
+
+@test "qgit cat-file tree: multi-entry tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_multi_entry_tree)
+    assert_matches_git_cat tree "$tree_sha"
+}
+
+@test "qgit cat-file tree: nested tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_nested_tree)
+    assert_matches_git_cat tree "$tree_sha"
+}
+
+@test "qgit cat-file tree: mixed mode tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_mixed_mode_tree)
+    assert_matches_git_cat tree "$tree_sha"
+}
+
+@test "qgit cat-file tree: empty tree matches git" {
+    local tree_sha
+    tree_sha=$(setup_empty_tree)
+    assert_matches_git_cat tree "$tree_sha"
+}
+
+@test "qgit cat-file tree: blob type on tree fails" {
+    local tree_sha blob_sha
+    tree_sha=$(setup_single_file_tree)
+    blob_sha=$(git_write_blob blob-single.txt)
+    run_cat_file blob "$tree_sha"
+    assert_failure
+}
+
+@test "qgit cat-file tree: commit type on tree fails" {
+    local tree_sha commit_sha
+    commit_sha=$(setup_root_commit)
+    tree_sha=$(commit_tree_sha "$commit_sha")
+    run_cat_file commit "$tree_sha"
+    assert_failure
+}
+
+@test "qgit cat-file tree: tag type on tree fails" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    run_cat_file tag "$tree_sha"
+    assert_failure
+}
+
+# tree vs git
+
+@test "qgit cat-file tree: commit sha fails without peeling to tree" {
+    local commit_sha
+    commit_sha=$(setup_root_commit)
+    git_cat tree "$commit_sha" >/dev/null || return 1
+    run_cat_file tree "$commit_sha"
+    assert_failure
+}
+
+@test "qgit cat-file tree: merge commit sha fails without peeling to tree" {
+    local commit_sha
+    commit_sha=$(setup_merge_commit)
+    git_cat tree "$commit_sha" >/dev/null || return 1
+    run_cat_file tree "$commit_sha"
+    assert_failure
+}
+
+# tree errors
+
+@test "qgit cat-file -p: missing tree object file fails" {
+    setup_single_file_tree >/dev/null
+    run_cat_file -p 0000000000000000000000000000000000000000
+    assert_failure
+}
+
+@test "qgit cat-file -t: missing tree object file fails" {
+    setup_single_file_tree >/dev/null
+    run_cat_file -t 0000000000000000000000000000000000000000
+    assert_failure
+}
+
+@test "qgit cat-file -s: missing tree object file fails" {
+    setup_single_file_tree >/dev/null
+    run_cat_file -s 0000000000000000000000000000000000000000
+    assert_failure
+}
+
+@test "qgit cat-file tree: missing tree object file fails" {
+    setup_single_file_tree >/dev/null
+    run_cat_file tree 0000000000000000000000000000000000000000
+    assert_failure
+}
+
+@test "qgit cat-file -p -t: flags cannot combine on tree" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    run_cat_file -p -t "$tree_sha"
+    assert_failure
+}
+
+@test "qgit cat-file -p -s: flags cannot combine on tree" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    run_cat_file -p -s "$tree_sha"
+    assert_failure
+}
+
+@test "qgit cat-file -s -t: flags cannot combine on tree" {
+    local tree_sha
+    tree_sha=$(setup_single_file_tree)
+    run_cat_file -s -t "$tree_sha"
     assert_failure
 }
 

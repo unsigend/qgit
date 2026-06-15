@@ -17,72 +17,22 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
 
 #include "argparse.h"
 #include "die.h"
 #include "obj/obj.h"
 
-static const char *mode_to_str(const char *mode, unsigned long *m)
-{
-  if (!mode) {
-    errno = EINVAL;
-    return NULL;
-  }
-  char *endptr;
-  errno = 0;
-  *m = strtoul(mode, &endptr, 8);
-  if (endptr == mode || *endptr != '\0') {
-    errno = EINVAL;
-    return NULL;
-  }
-  if (errno == ERANGE)
-    return NULL;
-  if ((*m & S_IFMT) == S_IFDIR)
-    return "tree";
-  else if ((*m & S_IFMT) == S_IFREG || (*m & S_IFMT) == S_IFLNK)
-    return "blob";
-  /* 160000: commit which for print only, not supported in qgit for submodule
-     refer external repository */
-  else if (*m == 0160000)
-    return "commit";
-  else {
-    errno = EINVAL;
-    return NULL;
-  }
-}
-
-static int print_tree(struct tree *tree)
-{
-  if (!tree) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  for (size_t i = 0; i < vec_size(&tree->entries); i++) {
-    struct tree_entry *entry = (struct tree_entry *)vec_at(&tree->entries, i);
-    unsigned long m = 0;
-    const char *t = mode_to_str(entry->mode, &m);
-    if (!t)
-      return -1;
-    unsigned char hex[SHA1_HEX_LENGTH];
-    if (sha1_to_hex(entry->sha1, hex) == -1)
-      return -1;
-    if (printf("%6.6lo %s %s\t%s\n", m, t, (char *)hex, entry->path) < 0)
-      return -1;
-  }
-  return 0;
-}
-
 int cmd_ls_tree(int argc, char **argv)
 {
   int r = 0;
+  int t = 0;
   const char *name = "HEAD";
   struct argparse ctx;
   struct argparse_opt opts[] = {
       OPT_HELP(),
       OPT_BOOL('r', NULL, "Recurse into sub-tree", &r),
+      OPT_BOOL('t', NULL, "Show tree entries even when going to recurse them",
+               &t),
       OPT_END(),
   };
 
@@ -122,11 +72,11 @@ int cmd_ls_tree(int argc, char **argv)
     die_errno();
 
   if (obj->type == OBJ_TREE) {
-    struct tree *tree = &obj->tree;
-    if (print_tree(tree) == -1) {
-      if (errno == EINVAL)
-        die("broken tree object");
-      else
+    if (r) {
+      if (tree_fprintf_r(stdout, obj, repo, t) == -1)
+        die_errno();
+    } else {
+      if (obj_fprintf(stdout, obj) == -1)
         die_errno();
     }
   } else if (obj->type == OBJ_COMMIT) {
@@ -137,11 +87,11 @@ int cmd_ls_tree(int argc, char **argv)
     if (obj_parse(tree_obj) == -1)
       die_errno();
 
-    struct tree *tree = &tree_obj->tree;
-    if (print_tree(tree) == -1) {
-      if (errno == EINVAL)
-        die("broken tree object");
-      else
+    if (r) {
+      if (tree_fprintf_r(stdout, tree_obj, repo, t) == -1)
+        die_errno();
+    } else {
+      if (obj_fprintf(stdout, tree_obj) == -1)
         die_errno();
     }
     obj_close(tree_obj);

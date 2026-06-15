@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "obj/obj.h"
@@ -27,22 +28,31 @@ static char *parse_entry(char *cur, char *end, struct tree_entry *entry)
     return NULL;
   }
 
-  entry->mode = cur;
+  const char *m = cur;
+  errno = 0;
+  char *endptr;
+  entry->mode = strtoul(m, &endptr, 8);
+  if (endptr == m || *endptr == '\0')
+    return NULL;
   while (cur < end && *cur != ' ')
     cur++;
-  if (cur >= end)
+  if (cur >= end) {
+    errno = EINVAL;
     return NULL;
+  }
   *cur++ = '\0';
   entry->path = cur;
   while (cur < end && *cur)
     cur++;
-  if (cur >= end)
+  if (cur >= end) {
+    errno = EINVAL;
     return NULL;
+  }
   cur++; /* skip '\0' */
-  if (cur >= end)
+  if (cur + SHA1_DIGEST_LENGTH > end) {
+    errno = EINVAL;
     return NULL;
-  if (cur + SHA1_DIGEST_LENGTH > end)
-    return NULL;
+  }
   sha1_copy((unsigned char *)cur, entry->sha1);
   return cur + SHA1_DIGEST_LENGTH; /* skip sha1 */
 }

@@ -27,6 +27,8 @@ int tree_fprintf(FILE *stream, struct obj *obj)
     return -1;
   }
 
-  /* TODO: implement */
+  for (size_t i = 0; i < vec_size(&obj->tree.entries); i++)
+    if (tree_entry_fprintf(stream, vec_at(&obj->tree.entries, i), NULL) == -1)
+      return -1;
   return 0;
 }

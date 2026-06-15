@@ -320,6 +320,41 @@ Show information about files in the index and working tree.
 
 List the contents of a tree object.
 
+#### Synopsis
+
+```
+qgit ls-tree [-r] [<tree-ish>]
+```
+
+#### Description
+
+Lists the contents of a given tree object. When `<tree-ish>` names a commit, qgit lists the tree recorded in that commit. The command must be run inside a qgit repository.
+
+Without `-r`, qgit lists only the entries at the top level of the tree. With `-r`, qgit recurses into sub-trees and prints blob paths with parent directory prefixes. The `-t` flag applies only with `-r` and makes qgit print tree entries for directories being recursed into.
+
+Each line uses the default Git format: object mode, object type, object name, a tab, and the path name.
+
+`<tree-ish>` may be a full SHA-1 hash, `HEAD`, or a branch name under `refs/heads`. When omitted, qgit uses `HEAD`. qgit does not accept path arguments or abbreviated object names.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-r`
+
+Recurse into sub-trees.
+
+`-t`
+
+Show tree entries even when going to recurse them. Has no effect unless `-r` is also given.
+
+`<tree-ish>`
+
+Tree or commit to list. Defaults to `HEAD`.
+
 ---
 
 ### rev-parse

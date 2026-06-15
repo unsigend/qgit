@@ -20,14 +20,16 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "collection/vector.h"
+#include "repo.h"
 #include "sha1.h"
 
 struct obj;
 
 struct tree_entry {
-  const char *mode;
+  mode_t mode;
   const char *path;
   unsigned char sha1[SHA1_DIGEST_LENGTH];
 };
@@ -44,8 +46,28 @@ struct tree {
 extern int tree_parse(struct obj *obj);
 extern void tree_free(struct tree *tree);
 
+/* Pretty print a tree entry to a stream or buffer. Return 0 on success, -1 on
+   error. */
+extern int tree_entry_fprintf(FILE *stream, struct tree_entry *entry,
+                              const char *prefix);
+
 /* Pretty print the tree to a stream or buffer. Return 0 on success, -1 on
    error. */
 extern int tree_fprintf(FILE *stream, struct obj *obj);
+
+/* Pretty print the tree to a stream or buffer recursively. Return 0 on success,
+   -1 on error. if showtree is false, show blob only. */
+extern int tree_fprintf_r(FILE *stream, struct obj *obj, struct repo *repo,
+                          int showtree);
+
+/* Callback function for tree traversal. Return 0 on success, -1 on error and
+   set errno. */
+typedef int (*tree_traverse_cb)(struct tree_entry *entry, const char *prefix,
+                                void *arg);
+
+/* Tree Traversal: Traverse the tree and call the callback for each entry.
+   Return 0 on success, -1 on error and set errno. */
+extern int tree_traverse(struct obj *obj, tree_traverse_cb cb,
+                         struct repo *repo, void *arg);
 
 #endif
