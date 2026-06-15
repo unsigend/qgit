@@ -34,9 +34,9 @@ static int timestamp_cmp(void *lhs, void *rhs)
 {
   struct obj *objlhs = *(struct obj **)lhs;
   struct obj *objrhs = *(struct obj **)rhs;
-  if (objlhs->commit.atime > objrhs->commit.atime)
+  if (objlhs->commit.ctime > objrhs->commit.ctime)
     return -1;
-  else if (objlhs->commit.atime < objrhs->commit.atime)
+  else if (objlhs->commit.ctime < objrhs->commit.ctime)
     return 1;
   else
     return 0;
@@ -72,6 +72,20 @@ int commit_iter_init(struct commit_iter *iter, struct obj *start,
       set_fini(&iter->visited);
       return -1;
     }
+
+    unsigned char *sha1 = malloc(SHA1_DIGEST_LENGTH);
+    if (!sha1) {
+      set_fini(&iter->visited);
+      heap_fini(&iter->pq);
+      return -1;
+    }
+    sha1_copy(start->sha1, sha1);
+    if (set_insert(&iter->visited, sha1) == -1) {
+      free(sha1);
+      set_fini(&iter->visited);
+      heap_fini(&iter->pq);
+      return -1;
+    };
   }
 
   return 0;

@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <stdlib.h>
 
 #include "collection/slist.h"
 #include "obj/commit.h"
@@ -47,11 +48,64 @@ static int iter_inc_first(struct commit_iter *iter)
   return 0;
 }
 
-// static int iter_inc_all(struct commit_iter *iter)
-// {
-//   /* TODO: Implement */
-//   return 0;
-// }
+static int iter_inc_all(struct commit_iter *iter)
+{
+  struct obj *next;
+  struct commit *commit = &iter->cur->commit;
+  unsigned char *sha1;
+  struct obj *obj;
+
+  struct slist_iter it;
+  if (slist_iter_init(&it, &commit->parents) == -1)
+    return -1;
+
+  while ((sha1 = (unsigned char *)(slist_iter_get(&it)))) {
+
+    if (set_contains(&iter->visited, sha1)) {
+      slist_iter_inc(&it);
+      continue;
+    }
+
+    obj = obj_open_sha1(iter->repo, sha1);
+    if (!obj)
+      return -1;
+    if (obj_parse(obj) == -1) {
+      obj_close(obj);
+      return -1;
+    }
+
+    unsigned char *sha1_clone = malloc(SHA1_DIGEST_LENGTH);
+    if (!sha1_clone) {
+      obj_close(obj);
+      return -1;
+    }
+    sha1_copy(sha1, sha1_clone);
+
+    if (set_insert(&iter->visited, sha1_clone) == -1) {
+      free(sha1_clone);
+      obj_close(obj);
+      return -1;
+    }
+
+    if (heap_push(&iter->pq, &obj) == -1) {
+      obj_close(obj);
+      return -1;
+    }
+
+    slist_iter_inc(&it);
+  }
+
+  if (heap_empty(&iter->pq))
+    return 1;
+
+  if (heap_pop(&iter->pq, &next) == -1)
+    return -1;
+
+  obj_close(iter->cur);
+  iter->cur = next;
+
+  return 0;
+}
 
 int commit_iter_inc(struct commit_iter *iter)
 {
@@ -63,7 +117,7 @@ int commit_iter_inc(struct commit_iter *iter)
   case COMMIT_WALK_FIRST:
     return iter_inc_first(iter);
   case COMMIT_WALK_ALL:
-    // return iter_inc_all(iter);
+    return iter_inc_all(iter);
     return 0;
   default:
     errno = EINVAL;

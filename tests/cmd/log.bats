@@ -190,6 +190,265 @@ EOF
     finalize_log_history "$merge_sha"
 }
 
+setup_diamond_merge_history() {
+    local root_sha left_sha left_tip_sha right_sha right_tip_sha merge_sha tree_sha chain
+
+    init_log_repos
+    chain=$(log_chain_file)
+    : > "$chain"
+
+    printf 'diamond-root\n' > blob-diamond-root.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-root.txt diamond-root.txt)
+    cat > commit-diamond-root.txt <<EOF
+tree $tree_sha
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+diamond root
+EOF
+    root_sha=$(git_write_commit commit-diamond-root.txt)
+    printf '%s\n' "$root_sha" >> "$chain"
+
+    printf 'diamond-left\n' > blob-diamond-left.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-left.txt diamond-left.txt)
+    cat > commit-diamond-left.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946771200 +0000
+committer Test User <test@example.com> 946771200 +0000
+
+diamond left branch
+EOF
+    left_sha=$(git_write_commit commit-diamond-left.txt)
+    printf '%s\n' "$left_sha" >> "$chain"
+
+    printf 'diamond-left-tip\n' > blob-diamond-left-tip.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-left-tip.txt diamond-left-tip.txt)
+    cat > commit-diamond-left-tip.txt <<EOF
+tree $tree_sha
+parent $left_sha
+author Test User <test@example.com> 946857600 +0000
+committer Test User <test@example.com> 946857600 +0000
+
+diamond left tip
+EOF
+    left_tip_sha=$(git_write_commit commit-diamond-left-tip.txt)
+    printf '%s\n' "$left_tip_sha" >> "$chain"
+
+    printf 'diamond-right\n' > blob-diamond-right.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-right.txt diamond-right.txt)
+    cat > commit-diamond-right.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946728000 +0000
+committer Test User <test@example.com> 946728000 +0000
+
+diamond right branch
+EOF
+    right_sha=$(git_write_commit commit-diamond-right.txt)
+
+    printf 'diamond-right-tip\n' > blob-diamond-right-tip.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-right-tip.txt diamond-right-tip.txt)
+    cat > commit-diamond-right-tip.txt <<EOF
+tree $tree_sha
+parent $right_sha
+author Test User <test@example.com> 946944000 +0000
+committer Test User <test@example.com> 946944000 +0000
+
+diamond right tip
+EOF
+    right_tip_sha=$(git_write_commit commit-diamond-right-tip.txt)
+
+    printf 'diamond-merged\n' > blob-diamond-merge.txt
+    tree_sha=$(write_tree_for_blob blob-diamond-merge.txt diamond-merge.txt)
+    cat > commit-diamond-merge.txt <<EOF
+tree $tree_sha
+parent $left_tip_sha
+parent $right_tip_sha
+author Test User <test@example.com> 947030400 +0000
+committer Test User <test@example.com> 947030400 +0000
+
+diamond merge tip
+EOF
+    merge_sha=$(git_write_commit commit-diamond-merge.txt)
+    printf '%s\n' "$merge_sha" >> "$chain"
+
+    finalize_log_history "$merge_sha"
+}
+
+setup_octopus_merge_history() {
+    local root_sha sha_a sha_b sha_c merge_sha tree_sha chain
+
+    init_log_repos
+    chain=$(log_chain_file)
+    : > "$chain"
+
+    printf 'octopus-root\n' > blob-octopus-root.txt
+    tree_sha=$(write_tree_for_blob blob-octopus-root.txt octopus-root.txt)
+    cat > commit-octopus-root.txt <<EOF
+tree $tree_sha
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+octopus root
+EOF
+    root_sha=$(git_write_commit commit-octopus-root.txt)
+    printf '%s\n' "$root_sha" >> "$chain"
+
+    printf 'octopus-a\n' > blob-octopus-a.txt
+    tree_sha=$(write_tree_for_blob blob-octopus-a.txt octopus-a.txt)
+    cat > commit-octopus-a.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946771200 +0000
+committer Test User <test@example.com> 946771200 +0000
+
+octopus branch a
+EOF
+    sha_a=$(git_write_commit commit-octopus-a.txt)
+
+    printf 'octopus-b\n' > blob-octopus-b.txt
+    tree_sha=$(write_tree_for_blob blob-octopus-b.txt octopus-b.txt)
+    cat > commit-octopus-b.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946857600 +0000
+committer Test User <test@example.com> 946857600 +0000
+
+octopus branch b
+EOF
+    sha_b=$(git_write_commit commit-octopus-b.txt)
+
+    printf 'octopus-c\n' > blob-octopus-c.txt
+    tree_sha=$(write_tree_for_blob blob-octopus-c.txt octopus-c.txt)
+    cat > commit-octopus-c.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946944000 +0000
+committer Test User <test@example.com> 946944000 +0000
+
+octopus branch c
+EOF
+    sha_c=$(git_write_commit commit-octopus-c.txt)
+
+    printf 'octopus-merged\n' > blob-octopus-merge.txt
+    tree_sha=$(write_tree_for_blob blob-octopus-merge.txt octopus-merge.txt)
+    cat > commit-octopus-merge.txt <<EOF
+tree $tree_sha
+parent $sha_a
+parent $sha_b
+parent $sha_c
+author Test User <test@example.com> 947030400 +0000
+committer Test User <test@example.com> 947030400 +0000
+
+octopus merge tip
+EOF
+    merge_sha=$(git_write_commit commit-octopus-merge.txt)
+    printf '%s\n' "$merge_sha" >> "$chain"
+
+    finalize_log_history "$merge_sha"
+}
+
+setup_nested_merge_history() {
+    local root_sha commit_a_sha commit_b_sha merge1_sha commit_c_sha commit_d_sha merge2_sha tree_sha chain
+
+    init_log_repos
+    chain=$(log_chain_file)
+    : > "$chain"
+
+    printf 'nested-root\n' > blob-nested-root.txt
+    tree_sha=$(write_tree_for_blob blob-nested-root.txt nested-root.txt)
+    cat > commit-nested-root.txt <<EOF
+tree $tree_sha
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+nested root
+EOF
+    root_sha=$(git_write_commit commit-nested-root.txt)
+    printf '%s\n' "$root_sha" >> "$chain"
+
+    printf 'nested-a\n' > blob-nested-a.txt
+    tree_sha=$(write_tree_for_blob blob-nested-a.txt nested-a.txt)
+    cat > commit-nested-a.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946771200 +0000
+committer Test User <test@example.com> 946771200 +0000
+
+nested branch a
+EOF
+    commit_a_sha=$(git_write_commit commit-nested-a.txt)
+    printf '%s\n' "$commit_a_sha" >> "$chain"
+
+    printf 'nested-b\n' > blob-nested-b.txt
+    tree_sha=$(write_tree_for_blob blob-nested-b.txt nested-b.txt)
+    cat > commit-nested-b.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946857600 +0000
+committer Test User <test@example.com> 946857600 +0000
+
+nested branch b
+EOF
+    commit_b_sha=$(git_write_commit commit-nested-b.txt)
+
+    printf 'nested-merge1\n' > blob-nested-merge1.txt
+    tree_sha=$(write_tree_for_blob blob-nested-merge1.txt nested-merge1.txt)
+    cat > commit-nested-merge1.txt <<EOF
+tree $tree_sha
+parent $commit_a_sha
+parent $commit_b_sha
+author Test User <test@example.com> 946944000 +0000
+committer Test User <test@example.com> 946944000 +0000
+
+nested first merge
+EOF
+    merge1_sha=$(git_write_commit commit-nested-merge1.txt)
+    printf '%s\n' "$merge1_sha" >> "$chain"
+
+    printf 'nested-c\n' > blob-nested-c.txt
+    tree_sha=$(write_tree_for_blob blob-nested-c.txt nested-c.txt)
+    cat > commit-nested-c.txt <<EOF
+tree $tree_sha
+parent $merge1_sha
+author Test User <test@example.com> 947030400 +0000
+committer Test User <test@example.com> 947030400 +0000
+
+nested after first merge
+EOF
+    commit_c_sha=$(git_write_commit commit-nested-c.txt)
+    printf '%s\n' "$commit_c_sha" >> "$chain"
+
+    printf 'nested-d\n' > blob-nested-d.txt
+    tree_sha=$(write_tree_for_blob blob-nested-d.txt nested-d.txt)
+    cat > commit-nested-d.txt <<EOF
+tree $tree_sha
+parent $commit_b_sha
+author Test User <test@example.com> 947116800 +0000
+committer Test User <test@example.com> 947116800 +0000
+
+nested continued b branch
+EOF
+    commit_d_sha=$(git_write_commit commit-nested-d.txt)
+
+    printf 'nested-merge2\n' > blob-nested-merge2.txt
+    tree_sha=$(write_tree_for_blob blob-nested-merge2.txt nested-merge2.txt)
+    cat > commit-nested-merge2.txt <<EOF
+tree $tree_sha
+parent $commit_c_sha
+parent $commit_d_sha
+author Test User <test@example.com> 947203200 +0000
+committer Test User <test@example.com> 947203200 +0000
+
+nested second merge
+EOF
+    merge2_sha=$(git_write_commit commit-nested-merge2.txt)
+    printf '%s\n' "$merge2_sha" >> "$chain"
+
+    finalize_log_history "$merge2_sha"
+}
+
 setup_utf8_history() {
     local root_sha child_sha tree_sha chain
 
@@ -295,6 +554,139 @@ EOF
     finalize_log_history "$child_sha"
 }
 
+setup_committer_order_merge_history() {
+    local root_sha commit_alpha_sha commit_beta_sha merge_sha tree_sha chain
+
+    init_log_repos
+    chain=$(log_chain_file)
+    : > "$chain"
+
+    printf 'order-root\n' > blob-order-root.txt
+    tree_sha=$(write_tree_for_blob blob-order-root.txt order-root.txt)
+    cat > commit-order-root.txt <<EOF
+tree $tree_sha
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+order root
+EOF
+    root_sha=$(git_write_commit commit-order-root.txt)
+    printf '%s\n' "$root_sha" >> "$chain"
+
+    printf 'order-alpha\n' > blob-order-alpha.txt
+    tree_sha=$(write_tree_for_blob blob-order-alpha.txt order-alpha.txt)
+    cat > commit-order-alpha.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 947116800 +0000
+committer Test User <test@example.com> 946771200 +0000
+
+branch alpha
+EOF
+    commit_alpha_sha=$(git_write_commit commit-order-alpha.txt)
+
+    printf 'order-beta\n' > blob-order-beta.txt
+    tree_sha=$(write_tree_for_blob blob-order-beta.txt order-beta.txt)
+    cat > commit-order-beta.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946771200 +0000
+committer Test User <test@example.com> 947116800 +0000
+
+branch beta
+EOF
+    commit_beta_sha=$(git_write_commit commit-order-beta.txt)
+
+    printf 'order-merge\n' > blob-order-merge.txt
+    tree_sha=$(write_tree_for_blob blob-order-merge.txt order-merge.txt)
+    cat > commit-order-merge.txt <<EOF
+tree $tree_sha
+parent $commit_alpha_sha
+parent $commit_beta_sha
+author Test User <test@example.com> 947203200 +0000
+committer Test User <test@example.com> 947203200 +0000
+
+order merge tip
+EOF
+    merge_sha=$(git_write_commit commit-order-merge.txt)
+    printf '%s\n' "$merge_sha" >> "$chain"
+
+    finalize_log_history "$merge_sha"
+}
+
+setup_committer_order_octopus_history() {
+    local root_sha sha_a sha_b sha_c merge_sha tree_sha chain
+
+    init_log_repos
+    chain=$(log_chain_file)
+    : > "$chain"
+
+    printf 'oct-order-root\n' > blob-oct-order-root.txt
+    tree_sha=$(write_tree_for_blob blob-oct-order-root.txt oct-order-root.txt)
+    cat > commit-oct-order-root.txt <<EOF
+tree $tree_sha
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+octopus order root
+EOF
+    root_sha=$(git_write_commit commit-oct-order-root.txt)
+    printf '%s\n' "$root_sha" >> "$chain"
+
+    printf 'oct-order-a\n' > blob-oct-order-a.txt
+    tree_sha=$(write_tree_for_blob blob-oct-order-a.txt oct-order-a.txt)
+    cat > commit-oct-order-a.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 947203200 +0000
+committer Test User <test@example.com> 946771200 +0000
+
+octopus order a
+EOF
+    sha_a=$(git_write_commit commit-oct-order-a.txt)
+
+    printf 'oct-order-b\n' > blob-oct-order-b.txt
+    tree_sha=$(write_tree_for_blob blob-oct-order-b.txt oct-order-b.txt)
+    cat > commit-oct-order-b.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 946771200 +0000
+committer Test User <test@example.com> 947203200 +0000
+
+octopus order b
+EOF
+    sha_b=$(git_write_commit commit-oct-order-b.txt)
+
+    printf 'oct-order-c\n' > blob-oct-order-c.txt
+    tree_sha=$(write_tree_for_blob blob-oct-order-c.txt oct-order-c.txt)
+    cat > commit-oct-order-c.txt <<EOF
+tree $tree_sha
+parent $root_sha
+author Test User <test@example.com> 947116800 +0000
+committer Test User <test@example.com> 947116800 +0000
+
+octopus order c
+EOF
+    sha_c=$(git_write_commit commit-oct-order-c.txt)
+
+    printf 'oct-order-merge\n' > blob-oct-order-merge.txt
+    tree_sha=$(write_tree_for_blob blob-oct-order-merge.txt oct-order-merge.txt)
+    cat > commit-oct-order-merge.txt <<EOF
+tree $tree_sha
+parent $sha_a
+parent $sha_b
+parent $sha_c
+author Test User <test@example.com> 947289600 +0000
+committer Test User <test@example.com> 947289600 +0000
+
+octopus order merge
+EOF
+    merge_sha=$(git_write_commit commit-oct-order-merge.txt)
+    printf '%s\n' "$merge_sha" >> "$chain"
+
+    finalize_log_history "$merge_sha"
+}
+
 setup_empty_message_log() {
     local tree_sha commit_sha
 
@@ -327,6 +719,315 @@ setup_message_log() {
     write_root_commit_file commit-msg.txt "$tree_sha" "$body"
     commit_sha=$(git_write_commit commit-msg.txt)
     finalize_log_history "$commit_sha"
+}
+
+# log
+
+@test "qgit log: linear history matches git" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: single commit matches git" {
+    setup_linear_history 1 >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: long linear chain matches git" {
+    setup_linear_history 8 >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: simple merge matches git" {
+    setup_merge_first_parent_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: merge includes second parent branch" {
+    setup_merge_first_parent_history >/dev/null
+    run_qgit_log
+    assert_success
+    assert_output_contains "second parent branch"
+}
+
+@test "qgit log: merge shows Merge line" {
+    setup_merge_first_parent_history >/dev/null
+    run_qgit_log
+    assert_success
+    assert_output_contains "Merge:"
+}
+
+@test "qgit log: diamond merge matches git" {
+    setup_diamond_merge_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: diamond merge includes both branch tips" {
+    setup_diamond_merge_history >/dev/null
+    run_qgit_log
+    assert_success
+    assert_output_contains "diamond left tip"
+    assert_output_contains "diamond right tip"
+}
+
+@test "qgit log: octopus merge matches git" {
+    setup_octopus_merge_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: octopus merge includes all branch commits" {
+    setup_octopus_merge_history >/dev/null
+    run_qgit_log
+    assert_success
+    assert_output_contains "octopus branch a"
+    assert_output_contains "octopus branch b"
+    assert_output_contains "octopus branch c"
+}
+
+@test "qgit log: nested merge matches git" {
+    setup_nested_merge_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: nested merge includes continued side branch" {
+    setup_nested_merge_history >/dev/null
+    run_qgit_log
+    assert_success
+    assert_output_contains "nested continued b branch"
+}
+
+@test "qgit log: merge history includes more commits than --first-parent" {
+    setup_diamond_merge_history >/dev/null
+    local all_count fp_count
+    all_count=$(git_log --oneline | wc -l | tr -d ' ')
+    fp_count=$(git_log --oneline --first-parent | wc -l | tr -d ' ')
+    [ "$all_count" -gt "$fp_count" ] || {
+        echo "Expected all-parent count ($all_count) > first-parent count ($fp_count)"
+        return 1
+    }
+}
+
+# --oneline
+
+@test "qgit log --oneline: linear history matches git" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log --oneline: single commit matches git" {
+    setup_linear_history 1 >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log --oneline: simple merge matches git" {
+    setup_merge_first_parent_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log --oneline: diamond merge matches git" {
+    setup_diamond_merge_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log --oneline: octopus merge matches git" {
+    setup_octopus_merge_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log --oneline: nested merge matches git" {
+    setup_nested_merge_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+# -n
+
+@test "qgit log -n 1: limits to one commit" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log -n 1
+}
+
+@test "qgit log -n 2: limits to two commits" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log -n 2
+}
+
+@test "qgit log -n 3: limits to three commits" {
+    setup_linear_history 5 >/dev/null
+    assert_matches_git_log -n 3
+}
+
+@test "qgit log -n 0: shows no commits" {
+    setup_linear_history 3 >/dev/null
+    assert_matches_git_log -n 0
+}
+
+@test "qgit log -n 10: shows all when limit exceeds history" {
+    setup_linear_history 3 >/dev/null
+    assert_matches_git_log -n 10
+}
+
+@test "qgit log -n 1 --oneline: one line limit matches git" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log -n 1 --oneline
+}
+
+@test "qgit log -n 2 --oneline: one line limit matches git" {
+    setup_linear_history 4 >/dev/null
+    assert_matches_git_log -n 2 --oneline
+}
+
+@test "qgit log -n 4: merge history limit matches git" {
+    setup_merge_first_parent_history >/dev/null
+    assert_matches_git_log -n 4
+}
+
+@test "qgit log -n 1: merge tip limits to one" {
+    setup_merge_first_parent_history >/dev/null
+    assert_matches_git_log -n 1
+}
+
+@test "qgit log -n 6: diamond merge limit matches git" {
+    setup_diamond_merge_history >/dev/null
+    assert_matches_git_log -n 6
+}
+
+# <commit>
+
+@test "qgit log HEAD: explicit HEAD matches git" {
+    setup_linear_history 3 >/dev/null
+    assert_matches_git_log HEAD
+}
+
+@test "qgit log <commit>: starts from middle commit" {
+    setup_linear_history 5 >/dev/null
+    local mid
+    mid=$(commit_at 2)
+    assert_matches_git_log "$mid"
+}
+
+@test "qgit log <commit>: root commit shows one entry" {
+    setup_linear_history 4 >/dev/null
+    local root
+    root=$(commit_at 0)
+    assert_matches_git_log "$root"
+}
+
+@test "qgit log --oneline <commit>: middle commit matches git" {
+    setup_linear_history 5 >/dev/null
+    local mid
+    mid=$(commit_at 2)
+    assert_matches_git_log --oneline "$mid"
+}
+
+@test "qgit log -n 1 <commit>: limits from middle commit" {
+    setup_linear_history 5 >/dev/null
+    local mid
+    mid=$(commit_at 3)
+    assert_matches_git_log -n 1 "$mid"
+}
+
+@test "qgit log <commit>: second parent branch tip matches git" {
+    setup_merge_first_parent_history >/dev/null
+    local second_parent
+    second_parent=$(
+        env GIT_DIR="$TEST_DIR/.git" "$GIT" log --format=%H --grep='second parent branch' -1
+    )
+    assert_matches_git_log "$second_parent"
+}
+
+@test "qgit log <commit>: diamond right branch tip matches git" {
+    setup_diamond_merge_history >/dev/null
+    local right_tip
+    right_tip=$(
+        env GIT_DIR="$TEST_DIR/.git" "$GIT" log --format=%H --grep='diamond right tip' -1
+    )
+    assert_matches_git_log "$right_tip"
+}
+
+# message edge cases
+
+@test "qgit log: empty commit message matches git" {
+    setup_empty_message_log >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: multiline message matches git" {
+    setup_multiline_log_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log --oneline: multiline message matches git" {
+    setup_multiline_log_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log: message starting with author matches git" {
+    setup_message_log "author note only" >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: message starting with committer matches git" {
+    setup_message_log "committer note only" >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: message starting with tree matches git" {
+    setup_message_log "tree rebuild notes" >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: message starting with parent matches git" {
+    setup_message_log "parent linkage notes" >/dev/null
+    assert_matches_git_log
+}
+
+# time and timezone
+
+@test "qgit log: utf8 messages match git" {
+    setup_utf8_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log: timezone offsets match git" {
+    setup_timezone_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log --oneline: timezone offsets match git" {
+    setup_timezone_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log: different author and committer times match git" {
+    setup_different_author_committer_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log --oneline: different author and committer times match git" {
+    setup_different_author_committer_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+# committer date ordering
+
+@test "qgit log: merge sibling order uses committer date like git" {
+    setup_committer_order_merge_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log --oneline: merge sibling order uses committer date like git" {
+    setup_committer_order_merge_history >/dev/null
+    assert_matches_git_log --oneline
+}
+
+@test "qgit log: octopus sibling order uses committer date like git" {
+    setup_committer_order_octopus_history >/dev/null
+    assert_matches_git_log
+}
+
+@test "qgit log --oneline: octopus sibling order uses committer date like git" {
+    setup_committer_order_octopus_history >/dev/null
+    assert_matches_git_log --oneline
 }
 
 # log --first-parent
@@ -549,6 +1250,38 @@ setup_message_log() {
 @test "qgit log -n: missing count fails" {
     setup_linear_history 2 >/dev/null
     run_qgit_log -n --first-parent
+    assert_failure
+}
+
+@test "qgit log: outside repository fails" {
+    mkdir outside && cd outside || return 1
+    run_qgit_log
+    assert_failure
+}
+
+@test "qgit log: unknown reference fails" {
+    setup_linear_history 2 >/dev/null
+    run_qgit_log not-a-ref
+    assert_failure
+}
+
+@test "qgit log: missing object fails" {
+    setup_linear_history 2 >/dev/null
+    run_qgit_log 0000000000000000000000000000000000000000
+    assert_failure
+}
+
+@test "qgit log: non-commit object fails" {
+    setup_linear_history 2 >/dev/null
+    local blob_sha
+    blob_sha=$(git_write_blob blob-v0.txt)
+    run_qgit_log "$blob_sha"
+    assert_failure
+}
+
+@test "qgit log -n: missing count without first-parent fails" {
+    setup_linear_history 2 >/dev/null
+    run_qgit_log -n
     assert_failure
 }
 

@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
+#include <string.h>
+
 #include "collection/heap.h"
 #include "collection/util.h"
 #include "collection/vector.h"
-
-#include <stddef.h>
-#include <string.h>
 
 #define PARENT(idx) (((idx) - 1) / 2)
 #define LEFT(idx) (2 * (idx) + 1)
@@ -66,12 +66,13 @@ int heap_pop(struct heap *heap, void *dest)
   else if (heap->vec.destroy)
     heap->vec.destroy(vec_raw(&heap->vec));
 
-  if (vec_size(&heap->vec) != 1)
+  /* Move semantic only no destroy for tail element */
+  if (vec_size(&heap->vec) > 1)
     memcpy(vec_raw(&heap->vec), vec_at(&heap->vec, vec_size(&heap->vec) - 1),
            heap->vec.elesz);
 
-  if (vec_popback(&heap->vec, NULL) == -1)
-    return -1;
+  heap->vec.sz--;
+
   if (vec_empty(&heap->vec))
     return 0;
   return shiftdown(heap, 0);
