@@ -74,12 +74,11 @@ static int iter_inc_all(struct commit_iter *iter)
       return -1;
     }
 
-    unsigned char *sha1_clone = malloc(SHA1_DIGEST_LENGTH);
+    unsigned char *sha1_clone = sha1dup(sha1);
     if (!sha1_clone) {
       obj_close(obj);
       return -1;
     }
-    sha1_copy(sha1, sha1_clone);
 
     if (set_insert(&iter->visited, sha1_clone) == -1) {
       free(sha1_clone);

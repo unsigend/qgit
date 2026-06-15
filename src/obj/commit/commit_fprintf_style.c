@@ -25,6 +25,8 @@
 #define ASCII_COLOR_YELLOW "\033[33m"
 #define ASCII_COLOR_RESET "\033[0m"
 
+#define INDENT_WIDTH 4
+
 static int print_default(FILE *stream, struct obj *obj)
 {
   int istty = isatty(fileno(stream));
@@ -63,8 +65,19 @@ static int print_default(FILE *stream, struct obj *obj)
   }
   fprintf(stream, "Author: %s\n", obj->commit.author);
   fprintf(stream, "Date:   %s %s\n\n", datebuf, zone);
-  if (obj->commit.msg) /* TODO: add indentation for each line */
-    fprintf(stream, "    %s\n", obj->commit.msg);
+  if (obj->commit.msg) {
+    const char *cur = obj->commit.msg;
+    fprintf(stream, "%*s", INDENT_WIDTH, " ");
+    while (*cur) {
+      if (*cur == '\n') {
+        fputc('\n', stream);
+        if (*(cur + 1)) /* not the last line */
+          fprintf(stream, "%*s", INDENT_WIDTH, " ");
+      } else
+        fputc(*cur, stream);
+      cur++;
+    }
+  }
   return 0;
 }
 

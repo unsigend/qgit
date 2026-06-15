@@ -73,19 +73,19 @@ int commit_iter_init(struct commit_iter *iter, struct obj *start,
       return -1;
     }
 
-    unsigned char *sha1 = malloc(SHA1_DIGEST_LENGTH);
+    unsigned char *sha1 = sha1dup(start->sha1);
     if (!sha1) {
       set_fini(&iter->visited);
       heap_fini(&iter->pq);
       return -1;
     }
-    sha1_copy(start->sha1, sha1);
+
     if (set_insert(&iter->visited, sha1) == -1) {
       free(sha1);
       set_fini(&iter->visited);
       heap_fini(&iter->pq);
       return -1;
-    };
+    }
   }
 
   return 0;

@@ -43,4 +43,8 @@ extern int hex_to_sha1(const unsigned char *hex,
 extern const unsigned char *sha1_copy(const unsigned char *sha1,
                                       unsigned char *buf);
 
+/* Duplicate a SHA1 digest. Return the duplicated SHA1 digest on heap on
+   success, NULL on error and set errno. */
+extern unsigned char *sha1dup(const unsigned char *sha1);
+
 #endif

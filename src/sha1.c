@@ -77,3 +77,17 @@ const unsigned char *sha1_copy(const unsigned char *sha1, unsigned char *buf)
   }
   return memcpy(buf, sha1, SHA1_DIGEST_LENGTH);
 }
+
+unsigned char *sha1dup(const unsigned char *sha1)
+{
+  if (!sha1) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  unsigned char *dup = malloc(SHA1_DIGEST_LENGTH);
+  if (!dup)
+    return NULL;
+  sha1_copy(sha1, dup);
+  return dup;
+}
