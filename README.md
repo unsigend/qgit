@@ -361,6 +361,29 @@ Tree or commit to list. Defaults to `HEAD`.
 
 Pick out and massage parameters.
 
+#### Synopsis
+
+```
+qgit rev-parse [options] <args>
+```
+
+#### Description
+
+Resolves each revision argument to a full 40-character object name and prints one line per argument to standard output. The command must be run inside a qgit repository.
+
+With no arguments, qgit exits successfully and prints nothing.
+
+Arguments are resolved in this order: a full 40-character hex SHA-1, `HEAD`, a full reference path such as `refs/heads/main` or `refs/tags/v1.0`, a branch or tag name, then an abbreviated SHA-1 of at least four hex digits. When the same bare name exists as both a branch and a tag, both references must point at the same object.
+
+qgit does not support Git porcelain flags yet such as `--verify`, `--short`, or revision suffixes like `^{commit}`.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
 ---
 
 ### rm
