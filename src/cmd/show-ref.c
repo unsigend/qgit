@@ -16,9 +16,28 @@
  */
 
 #include <errno.h>
+#include <stdio.h>
 
 #include "argparse.h"
 #include "die.h"
+#include "ref.h"
+#include "sha1.h"
+
+static int print_ref(const char *refname, const unsigned char *sha1, void *arg)
+{
+  (void)arg;
+  if (!refname || !sha1) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  unsigned char hex[SHA1_HEX_LENGTH];
+  if (sha1_to_hex(sha1, hex) == -1)
+    return -1;
+
+  printf("%s %s\n", hex, refname);
+  return 0;
+}
 
 int cmd_show_ref(int argc, char **argv)
 {
@@ -35,7 +54,7 @@ int cmd_show_ref(int argc, char **argv)
   };
 
   static const char *usages[] = {
-      "qgit show-ref [--head]",
+      "qgit show-ref [--head] [--branches] [--tags]",
   };
   struct argparse_desc desc = {
       .prog = "qgit show-ref",
@@ -50,6 +69,32 @@ int cmd_show_ref(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", ctx.errstr);
 
+  struct repo *repo = repo_cwd();
+  if (!repo)
+    die("not inside a qgit repository");
+
+  unsigned char sha1[SHA1_DIGEST_LENGTH];
+  int show_branches = (!branches && !tags) || branches;
+  int show_tags = (!branches && !tags) || tags;
+
+  if (head) {
+    if (ref_read(repo, "HEAD", sha1) == -1)
+      die_errno();
+    if (print_ref("HEAD", sha1, NULL) == -1)
+      die_errno();
+  }
+
+  if (show_branches) {
+    if (ref_foreach(repo, "refs/heads", print_ref, NULL) == -1)
+      die_errno();
+  }
+
+  if (show_tags) {
+    if (ref_foreach(repo, "refs/tags", print_ref, NULL) == -1)
+      die_errno();
+  }
+
+  repo_free(repo);
   argparse_fini(&ctx);
   return 0;
 }

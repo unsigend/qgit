@@ -33,4 +33,11 @@
 extern int ref_read(struct repo *repo, const char *refname,
                     unsigned char *sha1);
 
+typedef int (*ref_cb)(const char *refname, const unsigned char *sha1,
+                      void *arg);
+
+/* Traverse all refs in the repository with a given prefix. */
+extern int ref_foreach(struct repo *repo, const char *prefix, ref_cb cb,
+                       void *arg);
+
 #endif

@@ -373,6 +373,36 @@ Remove files from the working tree and from the index.
 
 List references in a local repository.
 
+#### Synopsis
+
+```
+qgit show-ref [--head] [--branches] [--tags]
+```
+
+#### Description
+
+Displays references available in a local repository along with the associated commit IDs. The command must be run inside a qgit repository.
+
+By default, qgit lists local branch and tag references under `refs/heads` and `refs/tags`. Output is one line per reference in the form `<oid> <ref>`.
+
+qgit reads loose refs only. Remote references and `packed-refs` are not supported.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`--head`
+
+Show the `HEAD` reference, even if it would normally be filtered out.
+
+`--branches`
+`--tags`
+
+Limit to local branches and local tags, respectively. These options are not mutually exclusive. When both are given, references stored in `refs/heads` and `refs/tags` are displayed.
+
 ---
 
 ### status
