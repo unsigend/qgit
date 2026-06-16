@@ -413,7 +413,49 @@ Show the working tree status.
 
 ### tag
 
-Create, list, delete or verify a tag object signed with GPG.
+Create, list, or delete tags.
+
+qgit supports lightweight tags only. Annotated tags, signing, and verification are not supported.
+
+#### Synopsis
+
+```
+qgit tag [options] <tagname> [<commit>]
+qgit tag [options] -d <tagname>
+```
+
+#### Description
+
+Create, list, or delete tag references in `refs/tags/`. The command must be run inside a qgit repository.
+
+With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a lightweight tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. With `-d`, qgit deletes the named tag.
+
+Creating a tag with an existing name overwrites the previous value.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-l`
+`--list`
+
+List tags. Running `qgit tag` with no arguments also lists tags.
+
+`-d`
+`--delete`
+
+Delete the tag with the given name.
+
+`<tagname>`
+
+The name of the tag to create, list, or delete.
+
+`<commit>`
+
+The object that the new tag will refer to, usually a commit. Defaults to `HEAD`.
 
 ---
 

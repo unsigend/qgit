@@ -40,4 +40,9 @@ typedef int (*ref_cb)(const char *refname, const unsigned char *sha1,
 extern int ref_foreach(struct repo *repo, const char *prefix, ref_cb cb,
                        void *arg);
 
+/* Update a ref in the repository. Create the ref if it doesn't exist. Return 0
+   on success, -1 on error and set errno. */
+extern int ref_update(struct repo *repo, const char *refname,
+                      const unsigned char *sha1);
+
 #endif
