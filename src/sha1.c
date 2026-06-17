@@ -21,7 +21,7 @@
 
 #include "sha1.h"
 
-int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGEST_LENGTH])
+int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGLEN])
 {
   EVP_MD_CTX *ctx = EVP_MD_CTX_new();
   if (!ctx)
@@ -35,13 +35,13 @@ int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGEST_LENGTH])
   return ok ? 0 : -1;
 }
 
-int sha1_to_hex(const unsigned char *sha1, unsigned char hex[SHA1_HEX_LENGTH])
+int sha1_to_hex(const unsigned char *sha1, unsigned char hex[SHA1_HEXLEN])
 {
-  for (size_t i = 0; i < SHA1_DIGEST_LENGTH; i++) {
+  for (size_t i = 0; i < SHA1_DIGLEN; i++) {
     if (snprintf((char *)(hex + i * 2), 3, "%02x", sha1[i]) < 0)
       return -1;
   }
-  hex[SHA1_HEX_LENGTH - 1] = '\0';
+  hex[SHA1_HEXLEN - 1] = '\0';
   return 0;
 }
 
@@ -56,10 +56,9 @@ static int hexval(unsigned char c)
   return -1;
 }
 
-int hex_to_sha1(const unsigned char *hex,
-                unsigned char sha1[SHA1_DIGEST_LENGTH])
+int hex_to_sha1(const unsigned char *hex, unsigned char sha1[SHA1_DIGLEN])
 {
-  for (size_t i = 0; i < SHA1_DIGEST_LENGTH; i++) {
+  for (size_t i = 0; i < SHA1_DIGLEN; i++) {
     int hi = hexval(hex[i * 2]);
     int lo = hexval(hex[i * 2 + 1]);
     if (hi == -1 || lo == -1)
@@ -75,7 +74,7 @@ const unsigned char *sha1_copy(const unsigned char *sha1, unsigned char *buf)
     errno = EINVAL;
     return NULL;
   }
-  return memcpy(buf, sha1, SHA1_DIGEST_LENGTH);
+  return memcpy(buf, sha1, SHA1_DIGLEN);
 }
 
 unsigned char *sha1dup(const unsigned char *sha1)
@@ -85,7 +84,7 @@ unsigned char *sha1dup(const unsigned char *sha1)
     return NULL;
   }
 
-  unsigned char *dup = malloc(SHA1_DIGEST_LENGTH);
+  unsigned char *dup = malloc(SHA1_DIGLEN);
   if (!dup)
     return NULL;
   sha1_copy(sha1, dup);

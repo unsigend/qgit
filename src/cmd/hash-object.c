@@ -15,85 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include "argparse.h"
-#include "die.h"
-#include "fs.h"
-#include "obj/obj.h"
-
 int cmd_hash_object(int argc, char **argv)
 {
-
-  const char *type = "blob";
-  const char *file = NULL;
-  int w = 0;
-
-  struct argparse ctx;
-  struct argparse_opt opts[] = {
-      OPT_HELP(),
-      OPT_STR('t', "type", "specify the type of the object", &type,
-              OPT_REQUIRED),
-      OPT_BOOL('w', "write", "write the object to the repository", &w),
-      OPT_END(),
-  };
-
-  static const char *usages[] = {
-      "qgit hash-object [-t <type>] [-w | --write] <file>",
-  };
-
-  struct argparse_desc desc = {
-      .prog = "qgit hash-object",
-      .desc = "Compute object ID and optionally create a blob from a file",
-      .usages = usages,
-      .nusages = sizeof(usages) / sizeof(usages[0]),
-  };
-
-  if (argparse_init(&ctx, opts, &desc) == -1)
-    die("%s", ctx.errstr);
-
-  if (argparse_parse(&ctx, argc, argv) == -1)
-    die("%s", ctx.errstr);
-
-  if (argparse_getremargc(&ctx) > 0)
-    file = argparse_getremargv(&ctx)[0];
-
-  if (!file)
-    die("no file specified");
-
-  obj_type_t obj_type = obj_type_from_str(type);
-  if (obj_type == OBJ_NONE)
-    die("invalid object type: %s", type);
-
-  char path[PATH_MAX];
-
-  if (fabspath(file, path) == -1)
-    die_errno();
-
-  struct obj *obj = obj_open_file(path, obj_type);
-  if (!obj)
-    die_errno();
-  if (obj_sha1(obj) == -1)
-    die_errno();
-
-  unsigned char hex[SHA1_HEX_LENGTH];
-  if (sha1_to_hex(obj->sha1, hex) == -1)
-    die_errno();
-  if (w) {
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) == NULL)
-      die_errno();
-    struct repo *repo = repo_find(cwd);
-    if (!repo)
-      die("not inside a qgit repository");
-    if (obj_write(repo, obj) == -1)
-      die_errno();
-    repo_free(repo);
-  }
-  printf("%s\n", hex);
-  obj_close(obj);
-
-  argparse_fini(&ctx);
+  (void)argc;
+  (void)argv;
   return 0;
 }

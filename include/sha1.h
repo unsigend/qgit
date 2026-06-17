@@ -20,26 +20,21 @@
 
 #include <stddef.h>
 
-#define SHA1_DIGEST_LENGTH 20
-#define SHA1_HEX_LENGTH (SHA1_DIGEST_LENGTH * 2 + 1)
+#define SHA1_DIGLEN 20
+#define SHA1_HEXLEN (SHA1_DIGLEN * 2 + 1)
 
-/* Compute the SHA1 digest of the given data. Return 0 on success, -1 on error
- */
-extern int sha1(const void *data, size_t len,
-                unsigned char sha1[SHA1_DIGEST_LENGTH]);
+/* Compute the SHA1 digest of the given data. */
+extern int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGLEN]);
 
-/* Convert a SHA1 digest to a hexadecimal string. Return 0 on success, -1 on
-   error. */
+/* Convert a SHA1 digest to a hexadecimal string. */
 extern int sha1_to_hex(const unsigned char *sha1,
-                       unsigned char hex[SHA1_HEX_LENGTH]);
+                       unsigned char hex[SHA1_HEXLEN]);
 
-/* Convert a hexadecimal string to a SHA1 digest. Return 0 on success, -1 on
-   error. */
+/* Convert a hexadecimal string to a SHA1 digest. */
 extern int hex_to_sha1(const unsigned char *hex,
-                       unsigned char sha1[SHA1_DIGEST_LENGTH]);
+                       unsigned char sha1[SHA1_DIGLEN]);
 
-/* Copy a SHA1 digest to a buffer. Return the buffer on success, NULL on error.
- */
+/* Copy a SHA1 digest to a buffer. */
 extern const unsigned char *sha1_copy(const unsigned char *sha1,
                                       unsigned char *buf);
 

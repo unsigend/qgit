@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "DIGESTLEN",
+        "DIGLEN",
         "existd",
         "existdir",
         "existf",
@@ -11,6 +13,9 @@
         "mkdirifne",
         "mkfileifne",
         "mktemp",
+        "NOTINREPO",
+        "NOTIREPO",
+        "NREPO",
         "objlhs",
         "objrhs",
         "reinit",

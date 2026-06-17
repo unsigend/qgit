@@ -15,14 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
-#include "obj/commit.h"
+#define QGIT_MAJOR 0
+#define QGIT_MINOR 1
+#define QGIT_PATCH 0
 
-struct obj *commit_iter_get(struct commit_iter *iter)
-{
-  if (!iter)
-    return NULL;
+#define PROG_NAME "qgit"
+#define PROG_VERSION ((QGIT_MAJOR) * 10000 + (QGIT_MINOR) * 100 + (QGIT_PATCH))
+#define PROG_REPO "https://github.com/unsigend/qgit"
 
-  return iter->cur;
-}
+#define GROUP(NAME)
+
+#endif
