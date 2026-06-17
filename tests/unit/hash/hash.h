@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <sha1.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,4 +122,57 @@ UTEST_CASE(hex_to_sha1)
   EXPECT_EQ_INT(sha1_to_hex(digest, hex), 0);
   hex[SHA1_DIGLEN * 2 - 1] = '\0';
   EXPECT_EQ_INT(hex_to_sha1(hex, back), -1);
+}
+
+UTEST_CASE(sha1_copy)
+{
+  unsigned char digest[SHA1_DIGLEN];
+  unsigned char buf[SHA1_DIGLEN];
+  unsigned char other[SHA1_DIGLEN];
+
+  EXPECT_EQ_INT(sha1("hello", 5, digest), 0);
+  EXPECT_EQ_PTR(sha1_copy(digest, buf), buf);
+  EXPECT_EQ_INT(memcmp(digest, buf, SHA1_DIGLEN), 0);
+
+  buf[0] ^= 0xff;
+  EXPECT_NE_INT(memcmp(digest, buf, SHA1_DIGLEN), 0);
+  EXPECT_EQ_PTR(sha1_copy(digest, buf), buf);
+  EXPECT_EQ_INT(memcmp(digest, buf, SHA1_DIGLEN), 0);
+
+  memset(other, 0, SHA1_DIGLEN);
+  EXPECT_EQ_PTR(sha1_copy(other, buf), buf);
+  EXPECT_EQ_INT(memcmp(other, buf, SHA1_DIGLEN), 0);
+
+  errno = 0;
+  EXPECT_NULL(sha1_copy(NULL, buf));
+  EXPECT_EQ_INT(errno, EINVAL);
+
+  errno = 0;
+  EXPECT_NULL(sha1_copy(digest, NULL));
+  EXPECT_EQ_INT(errno, EINVAL);
+}
+
+UTEST_CASE(sha1dup)
+{
+  unsigned char digest[SHA1_DIGLEN];
+  unsigned char *dup;
+
+  EXPECT_EQ_INT(sha1("hello", 5, digest), 0);
+  dup = sha1dup(digest);
+  EXPECT_NOTNULL(dup);
+  EXPECT_NE_PTR(dup, digest);
+  EXPECT_EQ_INT(memcmp(digest, dup, SHA1_DIGLEN), 0);
+
+  dup[0] ^= 0xff;
+  EXPECT_NE_INT(memcmp(digest, dup, SHA1_DIGLEN), 0);
+  free(dup);
+
+  dup = sha1dup(digest);
+  EXPECT_NOTNULL(dup);
+  EXPECT_EQ_INT(memcmp(digest, dup, SHA1_DIGLEN), 0);
+  free(dup);
+
+  errno = 0;
+  EXPECT_NULL(sha1dup(NULL));
+  EXPECT_EQ_INT(errno, EINVAL);
 }

@@ -19,37 +19,6 @@
 #include <stdlib.h>
 #include <zlib.h>
 
-int zlib_compress(const void *src, size_t srclen, void **dest, size_t *destlen)
-{
-  uLongf buflen = compressBound(srclen);
-  void *buf = malloc(buflen);
-  if (!buf)
-    return -1;
-
-  int ret = compress2(buf, &buflen, src, srclen, Z_BEST_COMPRESSION);
-  if (ret != Z_OK) {
-    if (ret == Z_MEM_ERROR)
-      errno = ENOMEM;
-    else if (ret == Z_BUF_ERROR)
-      errno = EINVAL;
-    else
-      errno = EIO;
-    free(buf);
-    return -1;
-  }
-
-  void *newbuf = realloc(buf, buflen); /* shrink to fit */
-  if (!newbuf) {
-    free(buf);
-    return -1;
-  }
-  buf = newbuf;
-
-  *dest = buf;
-  *destlen = buflen;
-  return 0;
-}
-
 int zlib_decompress(const void *src, size_t srclen, void **dest,
                     size_t *destlen)
 {

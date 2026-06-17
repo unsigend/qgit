@@ -24,12 +24,18 @@
    memory. Caller should free the memory after use. These functions are just
    wrappers around the zlib functions and set proper errno on error. */
 
-/* Compress data from src to dest. Return 0 on success, -1 on error. */
+/* Compress data from src to dest. */
 extern int zlib_compress(const void *src, size_t srclen, void **dest,
                          size_t *destlen);
 
-/* Decompress data from src to dest. Return 0 on success, -1 on error. */
+/* Compress data from src to a file. */
+extern int zlib_compressf(const void *src, size_t srclen, const char *path);
+
+/* Decompress data from src to dest. */
 extern int zlib_decompress(const void *src, size_t srclen, void **dest,
                            size_t *destlen);
+
+/* Decompress data from a file to dest. */
+extern int zlib_decompressf(const char *path, void **dest, size_t *destlen);
 
 #endif
