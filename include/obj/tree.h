@@ -22,11 +22,17 @@
 
 struct obj;
 
+/* Raw payload format for tree:
+     <mode> <path>\0<sha1-20>
+     ...
+     <mode> <path>\0<sha1-20>
+*/
+
 struct tree {
 };
 
 extern int tree_parse(struct obj *obj);
 extern void tree_close(struct tree *tree);
-extern int tree_fprintf(struct tree *tree, FILE *fp);
+extern int tree_fprintf(struct obj *obj, FILE *fp);
 
 #endif

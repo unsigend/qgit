@@ -21,6 +21,4 @@ void blob_close(struct blob *blob)
 {
   if (!blob)
     return;
-
-  /* TODO */
 }

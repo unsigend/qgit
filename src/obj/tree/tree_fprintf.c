@@ -17,9 +17,9 @@
 
 #include "obj/tree.h"
 
-int tree_fprintf(struct tree *tree, FILE *fp)
+int tree_fprintf(struct obj *obj, FILE *fp)
 {
-  if (!tree || !fp)
+  if (!obj || !fp)
     return -1;
 
   /* TODO */

@@ -17,9 +17,9 @@
 
 #include "obj/tag.h"
 
-int tag_fprintf(struct tag *tag, FILE *fp)
+int tag_fprintf(struct obj *obj, FILE *fp)
 {
-  if (!tag || !fp)
+  if (!obj || !fp)
     return -1;
 
   /* TODO */

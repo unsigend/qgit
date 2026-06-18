@@ -16,12 +16,12 @@
  */
 
 #include "obj/blob.h"
+#include "obj/object.h"
 
-int blob_fprintf(struct blob *blob, FILE *fp)
+int blob_fprintf(struct obj *obj, FILE *fp)
 {
-  if (!blob || !fp)
+  if (!obj || !fp)
     return -1;
 
-  /* TODO */
-  return 0;
+  return fwrite(obj->payload, 1, obj->payloadsz, fp) == obj->payloadsz ? 0 : -1;
 }

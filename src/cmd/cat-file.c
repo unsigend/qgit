@@ -15,9 +15,117 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "argparse.h"
+#include "die.h"
+#include "obj/object.h"
+#include "repo.h"
+
+static void mutex_check(int p, int t, int s)
+{
+  if (p && t)
+    die("cannot use -p and -t together");
+  if (p && s)
+    die("cannot use -p and -s together");
+  if (t && s)
+    die("cannot use -t and -s together");
+}
+
 int cmd_cat_file(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  int p, t, s;
+  p = t = s = 0;
+  int any = 0;
+
+  struct obj *obj = NULL;
+  struct repo *repo = NULL;
+  unsigned char sha1[SHA1_DIGLEN];
+  const char *name = NULL;
+
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_BOOL('p', NULL, "print the object contents in a pretty format", &p),
+      OPT_BOOL('t', NULL, "show the object type", &t),
+      OPT_BOOL('s', NULL, "show the object size", &s),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit cat-file (-p | -t | -s) <object>",
+      "qgit cat-file <type> <object>",
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit cat-file",
+      .desc = "Provide contents or details of repository objects",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  mutex_check(p, t, s);
+  any = p || t || s;
+
+  repo = repo_findcwd();
+  if (!repo)
+    die_errno();
+
+  if (any) /* auto mode */
+  {
+    if (argparse_getremargc(&ctx) < 1)
+      die("auto mode requires <object>");
+    name = argparse_getremargv(&ctx)[0];
+
+    if (hex_to_sha1((unsigned char *)name, sha1) == -1)
+      die_errno();
+
+    obj = obj_open(repo, sha1);
+    if (!obj)
+      die_errno();
+
+    if (p) {
+      if (obj_parse_payload(obj) == -1)
+        die_errno();
+      if (obj_fprintf(obj, stdout) == -1)
+        die_errno();
+    } else if (t) {
+      const char *otype = obj_type_to_str(obj->type);
+      if (otype == NULL)
+        die_errno();
+      printf("%s\n", otype);
+    } else if (s) {
+      printf("%zu\n", obj->payloadsz);
+    }
+
+  } else /* raw mode */
+  {
+    if (argparse_getremargc(&ctx) < 2)
+      die("raw mode requires <type> <object>");
+    name = argparse_getremargv(&ctx)[1];
+    const char *expect = argparse_getremargv(&ctx)[0];
+
+    if (hex_to_sha1((unsigned char *)name, sha1) == -1)
+      die_errno();
+
+    if (obj_type_from_str(expect) == OBJ_NONE)
+      die_errno();
+
+    obj = obj_open(repo, sha1);
+    if (!obj)
+      die_errno();
+    if (obj->type != obj_type_from_str(expect))
+      die("expect object type '%s', but got '%s'", expect,
+          obj_type_to_str(obj->type));
+    if (fwrite(obj->payload, 1, obj->payloadsz, stdout) != obj->payloadsz)
+      die_errno();
+  }
+
+  obj_close(obj);
+  repo_close(repo);
+  argparse_fini(&ctx);
   return 0;
 }

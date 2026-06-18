@@ -24,13 +24,13 @@ int obj_fprintf(struct obj *obj, FILE *fp)
     return -1;
   switch (obj->type) {
   case OBJ_COMMIT:
-    return commit_fprintf(&obj->commit, fp);
+    return commit_fprintf(obj, fp);
   case OBJ_BLOB:
-    return blob_fprintf(&obj->blob, fp);
+    return blob_fprintf(obj, fp);
   case OBJ_TREE:
-    return tree_fprintf(&obj->tree, fp);
+    return tree_fprintf(obj, fp);
   case OBJ_TAG:
-    return tag_fprintf(&obj->tag, fp);
+    return tag_fprintf(obj, fp);
   default: {
     setqerrno(QE_INVALIDOBJ);
     return -1;

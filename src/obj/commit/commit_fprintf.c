@@ -15,13 +15,52 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "collection/slist.h"
 #include "obj/commit.h"
+#include "obj/object.h"
+#include "sha1.h"
 
-int commit_fprintf(struct commit *commit, FILE *fp)
+int commit_fprintf(struct obj *obj, FILE *fp)
 {
-  if (!commit || !fp)
+  if (!obj || !fp || obj->type != OBJ_COMMIT)
     return -1;
 
-  /* TODO */
+  unsigned char hex[SHA1_HEXLEN];
+  struct slist_iter iter;
+
+  if (sha1_to_hex(obj->commit.tree, hex) == -1)
+    return -1;
+
+  if (fprintf(fp, "tree %s\n", hex) < 0)
+    return -1;
+
+  if (slist_iter_init(&iter, &obj->commit.parents) == -1)
+    return -1;
+
+  while (slist_iter_get(&iter)) {
+    if (sha1_to_hex((unsigned char *)slist_iter_get(&iter), hex) == -1)
+      return -1;
+    if (fprintf(fp, "parent %s\n", hex) < 0)
+      return -1;
+    slist_iter_inc(&iter);
+  }
+
+  if (obj->commit.author && obj->commit.azone) {
+    if (fprintf(fp, "author %s %ld %s\n", obj->commit.author, obj->commit.atime,
+                obj->commit.azone) < 0)
+      return -1;
+  }
+  if (obj->commit.committer && obj->commit.czone) {
+    if (fprintf(fp, "committer %s %ld %s\n", obj->commit.committer,
+                obj->commit.ctime, obj->commit.czone) < 0)
+      return -1;
+  }
+  if (fputc('\n', fp) < 0)
+    return -1;
+  if (obj->commit.msg) {
+    if (fprintf(fp, "%s", obj->commit.msg) < 0)
+      return -1;
+  }
+
   return 0;
 }

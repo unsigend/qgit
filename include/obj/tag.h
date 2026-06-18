@@ -27,6 +27,6 @@ struct tag {
 
 extern int tag_parse(struct obj *obj);
 extern void tag_close(struct tag *tag);
-extern int tag_fprintf(struct tag *tag, FILE *fp);
+extern int tag_fprintf(struct obj *obj, FILE *fp);
 
 #endif

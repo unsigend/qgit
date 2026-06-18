@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "collection/slist.h"
 #include "obj/commit.h"
 
 void commit_close(struct commit *commit)
@@ -22,5 +23,5 @@ void commit_close(struct commit *commit)
   if (!commit)
     return;
 
-  /* TODO */
+  slist_fini(&commit->parents);
 }

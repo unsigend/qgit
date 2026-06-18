@@ -27,6 +27,6 @@ struct blob {
 
 extern int blob_parse(struct obj *obj);
 extern void blob_close(struct blob *blob);
-extern int blob_fprintf(struct blob *blob, FILE *fp);
+extern int blob_fprintf(struct obj *obj, FILE *fp);
 
 #endif

@@ -22,6 +22,6 @@ int blob_parse(struct obj *obj)
   if (!obj)
     return -1;
 
-  /* TODO */
+  /* nothing to parse for blob. */
   return 0;
 }

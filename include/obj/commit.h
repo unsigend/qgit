@@ -19,14 +19,36 @@
 #define OBJ_COMMIT_H
 
 #include <stdio.h>
+#include <time.h>
+
+#include "collection/slist.h"
+#include "sha1.h"
 
 struct obj;
 
+/* Raw payload format for commit:
+     tree <sha1-40>\n
+     parent <sha1-40>\n (optional)
+     author <name> <email> <timestamp> <timezone>\n
+     committer <name> <email> <timestamp> <timezone>\n
+     \n
+     <message>
+*/
+
 struct commit {
+  unsigned char tree[SHA1_DIGLEN];
+  struct slist parents; /* sha1 strings*/
+  const char *author;
+  const char *committer;
+  const char *msg;
+  time_t atime;      /* author time */
+  time_t ctime;      /* committer time */
+  const char *azone; /* author timezone */
+  const char *czone; /* committer timezone */
 };
 
 extern int commit_parse(struct obj *obj);
 extern void commit_close(struct commit *commit);
-extern int commit_fprintf(struct commit *commit, FILE *fp);
+extern int commit_fprintf(struct obj *obj, FILE *fp);
 
 #endif
