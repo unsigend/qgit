@@ -116,6 +116,34 @@ assert_global_before_local() {
     assert_output_contains "invalid key format"
 }
 
+@test "qgit config --set: invalid key format fails" {
+    init_quiet
+
+    run_config --set foo bar
+    assert_failure
+    assert_output_contains "invalid key format"
+}
+
+@test "qgit config --unset: invalid key format fails" {
+    init_quiet
+
+    run_config --unset foo
+    assert_failure
+    assert_output_contains "invalid key format"
+}
+
+@test "qgit config --unset: missing key argument fails" {
+    run_config --unset
+    assert_failure
+    assert_output_contains "--unset requires a key"
+}
+
+@test "qgit config: multiple actions --list --unset fails" {
+    run_config --list --unset core.a
+    assert_failure
+    assert_output_contains "cannot use multiple actions at once"
+}
+
 # list
 
 @test "qgit config --global --list: prints global entries" {
@@ -132,15 +160,16 @@ EOF
     assert_output_contains "user.name=test"
 }
 
-@test "qgit config --global --list: empty when file missing" {
+@test "qgit config --global --list: exits 1 when file missing" {
     run_config --global --list
-    assert_success
+    assert_exit_status 1
     assert_output_empty
 }
 
 @test "qgit config --global --list: HOME unset fails" {
     run env -u HOME "$QGIT_BIN" config --global --list
     assert_failure
+    assert_output_contains "HOME is not set"
 }
 
 @test "qgit config --local --list: prints default local entries" {
@@ -157,11 +186,33 @@ EOF
     assert_output_contains "inside a qgit repository"
 }
 
-@test "qgit config --local --list: empty when config file missing" {
+@test "qgit config --local --list: fails when config file missing" {
     init_quiet
     rm -f "$(local_config)"
 
     run_config --local --list
+    assert_failure
+    assert_output_contains "missing config file in qgit repository"
+}
+
+@test "qgit config --list: auto scope lists global when local config missing" {
+    write_global_config <<'EOF'
+[core]
+	foo=global
+EOF
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --list
+    assert_success
+    assert_output_equals "core.foo=global"
+}
+
+@test "qgit config --list: auto scope empty when local and global missing" {
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --list
     assert_success
     assert_output_empty
 }
@@ -233,6 +284,11 @@ EOF
     assert_exit_status 1
 }
 
+@test "qgit config --global --get: HOME unset exits 1" {
+    run env -u HOME "$QGIT_BIN" config --global --get core.foo
+    assert_exit_status 1
+}
+
 @test "qgit config --global --get: missing key argument fails" {
     run_config --global --get
     assert_failure
@@ -254,11 +310,33 @@ EOF
     assert_exit_status 1
 }
 
-@test "qgit config --local --get: missing config file exits 1" {
+@test "qgit config --local --get: missing config file fails" {
     init_quiet
     rm -f "$(local_config)"
 
     run_config --local --get core.bare
+    assert_failure
+    assert_output_contains "missing config file in qgit repository"
+}
+
+@test "qgit config --get: auto scope falls back to global when local config missing" {
+    write_global_config <<'EOF'
+[core]
+	foo=global
+EOF
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --get core.foo
+    assert_success
+    assert_output_equals "global"
+}
+
+@test "qgit config --get: auto scope exits 1 when local config missing and key not found" {
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --get core.missing
     assert_exit_status 1
 }
 
@@ -394,6 +472,15 @@ EOF
     assert_output_contains "missing config file in qgit repository"
 }
 
+@test "qgit config --set: missing config file fails" {
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --set core.foo x
+    assert_failure
+    assert_output_contains "missing config file in qgit repository"
+}
+
 # unset
 
 @test "qgit config --global --unset: removes key and preserves others" {
@@ -419,9 +506,14 @@ EOF
     assert_exit_status 1
 }
 
-@test "qgit config --global --unset: exits 0 when file missing" {
+@test "qgit config --global --unset: exits 1 when file missing" {
     run_config --global --unset core.foo
-    assert_exit_status 0
+    assert_exit_status 1
+}
+
+@test "qgit config --global --unset: HOME unset exits 1" {
+    run env -u HOME "$QGIT_BIN" config --global --unset core.foo
+    assert_exit_status 1
 }
 
 @test "qgit config --unset: removes key from local config" {
@@ -459,6 +551,16 @@ EOF
 
     run_config --local --unset core.bare
     assert_failure
+    assert_output_contains "missing config file in qgit repository"
+}
+
+@test "qgit config --unset: missing config file fails" {
+    init_quiet
+    rm -f "$(local_config)"
+
+    run_config --unset core.bare
+    assert_failure
+    assert_output_contains "missing config file in qgit repository"
 }
 
 # integration
