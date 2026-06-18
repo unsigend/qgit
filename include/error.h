@@ -15,16 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#ifndef ERROR_H
+#define ERROR_H
 
-#include "feature.h"
+#include <errno.h>
 
-int cmd_version(int argc, char **argv)
-{
-  (void)argc;
-  (void)argv;
+#define QE_NOTINREPO 1
+#define QE_BADOBJFILE 2
+#define QE_INTERNAL 3
+#define QE_AMBIGUOUS 4
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
-}
+/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
+extern int *qerrno_location(void);
+#define qerrno (*qerrno_location())
+#define setqerrno(code)                                                        \
+  errno = 0;                                                                   \
+  qerrno = code;
+
+extern const char *qerror_str(int error);
+
+#endif

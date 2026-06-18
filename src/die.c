@@ -15,16 +15,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "die.h"
+#include "error.h"
 #include "feature.h"
 
-int cmd_version(int argc, char **argv)
+noreturn void die(const char *fmt, ...)
 {
-  (void)argc;
-  (void)argv;
+  va_list ap;
+  va_start(ap, fmt);
+  fprintf(stderr, PROG_NAME ": ");
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  va_end(ap);
+  exit(1);
+}
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
+noreturn void die_errno(void)
+{
+  if (errno)
+    fprintf(stderr, "%s: %s\n", PROG_NAME, strerror(errno));
+  else if (qerrno)
+    fprintf(stderr, "%s: %s\n", PROG_NAME, qerror_str(qerrno));
+  else
+    fprintf(stderr, "%s: unknown error\n", PROG_NAME);
+  exit(1);
 }

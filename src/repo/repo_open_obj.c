@@ -15,16 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include <errno.h>
+#include <limits.h>
 
-#include "feature.h"
+#include "repo.h"
+#include "sha1.h"
 
-int cmd_version(int argc, char **argv)
+FILE *repo_open_obj(struct repo *repo, unsigned char *sha1)
 {
-  (void)argc;
-  (void)argv;
+  if (!repo || !sha1)
+    return NULL;
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
+  char buf[PATH_MAX];
+  unsigned char hex[SHA1_HEXLEN];
+  FILE *fp = NULL;
+
+  if (sha1_to_hex(sha1, hex) == -1)
+    return NULL;
+
+  if (snprintf(buf, PATH_MAX, "%s/objects/%c%c/%s", repo->qgitdir, hex[0],
+               hex[1], &hex[2]) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  if (!(fp = fopen(buf, "rb")))
+    return NULL;
+
+  return fp;
 }

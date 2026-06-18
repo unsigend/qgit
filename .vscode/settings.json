@@ -20,8 +20,11 @@
         "NREPO",
         "objlhs",
         "objrhs",
+        "qerrno",
+        "QERROR",
         "reinit",
         "removen",
-        "rmrf"
+        "rmrf",
+        "setqerrno"
     ]
 }

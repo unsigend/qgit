@@ -15,16 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef REPO_H
+#define REPO_H
+
 #include <stdio.h>
 
-#include "feature.h"
+struct repo {
+  const char *worktree;
+  const char *qgitdir;
+};
 
-int cmd_version(int argc, char **argv)
-{
-  (void)argc;
-  (void)argv;
+extern struct repo *repo_open(const char *path);
+extern struct repo *repo_find(const char *path);
+extern struct repo *repo_findcwd(void); /* find repo start from "." */
+extern struct repo *repo_create(const char *path, const char *branch);
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
-}
+extern FILE *repo_open_obj(struct repo *repo, unsigned char *sha1);
+
+extern void repo_close(struct repo *repo);
+
+#endif

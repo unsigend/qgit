@@ -15,16 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include "feature.h"
+#include "iniparse.h"
+#include "repo.h"
 
-int cmd_version(int argc, char **argv)
-{
-  (void)argc;
-  (void)argv;
+extern struct iniFILE *config_repo(struct repo *repo);
+extern struct iniFILE *config_global(void);
+extern struct iniFILE *config_global_create(void);
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
-}
+#endif

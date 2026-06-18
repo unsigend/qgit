@@ -15,6 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
+#include "argparse.h"
+#include "cmd.h"
+#include "config.h"
+#include "die.h"
+#include "repo.h"
+
 /*
   qgit config behaviour:
     --list: if --global or --local is specified, list the global or local config
@@ -31,9 +39,113 @@
             the global or local config file, if auto, unset the value in local
             config.
 */
+
+static void action_check(int list, int get, int set, int unset)
+{
+  if ((list && (get || set || unset)) || (get && (set || unset)) ||
+      (set && unset))
+    die("cannot use multiple actions at once");
+}
+
+static void scope_check(int g, int l)
+{
+  if (g && l)
+    die("cannot use --global and --local together");
+}
+
+static void parse(char *buf, char **sec, char **key) /* inplace parse */
+{
+  char *dot = strchr(buf, '.');
+  if (!dot)
+    die("invalid key format");
+  *dot++ = '\0';
+  *sec = buf;
+  *key = dot;
+  if (!*sec || !*key)
+    die("invalid key format");
+}
+
+struct config_flags {
+  int g, l, a;               /* scope */
+  int list, get, set, unset; /* action */
+};
+
 int cmd_config(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
-  return 0;
+  struct config_flags f = {0};
+  struct iniFILE *global = NULL, *local = NULL;
+  struct repo *repo = NULL;
+  char *key, *val, *sec;
+  int ret = 0;
+
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_GROUP("Scope"),
+      OPT_BOOL(0, "global", "use global config file", &f.g),
+      OPT_BOOL(0, "local", "use local config file", &f.l),
+      OPT_GROUP_END(),
+      OPT_GROUP("Action"),
+      OPT_BOOL('l', "list", "list all options", &f.list),
+      OPT_BOOL('g', "get", "get the value of an key", &f.get),
+      OPT_BOOL('s', "set", "set the value of an key", &f.set),
+      OPT_BOOL('u', "unset", "unset the value of an key", &f.unset),
+      OPT_GROUP_END(),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit config [<scope>] --list",
+      "qgit config [<scope>] --get <key>",
+      "qgit config [<scope>] --set <key> <value>",
+      "qgit config [<scope>] --unset <key>",
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit config",
+      .desc = "Get and set repository or global options",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+      .epilog = "key format: <section>.<name>",
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  if (!f.list && !f.get && !f.set && !f.unset)
+    die("no action specified");
+
+  action_check(f.list, f.get, f.set, f.unset);
+  scope_check(f.g, f.l);
+  f.a = !f.g && !f.l;
+
+  repo = repo_findcwd();
+
+  if (f.g || f.a)
+    global = config_global();
+  if (f.l || f.a)
+    local = config_repo(repo);
+  if (f.l && !repo)
+    die("--local only can be used inside a qgit repository");
+
+  if (f.list) /* list mode */
+  {
+
+  } else if (f.get) /* get mode */
+  {
+
+  } else if (f.set) /* set mode */
+  {
+
+  } else if (f.unset) /* unset mode */
+  {
+  }
+
+  iniparse_close(global);
+  iniparse_close(local);
+  repo_close(repo);
+  argparse_fini(&ctx);
+  return ret;
 }

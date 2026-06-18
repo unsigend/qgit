@@ -15,16 +15,51 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "feature.h"
+#include "error.h"
+#include "fs.h"
+#include "repo.h"
 
-int cmd_version(int argc, char **argv)
+struct repo *repo_open(const char *path)
 {
-  (void)argc;
-  (void)argv;
+  if (!path)
+    return NULL;
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
+  char buf[PATH_MAX];
+  struct repo *repo;
+
+  if (!dir_exists(path)) {
+    if (!errno)
+      errno = ENOTDIR;
+    return NULL;
+  }
+
+  if (snprintf(buf, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  if (!dir_exists(buf)) {
+    setqerrno(QE_NOTINREPO);
+    return NULL;
+  }
+
+  if (!(repo = calloc(1, sizeof(struct repo))))
+    return NULL;
+
+  if (!(repo->worktree = strdup(path))) {
+    repo_close(repo);
+    return NULL;
+  }
+
+  if (!(repo->qgitdir = strdup(buf))) {
+    repo_close(repo);
+    return NULL;
+  }
+  return repo;
 }

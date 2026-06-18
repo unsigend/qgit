@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include "cmd.h"
+#include "die.h"
 
 const struct subcmd subcmds[] = {
     {"add", "Add file contents to the index", cmd_add},
@@ -62,5 +63,5 @@ int exec_cmd(int argc, char **argv)
     }
   }
 
-  return -1;
+  die("'%s' is not a qgit command. See 'qgit help'.", cmd);
 }

@@ -15,16 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include "error.h"
 
-#include "feature.h"
+static int __qerrno = 0;
 
-int cmd_version(int argc, char **argv)
+int *qerrno_location(void) { return &__qerrno; }
+
+static const char *errstr[] = {
+    [QE_NOTINREPO] = "not inside a qgit repository",
+    [QE_BADOBJFILE] = "bad object file",
+    [QE_INTERNAL] = "internal error",
+    [QE_AMBIGUOUS] = "ambiguous argument",
+};
+
+const char *qerror_str(int error)
 {
-  (void)argc;
-  (void)argv;
+  if (error < 1 || error >= (int)(sizeof(errstr) / sizeof(errstr[0])))
+    return "unknown error";
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
+  return errstr[error];
 }

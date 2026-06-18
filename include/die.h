@@ -15,16 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#ifndef DIE_H
+#define DIE_H
 
-#include "feature.h"
+#include <stdnoreturn.h>
 
-int cmd_version(int argc, char **argv)
-{
-  (void)argc;
-  (void)argv;
+extern noreturn void die(const char *fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
-}
+extern noreturn void die_errno(void);
+
+#endif

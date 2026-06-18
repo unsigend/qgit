@@ -15,16 +15,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "feature.h"
+#include "error.h"
+#include "repo.h"
 
-int cmd_version(int argc, char **argv)
+struct repo *repo_find(const char *path)
 {
-  (void)argc;
-  (void)argv;
+  if (!path)
+    return NULL;
 
-  printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
-         QGIT_PATCH);
-  return 0;
+  struct repo *repo;
+  char buf[PATH_MAX];
+  char *slash;
+
+  if ((repo = repo_open(path)))
+    return repo;
+
+  if (strcmp(path, "/") == 0) {
+    setqerrno(QE_NOTINREPO);
+    return NULL;
+  }
+
+  strncpy(buf, path, PATH_MAX - 1);
+  buf[PATH_MAX - 1] = '\0';
+  slash = strrchr(buf, '/');
+  if (slash == buf) {
+    setqerrno(QE_NOTINREPO);
+    return NULL;
+  }
+
+  *slash = '\0';
+
+  return repo_find(buf);
 }
