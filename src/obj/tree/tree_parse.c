@@ -15,13 +15,65 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <stdlib.h>
+
+#include "collection/vector.h"
+#include "error.h"
+#include "obj/object.h"
 #include "obj/tree.h"
+#include "sha1.h"
+
+static char *parse_entry(char *buf, char *end, struct tree_entry *entry)
+{
+  char *endstr = NULL;
+  char *cur = buf;
+
+  errno = 0;
+  entry->mode = strtoul(cur, &endstr, 8);
+  if (errno || endstr == cur || endstr >= end || *endstr != ' ') {
+    if (!errno)
+      setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  cur = endstr + 1;
+  entry->path = cur;
+
+  while (cur < end && *cur)
+    cur++;
+  if (cur == end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  cur++; /* skip '\0' */
+  if (cur + SHA1_DIGLEN > end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  sha1_copy((unsigned char *)cur, entry->sha1);
+  cur += SHA1_DIGLEN;
+  return cur;
+}
 
 int tree_parse(struct obj *obj)
 {
-  if (!obj)
+  if (!obj || obj->type != OBJ_TREE)
     return -1;
 
-  /* TODO */
+  char *cur = obj->payload;
+  char *end = cur + obj->payloadsz;
+
+  if (vec_init(&obj->tree.entries, sizeof(struct tree_entry), NULL) == -1)
+    return -1;
+
+  while (cur < end) {
+    struct tree_entry entry;
+    cur = parse_entry(cur, end, &entry);
+    if (!cur)
+      return -1;
+    if (vec_pushback(&obj->tree.entries, &entry) == -1)
+      return -1;
+  }
   return 0;
 }

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "collection/vector.h"
 #include "obj/tree.h"
 
 void tree_close(struct tree *tree)
@@ -22,5 +23,5 @@ void tree_close(struct tree *tree)
   if (!tree)
     return;
 
-  /* TODO */
+  vec_fini(&tree->entries);
 }

@@ -15,35 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OBJ_TREE_H
-#define OBJ_TREE_H
+#include "obj/commit.h"
+#include "obj/object.h"
 
-#include <stdio.h>
-#include <sys/stat.h>
+int commit_iter_init(struct commit_iter *iter, struct repo *repo,
+                     struct obj *start, enum commit_walk_t type)
+{
+  if (!iter || !repo || !start || start->type != OBJ_COMMIT)
+    return -1;
 
-#include "collection/vector.h"
-#include "sha1.h"
+  iter->cur = start;
+  iter->type = type;
+  iter->repo = repo;
 
-struct obj;
+  if (obj_parse_payload(iter->cur) == -1) {
+    obj_close(iter->cur);
+    return -1;
+  }
 
-/* Raw payload format for tree:
-     <mode> <path>\0<sha1-20>
-     ...
-     <mode> <path>\0<sha1-20>
-*/
-
-struct tree_entry {
-  mode_t mode;
-  const char *path;
-  unsigned char sha1[SHA1_DIGLEN];
-};
-
-struct tree {
-  struct vector entries;
-};
-
-extern int tree_parse(struct obj *obj);
-extern void tree_close(struct tree *tree);
-extern int tree_fprintf(struct obj *obj, FILE *fp);
-
-#endif
+  if (iter->type == COMMIT_WALK_ALL) {
+    /* TODO */
+  }
+  return 0;
+}

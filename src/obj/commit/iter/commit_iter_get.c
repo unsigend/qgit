@@ -15,35 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OBJ_TREE_H
-#define OBJ_TREE_H
+#include "obj/commit.h"
 
-#include <stdio.h>
-#include <sys/stat.h>
-
-#include "collection/vector.h"
-#include "sha1.h"
-
-struct obj;
-
-/* Raw payload format for tree:
-     <mode> <path>\0<sha1-20>
-     ...
-     <mode> <path>\0<sha1-20>
-*/
-
-struct tree_entry {
-  mode_t mode;
-  const char *path;
-  unsigned char sha1[SHA1_DIGLEN];
-};
-
-struct tree {
-  struct vector entries;
-};
-
-extern int tree_parse(struct obj *obj);
-extern void tree_close(struct tree *tree);
-extern int tree_fprintf(struct obj *obj, FILE *fp);
-
-#endif
+struct obj *commit_iter_get(struct commit_iter *iter)
+{
+  if (!iter)
+    return NULL;
+  return iter->cur;
+}
