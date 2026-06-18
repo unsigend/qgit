@@ -15,24 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include <stdlib.h>
+#include <string.h>
 
-#include <errno.h>
+#include "obj/object.h"
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
+static void delegate(struct obj *obj)
+{
+  switch (obj->type) {
+  case OBJ_COMMIT:
+    commit_close(&obj->commit);
+    break;
+  case OBJ_BLOB:
+    blob_close(&obj->blob);
+    break;
+  case OBJ_TREE:
+    tree_close(&obj->tree);
+    break;
+  case OBJ_TAG:
+    tag_close(&obj->tag);
+    break;
+  default:
+    break;
+  }
+}
 
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
-
-extern const char *qerror_str(int error);
-
-#endif
+void obj_close(struct obj *obj)
+{
+  if (!obj)
+    return;
+  if (obj->payload)
+    free(obj->payload);
+  delegate(obj);
+  memset(obj, 0, sizeof(struct obj));
+  free(obj);
+}

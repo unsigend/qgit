@@ -15,24 +15,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
-
 #include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
+#include "compress.h"
+#include "obj/object.h"
+#include "repo.h"
 
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
+struct obj *obj_open(struct repo *repo, unsigned char *sha1)
+{
+  if (!repo || !sha1)
+    return NULL;
 
-extern const char *qerror_str(int error);
+  void *buf = NULL;
+  size_t buflen = 0;
+  char path[PATH_MAX];
+  struct obj *obj = NULL;
+  unsigned char hex[SHA1_HEXLEN];
 
-#endif
+  if (sha1_to_hex(sha1, hex) == -1)
+    return NULL;
+
+  if (snprintf(path, PATH_MAX, "%s/objects/%c%c/%s", repo->qgitdir, hex[0],
+               hex[1], &hex[2]) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return NULL;
+  }
+
+  if (zlib_decompressf(path, &buf, &buflen) == -1)
+    return NULL;
+
+  if (!(obj = obj_open_raw(buf, buflen))) {
+    free(buf);
+    return NULL;
+  }
+  free(buf);
+  sha1_copy(sha1, obj->sha1);
+  return obj;
+}

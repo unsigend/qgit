@@ -15,24 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef OBJ_TREE_H
+#define OBJ_TREE_H
 
-#include <errno.h>
+#include <stdio.h>
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
+struct obj;
 
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
+struct tree {
+};
 
-extern const char *qerror_str(int error);
+extern int tree_parse(struct obj *obj);
+extern void tree_close(struct tree *tree);
+extern int tree_fprintf(struct tree *tree, FILE *fp);
 
 #endif

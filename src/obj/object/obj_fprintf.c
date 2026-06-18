@@ -15,24 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include "error.h"
+#include "obj/object.h"
 
-#include <errno.h>
-
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
-
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
-
-extern const char *qerror_str(int error);
-
-#endif
+int obj_fprintf(struct obj *obj, FILE *fp)
+{
+  if (!obj || !fp)
+    return -1;
+  switch (obj->type) {
+  case OBJ_COMMIT:
+    return commit_fprintf(&obj->commit, fp);
+  case OBJ_BLOB:
+    return blob_fprintf(&obj->blob, fp);
+  case OBJ_TREE:
+    return tree_fprintf(&obj->tree, fp);
+  case OBJ_TAG:
+    return tag_fprintf(&obj->tag, fp);
+  default: {
+    setqerrno(QE_INVALIDOBJ);
+    return -1;
+  }
+  }
+}

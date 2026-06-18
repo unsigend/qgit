@@ -15,24 +15,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include <string.h>
 
-#include <errno.h>
+#include "error.h"
+#include "obj/object.h"
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
+enum obj_type obj_type_from_str(const char *str)
+{
+  if (!str)
+    return OBJ_NONE;
+  if (strcmp(str, "commit") == 0)
+    return OBJ_COMMIT;
+  if (strcmp(str, "blob") == 0)
+    return OBJ_BLOB;
+  if (strcmp(str, "tree") == 0)
+    return OBJ_TREE;
+  if (strcmp(str, "tag") == 0)
+    return OBJ_TAG;
+  setqerrno(QE_INVALIDOBJ);
+  return OBJ_NONE;
+}
 
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
-
-extern const char *qerror_str(int error);
-
-#endif
+const char *obj_type_to_str(enum obj_type type)
+{
+  switch (type) {
+  case OBJ_COMMIT:
+    return "commit";
+  case OBJ_BLOB:
+    return "blob";
+  case OBJ_TREE:
+    return "tree";
+  case OBJ_TAG:
+    return "tag";
+  default:
+    setqerrno(QE_INVALIDOBJ);
+    return NULL;
+  }
+}
