@@ -50,9 +50,17 @@ struct commit {
   const char *czone; /* committer timezone */
 };
 
+enum commit_print_style {
+  COMMIT_PRINT_STYLE_DEFAULT,
+  COMMIT_PRINT_STYLE_RAW,
+  COMMIT_PRINT_STYLE_ONELINE,
+};
+
 extern int commit_parse(struct obj *obj);
 extern void commit_close(struct commit *commit);
 extern int commit_fprintf(struct obj *obj, FILE *fp);
+extern int commit_fprintf_style(struct obj *obj, FILE *fp,
+                                enum commit_print_style style);
 
 enum commit_walk_t {
   COMMIT_WALK_FPARENT,
@@ -62,8 +70,8 @@ enum commit_walk_t {
 struct commit_iter {
   struct obj *cur;
   struct repo *repo;
-  struct heap pq; /* priority queue */
-  struct set visited;
+  struct heap pq;     /* priority queue with struct obj* */
+  struct set visited; /* visited commits with sha1 */
   struct set_fns fns;
   enum commit_walk_t type;
 };

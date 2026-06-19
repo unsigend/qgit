@@ -27,6 +27,7 @@ void commit_iter_fini(struct commit_iter *iter)
   iter->cur = NULL;
 
   if (iter->type == COMMIT_WALK_ALL) {
-    /* TODO */
+    heap_fini(&iter->pq);
+    set_fini(&iter->visited);
   }
 }

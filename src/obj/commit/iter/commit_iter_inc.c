@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+
+#include "collection/vector.h"
 #include "obj/commit.h"
 #include "obj/object.h"
 
@@ -46,8 +49,61 @@ static int iter_inc_first(struct commit_iter *iter)
 
 static int iter_inc_all(struct commit_iter *iter)
 {
-  /* TODO */
-  (void)iter;
+  struct obj *next = NULL;
+  unsigned char *sha1 = NULL;
+  struct slist_iter it;
+  struct obj *obj = NULL;
+
+  if (!slist_empty(&iter->cur->commit.parents)) {
+    if (slist_iter_init(&it, &iter->cur->commit.parents) == -1)
+      return -1;
+
+    while (slist_iter_get(&it)) {
+      sha1 = sha1dup(slist_iter_get(&it));
+      if (!sha1)
+        return -1;
+      if (set_contains(&iter->visited, sha1)) {
+        free(sha1);
+        slist_iter_inc(&it);
+        continue;
+      }
+
+      obj = obj_open(iter->repo, sha1);
+      if (!obj) {
+        free(sha1);
+        return -1;
+      }
+
+      if (obj_parse_payload(obj) == -1) {
+        obj_close(obj);
+        free(sha1);
+        return -1;
+      }
+
+      if (set_insert(&iter->visited, sha1) == -1) {
+        obj_close(obj);
+        free(sha1);
+        return -1;
+      }
+
+      if (heap_push(&iter->pq, &obj) == -1) {
+        set_remove(&iter->visited, sha1);
+        obj_close(obj);
+        return -1;
+      }
+
+      slist_iter_inc(&it);
+    }
+  }
+
+  if (heap_empty(&iter->pq))
+    return 1;
+
+  if (heap_pop(&iter->pq, &next) == -1)
+    return -1;
+
+  obj_close(iter->cur);
+  iter->cur = next;
   return 0;
 }
 
