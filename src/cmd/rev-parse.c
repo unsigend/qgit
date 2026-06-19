@@ -15,9 +15,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
+#include "argparse.h"
+#include "die.h"
+#include "ref.h"
+#include "repo.h"
+#include "sha1.h"
+
 int cmd_rev_parse(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit rev-parse [options] <args>",
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit rev-parse",
+      .desc = "Pick out and massage parameters",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  struct repo *repo = NULL;
+  unsigned char sha1[SHA1_DIGLEN];
+  unsigned char hex[SHA1_HEXLEN];
+  const char *refname = NULL;
+
+  if (argparse_getremargc(&ctx) > 0) {
+    if (!((repo = repo_findcwd())))
+      die_errno();
+    for (size_t i = 0; i < argparse_getremargc(&ctx); i++) {
+      refname = argparse_getremargv(&ctx)[i];
+      if (ref_resolve(repo, refname, sha1) == -1)
+        die_errno();
+      if (sha1_to_hex(sha1, hex) == -1)
+        die_errno();
+      printf("%s\n", hex);
+    }
+  }
+
+  repo_close(repo);
+  argparse_fini(&ctx);
   return 0;
 }
