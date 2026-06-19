@@ -15,9 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "argparse.h"
+#include "die.h"
+
 int cmd_show_ref(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  int head = 0;
+  int branches = 0;
+  int tags = 0;
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_BOOL(0, "head", "Show the HEAD reference", &head),
+      OPT_BOOL(0, "branches", "Show all branches", &branches),
+      OPT_BOOL(0, "tags", "Show all tags", &tags),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit show-ref [--head] [--branches] [--tags]",
+  };
+  struct argparse_desc desc = {
+      .prog = "qgit show-ref",
+      .desc = "List references in a local repository",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  argparse_fini(&ctx);
   return 0;
 }

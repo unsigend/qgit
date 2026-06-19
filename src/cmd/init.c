@@ -29,10 +29,6 @@ int cmd_init(int argc, char **argv)
   int q = 0;
   const char *branch = "main";
   const char *path = ".";
-  struct repo *repo = NULL;
-  int reinit = 0;
-  char abspath[PATH_MAX];
-  char qgitdir[PATH_MAX];
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -61,6 +57,11 @@ int cmd_init(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", argparse_strerror(&ctx));
+
+  struct repo *repo = NULL;
+  int reinit = 0;
+  char abspath[PATH_MAX];
+  char qgitdir[PATH_MAX];
 
   if (argparse_getremargc(&ctx) > 0)
     path = argparse_getremargv(&ctx)[0];

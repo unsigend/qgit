@@ -40,7 +40,7 @@ struct repo;
 
 struct commit {
   unsigned char tree[SHA1_DIGLEN];
-  struct slist parents; /* sha1 strings*/
+  struct slist parents; /* sha1 strings */
   const char *author;
   const char *committer;
   const char *msg;

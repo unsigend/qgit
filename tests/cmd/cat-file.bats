@@ -214,6 +214,38 @@ EOF
     echo "$commit_sha"
 }
 
+write_ref() {
+    local refname="$1"
+    local sha="$2"
+    local file
+
+    file="$TEST_DIR/.qgit/$refname"
+    mkdir -p "$(dirname "$file")"
+    printf '%s\n' "$sha" >"$file"
+}
+
+set_symref_head() {
+    local branch="$1"
+
+    printf 'ref: refs/heads/%s\n' "$branch" >"$TEST_DIR/.qgit/HEAD"
+}
+
+setup_commit_with_branch_ref() {
+    local sha
+
+    sha=$(setup_root_commit)
+    write_ref "refs/heads/$QGIT_DEFAULT_BRANCH" "$sha"
+    set_symref_head "$QGIT_DEFAULT_BRANCH"
+    printf '%s\n' "$sha"
+}
+
+abbrev_sha() {
+    local sha="$1"
+    local len="$2"
+
+    printf '%s' "${sha:0:$len}"
+}
+
 setup_commit_with_parent() {
     init_mock_git
 
@@ -1111,6 +1143,74 @@ EOF
     local hash
     hash=$(setup_single_file_tree)
     run_cat_file -s -t "$hash"
+    assert_failure
+}
+
+# name resolution
+
+@test "qgit cat-file -t: HEAD resolves commit type" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat -t HEAD
+}
+
+@test "qgit cat-file -t: branch name resolves commit type" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat -t "$QGIT_DEFAULT_BRANCH"
+}
+
+@test "qgit cat-file -t: refs/heads path resolves commit type" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat -t "refs/heads/$QGIT_DEFAULT_BRANCH"
+}
+
+@test "qgit cat-file -t: short sha1 resolves commit type" {
+    local sha abbrev
+
+    sha=$(setup_commit_with_branch_ref)
+    abbrev=$(abbrev_sha "$sha" 7)
+    assert_matches_git_cat -t "$abbrev"
+}
+
+@test "qgit cat-file -p: HEAD resolves commit contents" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat_p HEAD
+}
+
+@test "qgit cat-file -t: tag name resolves commit type" {
+    local sha
+
+    sha=$(setup_commit_with_branch_ref)
+    write_ref "refs/tags/v1.0" "$sha"
+    assert_matches_git_cat -t v1.0
+}
+
+@test "qgit cat-file -p: unknown ref name fails" {
+    setup_commit_with_branch_ref >/dev/null
+    run_cat_file -p no-such-branch
+    assert_failure
+}
+
+@test "qgit cat-file commit: HEAD resolves in raw mode" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat commit HEAD
+}
+
+@test "qgit cat-file commit: branch name resolves in raw mode" {
+    setup_commit_with_branch_ref >/dev/null
+    assert_matches_git_cat commit "$QGIT_DEFAULT_BRANCH"
+}
+
+@test "qgit cat-file commit: short sha1 resolves in raw mode" {
+    local sha abbrev
+
+    sha=$(setup_commit_with_branch_ref)
+    abbrev=$(abbrev_sha "$sha" 7)
+    assert_matches_git_cat commit "$abbrev"
+}
+
+@test "qgit cat-file blob: wrong type still fails with resolved ref name" {
+    setup_commit_with_branch_ref >/dev/null
+    run_cat_file blob HEAD
     assert_failure
 }
 

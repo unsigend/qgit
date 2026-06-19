@@ -17,14 +17,20 @@
 
 #include "argparse.h"
 #include "die.h"
+#include "obj/commit.h"
+#include "obj/object.h"
+#include "ref.h"
 #include "repo.h"
 #include "sha1.h"
+
+#define UNLIMITED -1
 
 int cmd_log(int argc, char **argv)
 {
   int oneline = 0;
   int first_parent = 0;
-  int n = 0;
+  int n = UNLIMITED; /* unlimited */
+  const char *name = "HEAD";
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -45,6 +51,7 @@ int cmd_log(int argc, char **argv)
       .desc = "Show commit logs",
       .usages = usages,
       .nusages = sizeof(usages) / sizeof(usages[0]),
+      .epilog = "start from HEAD by default",
   };
 
   if (argparse_init(&ctx, opts, &desc) == -1)
@@ -53,12 +60,46 @@ int cmd_log(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
 
   struct repo *repo = NULL;
-  // struct obj *obj = NULL;
-  // unsigned char sha1[SHA1_DIGLEN];
+  struct obj *obj = NULL;
+  struct commit_iter iter;
+  unsigned char sha1[SHA1_DIGLEN];
+
+  if (argparse_getremargc(&ctx) > 0)
+    name = argparse_getremargv(&ctx)[0];
+
+  if (n < 0) /* ignore negative values */
+    n = UNLIMITED;
 
   if (!(repo = repo_findcwd()))
     die_errno();
 
+  if (ref_resolve(repo, name, sha1) == -1)
+    die_errno();
+
+  if (!((obj = obj_open(repo, sha1))))
+    die_errno();
+
+  if (commit_iter_init(&iter, repo, obj,
+                       first_parent ? COMMIT_WALK_FPARENT : COMMIT_WALK_ALL) ==
+      -1)
+    die_errno();
+
+  while ((obj = commit_iter_get(&iter)) && (n == UNLIMITED || n > 0)) {
+    if (commit_fprintf_style(obj, stdout,
+                             oneline ? COMMIT_PRINT_STYLE_ONELINE
+                                     : COMMIT_PRINT_STYLE_DEFAULT) == -1)
+      die_errno();
+    int ret = commit_iter_inc(&iter);
+    if (ret == -1)
+      die_errno();
+    if (ret == 1)
+      break;
+    if (n != UNLIMITED)
+      n--;
+  }
+
+  commit_iter_fini(&iter);
+  repo_close(repo);
   argparse_fini(&ctx);
   return 0;
 }

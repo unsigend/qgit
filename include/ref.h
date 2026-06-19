@@ -22,6 +22,16 @@ struct repo;
 
 extern int ref_resolve(struct repo *repo, const char *refname,
                        unsigned char *sha1);
+enum ref_scope {
+  REF_SCOPE_ALL,
+  REF_SCOPE_BRANCHES,
+  REF_SCOPE_TAGS,
+};
+
+typedef int (*ref_foreach_cb)(const char *refname, unsigned char *sha1);
+
+extern int ref_foreach(struct repo *repo, enum ref_scope scope,
+                       ref_foreach_cb cb);
 
 /* resolve HEAD */
 extern int ref_resolve_head(struct repo *repo, unsigned char *sha1);

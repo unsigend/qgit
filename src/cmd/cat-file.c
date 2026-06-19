@@ -18,6 +18,7 @@
 #include "argparse.h"
 #include "die.h"
 #include "obj/object.h"
+#include "ref.h"
 #include "repo.h"
 
 static void mutex_check(int p, int t, int s)
@@ -34,12 +35,6 @@ int cmd_cat_file(int argc, char **argv)
 {
   int p, t, s;
   p = t = s = 0;
-  int any = 0;
-
-  struct obj *obj = NULL;
-  struct repo *repo = NULL;
-  unsigned char sha1[SHA1_DIGLEN];
-  const char *name = NULL;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -67,8 +62,13 @@ int cmd_cat_file(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", argparse_strerror(&ctx));
 
+  struct obj *obj = NULL;
+  struct repo *repo = NULL;
+  unsigned char sha1[SHA1_DIGLEN];
+  const char *name = NULL;
+
   mutex_check(p, t, s);
-  any = p || t || s;
+  int any = p || t || s;
 
   repo = repo_findcwd();
   if (!repo)
@@ -80,7 +80,7 @@ int cmd_cat_file(int argc, char **argv)
       die("auto mode requires <object>");
     name = argparse_getremargv(&ctx)[0];
 
-    if (hex_to_sha1((unsigned char *)name, sha1) == -1)
+    if (ref_resolve(repo, name, sha1) == -1)
       die_errno();
 
     obj = obj_open(repo, sha1);
@@ -108,7 +108,7 @@ int cmd_cat_file(int argc, char **argv)
     name = argparse_getremargv(&ctx)[1];
     const char *expect = argparse_getremargv(&ctx)[0];
 
-    if (hex_to_sha1((unsigned char *)name, sha1) == -1)
+    if (ref_resolve(repo, name, sha1) == -1)
       die_errno();
 
     if (obj_type_from_str(expect) == OBJ_NONE)
