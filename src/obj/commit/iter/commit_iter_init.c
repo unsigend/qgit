@@ -51,11 +51,6 @@ int commit_iter_init(struct commit_iter *iter, struct repo *repo,
   iter->type = type;
   iter->repo = repo;
 
-  if (obj_parse_payload(iter->cur) == -1) {
-    obj_close(iter->cur);
-    return -1;
-  }
-
   if (iter->type == COMMIT_WALK_ALL) {
     if (heap_init(&iter->pq, sizeof(struct obj *), pq_cmp, pq_destroy) == -1) {
       obj_close(iter->cur);

@@ -15,9 +15,90 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "argparse.h"
+#include "die.h"
+#include "obj/object.h"
+#include "obj/tree.h"
+#include "ref.h"
+#include "repo.h"
+#include "sha1.h"
+
 int cmd_ls_tree(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  int r = 0;
+  int t = 0;
+  const char *name;
+
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_BOOL('r', NULL, "Recurse into sub-tree", &r),
+      OPT_BOOL('t', NULL, "Show tree entries even when going to recurse them",
+               &t),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit ls-tree [-r] [<tree-ish>]",
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit ls-tree",
+      .desc = "List the contents of a tree object",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  if (argparse_getremargc(&ctx) < 1)
+    die("missing <tree-ish>");
+  name = argparse_getremargv(&ctx)[0];
+
+  struct repo *repo = NULL;
+  unsigned char sha1[SHA1_DIGLEN];
+  struct obj *obj = NULL;
+  enum tree_print_style style = TREE_PRINT_STYLE_DEFAULT;
+
+  if (!((repo = repo_findcwd())))
+    die_errno();
+
+  if (ref_resolve(repo, name, sha1) == -1)
+    die_errno();
+
+  if (!((obj = obj_open(repo, sha1))))
+    die_errno();
+
+  if (obj->type != OBJ_TREE) {
+    if (obj->type != OBJ_COMMIT)
+      die("not a tree or commit");
+
+    if (obj_parse_payload(obj) == -1)
+      die_errno();
+
+    sha1_copy(obj->commit.tree, sha1);
+    obj_close(obj);
+    if (!((obj = obj_open(repo, sha1))))
+      die_errno();
+  }
+  if (obj_parse_payload(obj) == -1)
+    die_errno();
+
+  if (r) {
+    if (t)
+      style = TREE_PRINT_STYLE_SHOW_TREE;
+    else
+      style = TREE_PRINT_STYLE_RECURSE;
+  }
+
+  if (tree_fprintf_style(obj, stdout, repo, style) == -1)
+    die_errno();
+
+  obj_close(obj);
+  repo_close(repo);
+  argparse_fini(&ctx);
   return 0;
 }

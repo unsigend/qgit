@@ -323,7 +323,7 @@ List the contents of a tree object.
 #### Synopsis
 
 ```
-qgit ls-tree [-r] [<tree-ish>]
+qgit ls-tree [-r] [-t] <tree-ish>
 ```
 
 #### Description
@@ -334,7 +334,7 @@ Without `-r`, qgit lists only the entries at the top level of the tree. With `-r
 
 Each line uses the default Git format: object mode, object type, object name, a tab, and the path name.
 
-`<tree-ish>` may be a full SHA-1 hash, `HEAD`, or a branch name under `refs/heads`. When omitted, qgit uses `HEAD`. qgit does not accept path arguments or abbreviated object names.
+`<tree-ish>` is required. It may be a full SHA-1 hash, `HEAD`, or a branch name under `refs/heads`. qgit does not accept path arguments or abbreviated object names.
 
 #### Options
 
@@ -353,7 +353,7 @@ Show tree entries even when going to recurse them. Has no effect unless `-r` is 
 
 `<tree-ish>`
 
-Tree or commit to list. Defaults to `HEAD`.
+Tree or commit to list.
 
 ---
 

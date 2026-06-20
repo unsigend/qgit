@@ -79,6 +79,9 @@ int cmd_log(int argc, char **argv)
   if (!((obj = obj_open(repo, sha1))))
     die_errno();
 
+  if (obj_parse_payload(obj) == -1)
+    die_errno();
+
   if (commit_iter_init(&iter, repo, obj,
                        first_parent ? COMMIT_WALK_FPARENT : COMMIT_WALK_ALL) ==
       -1)
