@@ -15,8 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
 #include "argparse.h"
 #include "die.h"
+#include "ref.h"
+#include "repo.h"
+#include "sha1.h"
+
+static int printref(const char *refname, unsigned char *sha1)
+{
+  unsigned char hex[SHA1_HEXLEN];
+  if (sha1_to_hex(sha1, hex) == -1)
+    return -1;
+  printf("%s %s\n", hex, refname);
+  return 0;
+}
 
 int cmd_show_ref(int argc, char **argv)
 {
@@ -47,6 +61,30 @@ int cmd_show_ref(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", argparse_strerror(&ctx));
 
+  struct repo *repo = NULL;
+  int show_branches = branches || (!branches && !tags);
+  int show_tags = tags || (!branches && !tags);
+
+  if (!((repo = repo_findcwd())))
+    die_errno();
+
+  if (head) {
+    unsigned char sha1[SHA1_DIGLEN];
+    if (ref_resolve_head(repo, sha1) == -1)
+      die_errno();
+    if (printref("HEAD", sha1) == -1)
+      die_errno();
+  }
+  if (show_branches) {
+    if (ref_foreach(repo, REF_SCOPE_BRANCHES, printref) == -1)
+      die_errno();
+  }
+  if (show_tags) {
+    if (ref_foreach(repo, REF_SCOPE_TAGS, printref) == -1)
+      die_errno();
+  }
+
+  repo_close(repo);
   argparse_fini(&ctx);
   return 0;
 }
