@@ -15,45 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <string.h>
-
-#include "error.h"
 #include "obj/object.h"
+#include "ref.h"
+#include "repo.h"
 
-static int check_type(enum obj_type type)
+struct obj *obj_find(struct repo *repo, const char *name)
 {
-  if (type != OBJ_COMMIT && type != OBJ_BLOB && type != OBJ_TREE &&
-      type != OBJ_TAG) {
-    setqerrno(QE_INVALIDOBJ);
-    return -1;
-  }
-  return 0;
-}
-
-struct obj *obj_open_buf(unsigned char *buf, size_t buflen, enum obj_type type)
-{
-  if (buflen && !buf)
-    return NULL;
-  if (check_type(type) == -1)
+  if (!repo || !name)
     return NULL;
 
-  struct obj *obj = NULL;
-  size_t payloadsz = buflen + 1; /* always null terminated */
-
-  if (!(obj = calloc(1, sizeof(struct obj))))
+  unsigned char sha1[SHA1_DIGLEN];
+  if (ref_resolve(repo, name, sha1) == -1)
     return NULL;
-  obj->type = OBJ_NONE;
 
-  if (!(obj->payload = malloc(payloadsz))) {
-    obj_close(obj);
-    return NULL;
-  }
-
-  if (buflen)
-    memcpy(obj->payload, buf, buflen);
-  ((char *)obj->payload)[buflen] = '\0';
-  obj->payloadsz = buflen;
-  obj->type = type;
-  return obj;
+  return obj_open(repo, sha1);
 }

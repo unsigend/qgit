@@ -64,7 +64,6 @@ int cmd_cat_file(int argc, char **argv)
 
   struct obj *obj = NULL;
   struct repo *repo = NULL;
-  unsigned char sha1[SHA1_DIGLEN];
   const char *name = NULL;
 
   mutex_check(p, t, s);
@@ -80,11 +79,7 @@ int cmd_cat_file(int argc, char **argv)
       die("auto mode requires <object>");
     name = argparse_getremargv(&ctx)[0];
 
-    if (ref_resolve(repo, name, sha1) == -1)
-      die_errno();
-
-    obj = obj_open(repo, sha1);
-    if (!obj)
+    if (!((obj = obj_find(repo, name))))
       die_errno();
 
     if (p) {
@@ -108,15 +103,12 @@ int cmd_cat_file(int argc, char **argv)
     name = argparse_getremargv(&ctx)[1];
     const char *expect = argparse_getremargv(&ctx)[0];
 
-    if (ref_resolve(repo, name, sha1) == -1)
-      die_errno();
-
     if (obj_type_from_str(expect) == OBJ_NONE)
       die_errno();
 
-    obj = obj_open(repo, sha1);
-    if (!obj)
+    if (!((obj = obj_find(repo, name))))
       die_errno();
+
     if (obj->type != obj_type_from_str(expect))
       die("expect object type '%s', but got '%s'", expect,
           obj_type_to_str(obj->type));

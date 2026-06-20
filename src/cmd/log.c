@@ -62,7 +62,6 @@ int cmd_log(int argc, char **argv)
   struct repo *repo = NULL;
   struct obj *obj = NULL;
   struct commit_iter iter;
-  unsigned char sha1[SHA1_DIGLEN];
 
   if (argparse_getremargc(&ctx) > 0)
     name = argparse_getremargv(&ctx)[0];
@@ -73,10 +72,7 @@ int cmd_log(int argc, char **argv)
   if (!(repo = repo_findcwd()))
     die_errno();
 
-  if (ref_resolve(repo, name, sha1) == -1)
-    die_errno();
-
-  if (!((obj = obj_open(repo, sha1))))
+  if (!((obj = obj_find(repo, name))))
     die_errno();
 
   if (obj_parse_payload(obj) == -1)

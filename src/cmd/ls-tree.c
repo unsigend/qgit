@@ -66,10 +66,7 @@ int cmd_ls_tree(int argc, char **argv)
   if (!((repo = repo_findcwd())))
     die_errno();
 
-  if (ref_resolve(repo, name, sha1) == -1)
-    die_errno();
-
-  if (!((obj = obj_open(repo, sha1))))
+  if (!((obj = obj_find(repo, name))))
     die_errno();
 
   if (obj->type != OBJ_TREE) {

@@ -50,13 +50,7 @@ struct obj {
 };
 
 extern struct obj *obj_open(struct repo *repo, unsigned char *sha1);
-
-/* open object from payload buffer */
-extern struct obj *obj_open_buf(unsigned char *buf, size_t buflen,
-                                enum obj_type type);
-
-/* open object from "type <size>\0<payload>". */
-extern struct obj *obj_open_raw(unsigned char *buf, size_t buflen);
+extern struct obj *obj_find(struct repo *repo, const char *name);
 
 extern int obj_parse_payload(struct obj *obj);
 extern int obj_fprintf(struct obj *obj, FILE *fp);
@@ -67,5 +61,12 @@ extern const char *obj_type_to_str(enum obj_type type);
 
 /* write "type <size>\0<payload>" to buffer. */
 extern int obj_write_buf(struct obj *obj, void **buf, size_t *buflen);
+
+/* open object from payload buffer */
+extern struct obj *obj_open_buf(unsigned char *buf, size_t buflen,
+                                enum obj_type type);
+
+/* open object from "type <size>\0<payload>". */
+extern struct obj *obj_open_raw(unsigned char *buf, size_t buflen);
 
 #endif
