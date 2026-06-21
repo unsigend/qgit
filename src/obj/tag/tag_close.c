@@ -21,6 +21,4 @@ void tag_close(struct tag *tag)
 {
   if (!tag)
     return;
-
-  /* TODO */
 }

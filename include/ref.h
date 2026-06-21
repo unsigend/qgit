@@ -44,4 +44,9 @@ extern int ref_resolve_path(struct repo *repo, const char *path,
 int ref_resolve_short_sha1(struct repo *repo, const char *refname,
                            unsigned char *sha1);
 
+/* update a ref to a new sha1, create if not exists. assume name like
+   refs/heads/main */
+extern int ref_update(struct repo *repo, const char *refname,
+                      const unsigned char *sha1);
+
 #endif

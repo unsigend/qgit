@@ -83,6 +83,155 @@ git_write_commit() {
     env GIT_DIR="$TEST_DIR/.git" "$GIT" hash-object -w -t commit "$@"
 }
 
+EMPTY_TREE_SHA="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+store_malformed_commit_payload() {
+    local file="$1"
+    local sha type
+
+    init_repo
+    sha=$("$QGIT_BIN" hash-object -w -t commit "$file")
+    if [ -z "$sha" ]; then
+        echo "qgit hash-object failed to store malformed commit" >&2
+        return 1
+    fi
+
+    type=$("$QGIT_BIN" cat-file -t "$sha")
+    if [ "$type" != "commit" ]; then
+        echo "expected stored commit object, got type: $type" >&2
+        return 1
+    fi
+
+    printf '%s\n' "$sha"
+}
+
+write_commit_missing_tree() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+missing tree line
+EOF
+}
+
+write_commit_missing_author() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+committer Test User <test@example.com> 946684800 +0000
+
+missing author line
+EOF
+}
+
+write_commit_missing_committer() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+author Test User <test@example.com> 946684800 +0000
+
+missing committer line
+EOF
+}
+
+write_commit_missing_all_headers() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+
+message only
+EOF
+}
+
+write_commit_unknown_header() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+invalid header value
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+unknown header line
+EOF
+}
+
+write_commit_duplicate_tree() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+tree $EMPTY_TREE_SHA
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+duplicate tree lines
+EOF
+}
+
+write_commit_duplicate_author() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+author Test User <test@example.com> 946684800 +0000
+author Another User <other@example.com> 946684900 +0000
+committer Test User <test@example.com> 946684800 +0000
+
+duplicate author lines
+EOF
+}
+
+write_commit_duplicate_committer() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+author Test User <test@example.com> 946684800 +0000
+committer Test User <test@example.com> 946684800 +0000
+committer Another User <other@example.com> 946684900 +0000
+
+duplicate committer lines
+EOF
+}
+
+write_commit_bad_author_signature() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+author bad signature line
+committer Test User <test@example.com> 946684800 +0000
+
+bad author signature
+EOF
+}
+
+write_commit_bad_committer_signature() {
+    local file="$1"
+
+    cat >"$file" <<EOF
+tree $EMPTY_TREE_SHA
+author Test User <test@example.com> 946684800 +0000
+committer bad signature line
+
+bad committer signature
+EOF
+}
+
+assert_cat_file_p_rejects_malformed_commit() {
+    local file="$1"
+    local hash
+
+    hash=$(store_malformed_commit_payload "$file")
+    run_cat_file -p "$hash"
+    assert_failure
+}
+
 write_tree_for_blob() {
     local blob_file="$1"
     local entry_name="$2"
@@ -930,6 +1079,78 @@ EOF
     hash=$(setup_root_commit)
     run_cat_file tree "$hash"
     assert_failure
+}
+
+# commit parse errors
+
+@test "qgit cat-file -p: commit missing tree line fails" {
+    local file="$TEST_DIR/commit-missing-tree.txt"
+
+    write_commit_missing_tree "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit missing author line fails" {
+    local file="$TEST_DIR/commit-missing-author.txt"
+
+    write_commit_missing_author "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit missing committer line fails" {
+    local file="$TEST_DIR/commit-missing-committer.txt"
+
+    write_commit_missing_committer "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit missing all header lines fails" {
+    local file="$TEST_DIR/commit-missing-headers.txt"
+
+    write_commit_missing_all_headers "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit duplicate tree line fails" {
+    local file="$TEST_DIR/commit-duplicate-tree.txt"
+
+    write_commit_duplicate_tree "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit duplicate author line fails" {
+    local file="$TEST_DIR/commit-duplicate-author.txt"
+
+    write_commit_duplicate_author "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit duplicate committer line fails" {
+    local file="$TEST_DIR/commit-duplicate-committer.txt"
+
+    write_commit_duplicate_committer "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit unknown header line fails" {
+    local file="$TEST_DIR/commit-unknown-header.txt"
+
+    write_commit_unknown_header "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit bad author signature fails" {
+    local file="$TEST_DIR/commit-bad-author.txt"
+
+    write_commit_bad_author_signature "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
+}
+
+@test "qgit cat-file -p: commit bad committer signature fails" {
+    local file="$TEST_DIR/commit-bad-committer.txt"
+
+    write_commit_bad_committer_signature "$file"
+    assert_cat_file_p_rejects_malformed_commit "$file"
 }
 
 # tree -p

@@ -453,7 +453,7 @@ Create, list, or delete tag references in `refs/tags/`. The command must be run 
 
 With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a lightweight tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. With `-d`, qgit deletes the named tag.
 
-Creating a tag with an existing name overwrites the previous value.
+Creating a tag with an existing name fails unless `-f` is given.
 
 #### Options
 
@@ -471,6 +471,11 @@ List tags. Running `qgit tag` with no arguments also lists tags.
 `--delete`
 
 Delete the tag with the given name.
+
+`-f`
+`--force`
+
+Replace an existing tag if `<tagname>` is already present.
 
 `<tagname>`
 

@@ -15,13 +15,163 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "error.h"
+#include "obj/object.h"
 #include "obj/tag.h"
+#include "sha1.h"
+
+/* parse signature: <name> <email> <timestamp> <timezone> */
+static char *parse_sign(char *buf, char *end, const char **name, time_t *time,
+                        const char **zone)
+{
+  char *cur = buf, *endstr;
+
+  *name = cur;
+  while (cur < end && *cur != '>')
+    cur++;
+  if (cur + 2 >= end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  *(++cur) = '\0'; /* skip '>' */
+  cur++;
+
+  errno = 0;
+  *time = strtoul(cur, &endstr, 10);
+  if (errno || endstr == cur || endstr >= end || *endstr != ' ') {
+    if (!errno)
+      setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  while (cur < end && *cur != ' ') /* skip time */
+    cur++;
+  if (cur == end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  *cur++ = '\0';
+  *zone = cur;
+
+  while (cur < end && *cur != '\n')
+    cur++;
+
+  if (cur == end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  *cur++ = '\0';
+  return cur;
+}
+
+static int parse_header(struct obj *obj, char *cur, char *end)
+{
+  int has_object = 0;
+  while (cur < end) {
+    if (*cur == '\n') {
+      cur++;
+      continue;
+    }
+    if (strncmp(cur, "object ", 7) == 0) {
+      if (has_object) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      has_object = 1;
+      cur += 7;
+      if (cur + SHA1_HEXLEN >= end) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      if (hex_to_sha1((unsigned char *)cur, obj->tag.object) == -1) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      cur += SHA1_HEXLEN;
+
+    } else if (strncmp(cur, "type ", 5) == 0) {
+      if (obj->tag.type) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      cur += 5;
+      const char *type = cur;
+      while (cur < end && *cur != '\n')
+        cur++;
+      if (cur == end) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      *cur++ = '\0';
+      if (strcmp(type, "commit") == 0) {
+        obj->tag.type = "commit";
+      } else if (strcmp(type, "tree") == 0) {
+        obj->tag.type = "tree";
+      } else if (strcmp(type, "blob") == 0) {
+        obj->tag.type = "blob";
+      } else if (strcmp(type, "tag") == 0) {
+        obj->tag.type = "tag";
+      } else {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+    } else if (strncmp(cur, "tag ", 4) == 0) {
+      if (obj->tag.name) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      cur += 4;
+      obj->tag.name = cur;
+      while (cur < end && *cur != '\n')
+        cur++;
+      *cur++ = '\0';
+
+    } else if (strncmp(cur, "tagger ", 7) == 0) {
+      if (obj->tag.tagger) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      cur += 7;
+      cur = parse_sign(cur, end, &obj->tag.tagger, &obj->tag.time,
+                       &obj->tag.timezone);
+      if (!cur)
+        return -1;
+    } else {
+      setqerrno(QE_BADOBJFILE);
+      return -1;
+    }
+  }
+  if (!has_object || !obj->tag.type || !obj->tag.name || !obj->tag.tagger) {
+    setqerrno(QE_BADOBJFILE);
+    return -1;
+  }
+  return 0;
+}
 
 int tag_parse(struct obj *obj)
 {
-  if (!obj)
+  if (!obj || obj->type != OBJ_TAG)
     return -1;
 
-  /* TODO */
+  char *cur = obj->payload;
+  char *body = NULL, *end;
+
+  body = strstr(cur, "\n\n");
+  if (body)
+    end = body + 1;
+  else
+    end = cur + obj->payloadsz;
+
+  if (parse_header(obj, cur, end) == -1)
+    return -1;
+
+  if (body)
+    obj->tag.msg = body + 2;
+  else
+    obj->tag.msg = NULL;
   return 0;
 }

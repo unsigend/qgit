@@ -71,12 +71,18 @@ static char *parse_sign(char *buf, char *end, const char **name, time_t *time,
 
 static int parse_header(struct obj *obj, char *cur, char *end)
 {
+  int has_tree = 0;
   while (cur < end) {
     if (*cur == '\n') {
       cur++;
       continue;
     }
     if (strncmp(cur, "tree ", 5) == 0) {
+      if (has_tree) {
+        setqerrno(QE_BADOBJFILE);
+        return -1;
+      }
+      has_tree = 1;
       cur += 5;
       if (cur + SHA1_HEXLEN >= end) {
         setqerrno(QE_BADOBJFILE);
@@ -132,6 +138,10 @@ static int parse_header(struct obj *obj, char *cur, char *end)
       setqerrno(QE_BADOBJFILE);
       return -1;
     }
+  }
+  if (!has_tree || !obj->commit.author || !obj->commit.committer) {
+    setqerrno(QE_BADOBJFILE);
+    return -1;
   }
   return 0;
 }

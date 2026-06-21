@@ -19,10 +19,30 @@
 #define OBJ_TAG_H
 
 #include <stdio.h>
+#include <time.h>
+
+#include "sha1.h"
 
 struct obj;
 
+/* Raw payload format for annotated tag:
+     object <sha1-40>\n
+     type <commit|tree|blob|tag>\n
+     tag <name>\n
+     tagger <name> <email> <timestamp> <timezone>\n
+     \n
+     <message>
+*/
+
+/* current implementation only supports commit for tag object*/
 struct tag {
+  unsigned char object[SHA1_DIGLEN];
+  const char *type;
+  const char *name;
+  const char *tagger;
+  time_t time;
+  const char *timezone;
+  const char *msg;
 };
 
 extern int tag_parse(struct obj *obj);

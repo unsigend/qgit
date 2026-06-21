@@ -26,6 +26,7 @@ static const char *errstr[] = {
     [QE_BADOBJFILE] = "bad object file",
     [QE_INTERNAL] = "internal error",
     [QE_AMBIGUOUS] = "ambiguous argument",
+    [QE_EXISTSTAG] = "tag already exists",
 };
 
 const char *qerror_str(int error)
