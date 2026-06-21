@@ -30,7 +30,8 @@ UNIT_DEP      := $(UNIT_BUILD)/dep
 include $(CONFIG_PATH)/config.mk
 
 BATS       ?= bats
-CMD_TESTS  := $(CUR_DIR)/cmd
+CMD_TESTS  := cmd
+CMD_BATS   := $(sort $(wildcard $(CMD_TESTS)/*/*.bats))
 QGIT       := $(abspath $(BIN_PATH)/$(BIN_NAME))
 GIT        ?= git
 
@@ -119,11 +120,24 @@ $(UNIT_BUILD)/test: $(OBJS_ALL) $(LIB_ARTIFACT)
 
 test:
 	@$(MAKE) -C $(ROOT_DIR) bin
-	@$(BATS) $(CMD_TESTS)
+	@$(BATS) $(CMD_BATS)
 
+# Run one file or directory. Examples:
+#   make test-init
+#   make test-cat-file/cat-file-tag
+#   make test-cat-file
 test-%:
 	@$(MAKE) -C $(ROOT_DIR) bin
-	@$(BATS) $(CMD_TESTS)/$*.bats
+	@target="$(CUR_DIR)/$(CMD_TESTS)/$*"; \
+	if [ -f "$$target.bats" ]; then \
+		$(BATS) "$$target.bats"; \
+	elif [ -f "$$target" ]; then \
+		$(BATS) "$$target"; \
+	elif [ -d "$$target" ]; then \
+		$(BATS) "$$target"; \
+	else \
+		echo "No test target: $$target" >&2; exit 1; \
+	fi
 
 unit: $(UNIT_BUILD)/test
 	@$(UNIT_BUILD)/test

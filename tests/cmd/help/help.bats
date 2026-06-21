@@ -1,17 +1,7 @@
-load "helpers/setup.bash"
-load "helpers/helpers.bash"
-load "helpers/globals.bash"
+load "../helpers/setup.bash"
+load "../helpers/helpers.bash"
+load "../helpers/globals.bash"
 load "helpers/help.bash"
-
-# helpers
-
-run_help() {
-    run "$QGIT_BIN" help "$@"
-}
-
-run_qgit() {
-    run "$QGIT_BIN" "$@"
-}
 
 # help
 

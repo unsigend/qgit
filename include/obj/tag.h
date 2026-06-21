@@ -34,7 +34,7 @@ struct obj;
      <message>
 */
 
-/* current implementation only supports commit for tag object*/
+/* current implementation only supports commit for tag object */
 struct tag {
   unsigned char object[SHA1_DIGLEN];
   const char *type;

@@ -32,3 +32,11 @@ assert_qgit_help_output() {
         assert_output_contains "$cmd"
     done
 }
+
+run_help() {
+    run "$QGIT_BIN" help "$@"
+}
+
+run_qgit() {
+    run "$QGIT_BIN" "$@"
+}
