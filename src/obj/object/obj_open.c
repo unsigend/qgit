@@ -18,10 +18,90 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "compress.h"
+#include "error.h"
 #include "obj/object.h"
 #include "repo.h"
+
+/* parse payload from "type <size>\0<payload>". */
+static struct obj *parse_payload(unsigned char *buf, size_t buflen)
+{
+  if (!buf || !buflen)
+    return NULL;
+
+  unsigned char *cur = buf;
+  unsigned char *end = cur + buflen;
+  size_t len, payloadsz;
+  char *endstr = NULL;
+  enum obj_type type = OBJ_NONE;
+  struct obj *obj = NULL;
+
+  while (cur < end && *cur != ' ')
+    cur++;
+
+  if (cur == end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  len = cur - (unsigned char *)buf;
+
+  if (len == 6 && memcmp((char *)buf, "commit", len) == 0)
+    type = OBJ_COMMIT;
+  else if (len == 4 && memcmp((char *)buf, "blob", len) == 0)
+    type = OBJ_BLOB;
+  else if (len == 4 && memcmp((char *)buf, "tree", len) == 0)
+    type = OBJ_TREE;
+  else if (len == 3 && memcmp((char *)buf, "tag", len) == 0)
+    type = OBJ_TAG;
+  else {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  cur++;
+
+  errno = 0;
+  payloadsz = strtoul((char *)cur, &endstr, 10);
+  if (errno || endstr == (char *)cur || *endstr) {
+    if (!errno)
+      setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  while (cur < end && *cur)
+    cur++;
+
+  if (cur == end) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  cur++;
+  if (cur == end && payloadsz) {
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+
+  if (!(obj = calloc(1, sizeof(struct obj))))
+    return NULL;
+
+  obj->type = type;
+  obj->payloadsz = payloadsz;
+  obj->payload = malloc(payloadsz + 1); /* always null terminated */
+  if (!obj->payload) {
+    obj_close(obj);
+    return NULL;
+  }
+  if (payloadsz > (size_t)(end - cur)) {
+    obj_close(obj);
+    setqerrno(QE_BADOBJFILE);
+    return NULL;
+  }
+  memcpy(obj->payload, cur, payloadsz);
+  ((char *)obj->payload)[payloadsz] = '\0';
+  return obj;
+}
 
 struct obj *obj_open(struct repo *repo, unsigned char *sha1)
 {
@@ -46,7 +126,7 @@ struct obj *obj_open(struct repo *repo, unsigned char *sha1)
   if (zlib_decompressf(path, &buf, &buflen) == -1)
     return NULL;
 
-  if (!(obj = obj_open_raw(buf, buflen))) {
+  if (!(obj = parse_payload(buf, buflen))) {
     free(buf);
     return NULL;
   }

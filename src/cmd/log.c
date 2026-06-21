@@ -75,7 +75,7 @@ int cmd_log(int argc, char **argv)
   if (!((obj = obj_find(repo, name))))
     die_errno();
 
-  if (obj_parse_payload(obj) == -1)
+  if (obj_parse(obj) == -1)
     die_errno();
 
   if (commit_iter_init(&iter, repo, obj,

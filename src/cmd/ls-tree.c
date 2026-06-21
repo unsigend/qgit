@@ -73,7 +73,7 @@ int cmd_ls_tree(int argc, char **argv)
     if (obj->type != OBJ_COMMIT)
       die("not a tree or commit");
 
-    if (obj_parse_payload(obj) == -1)
+    if (obj_parse(obj) == -1)
       die_errno();
 
     sha1_copy(obj->commit.tree, sha1);
@@ -81,7 +81,7 @@ int cmd_ls_tree(int argc, char **argv)
     if (!((obj = obj_open(repo, sha1))))
       die_errno();
   }
-  if (obj_parse_payload(obj) == -1)
+  if (obj_parse(obj) == -1)
     die_errno();
 
   if (r) {

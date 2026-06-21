@@ -19,13 +19,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 
-#include "compress.h"
-#include "fs.h"
 #include "obj/object.h"
-
-static mode_t dirmode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
 int obj_write(struct obj *obj, struct repo *repo)
 {
@@ -34,8 +29,6 @@ int obj_write(struct obj *obj, struct repo *repo)
 
   void *buf = NULL;
   size_t buflen = 0;
-  unsigned char hex[SHA1_HEXLEN];
-  char path[PATH_MAX];
 
   if (obj_write_buf(obj, &buf, &buflen) == -1)
     return -1;
@@ -45,31 +38,7 @@ int obj_write(struct obj *obj, struct repo *repo)
     return -1;
   }
 
-  if (sha1_to_hex(obj->sha1, hex) == -1) {
-    free(buf);
-    return -1;
-  }
-
-  if (snprintf(path, PATH_MAX, "%s/objects/%c%c", repo->qgitdir, hex[0],
-               hex[1]) >= PATH_MAX) {
-    free(buf);
-    return -1;
-  }
-
-  if (!dir_exists(path)) {
-    if (mkdirp(path, dirmode) == -1) {
-      free(buf);
-      return -1;
-    }
-  }
-
-  if (snprintf(path, PATH_MAX, "%s/objects/%c%c/%s", repo->qgitdir, hex[0],
-               hex[1], &hex[2]) >= PATH_MAX) {
-    free(buf);
-    return -1;
-  }
-
-  if (zlib_compressf(buf, buflen, path) == -1) {
+  if (obj_store(repo, obj->sha1, buf, buflen) == -1) {
     free(buf);
     return -1;
   }

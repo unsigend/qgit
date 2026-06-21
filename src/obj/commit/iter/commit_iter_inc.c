@@ -37,7 +37,7 @@ static int iter_inc_first(struct commit_iter *iter)
   if (!next)
     return -1;
 
-  if (obj_parse_payload(next) == -1) {
+  if (obj_parse(next) == -1) {
     obj_close(next);
     return -1;
   }
@@ -74,7 +74,7 @@ static int iter_inc_all(struct commit_iter *iter)
         return -1;
       }
 
-      if (obj_parse_payload(obj) == -1) {
+      if (obj_parse(obj) == -1) {
         obj_close(obj);
         free(sha1);
         return -1;

@@ -45,7 +45,7 @@ static int foreach (struct obj *obj, struct repo * repo, tree_foreach_cb cb,
         obj_close(obj);
         return -1;
       }
-      if (obj_parse_payload(obj) == -1) {
+      if (obj_parse(obj) == -1) {
         obj_close(obj);
         return -1;
       }

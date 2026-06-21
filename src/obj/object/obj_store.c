@@ -15,42 +15,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
 
+#include "compress.h"
+#include "fs.h"
 #include "obj/object.h"
 
-int obj_write_buf(struct obj *obj, void **buf, size_t *buflen)
+static mode_t dirmode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+
+int obj_store(struct repo *repo, const unsigned char *sha1, const void *buf,
+              size_t buflen)
 {
-  if (!obj || !buf || !buflen)
+  if (!repo || !sha1 || !buf || !buflen)
     return -1;
 
-  const char *type = NULL;
-  char *cur = NULL;
-  int n = 0;
+  unsigned char hex[SHA1_HEXLEN];
+  char path[PATH_MAX];
 
-  type = obj_type_to_str(obj->type);
-  if (!type)
+  if (sha1_to_hex(sha1, hex) == -1)
     return -1;
 
-  if ((n = snprintf(NULL, 0, "%s %zu", type, obj->payloadsz)) < 0)
-    return -1;
-
-  *buflen = n + obj->payloadsz + 1;
-  if (!(*buf = malloc(*buflen)))
-    return -1;
-
-  cur = (char *)*buf;
-
-  if ((n = (snprintf(cur, *buflen, "%s %zu", type, obj->payloadsz))) < 0) {
-    free(*buf);
-    *buf = NULL;
+  if (snprintf(path, PATH_MAX, "%s/objects/%c%c", repo->qgitdir, hex[0],
+               hex[1]) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
     return -1;
   }
 
-  cur += n;
-  *cur++ = '\0';
-  if (obj->payload && obj->payloadsz)
-    memcpy(cur, obj->payload, obj->payloadsz);
+  if (!dir_exists(path)) {
+    if (mkdirp(path, dirmode) == -1)
+      return -1;
+  }
+
+  if (snprintf(path, PATH_MAX, "%s/objects/%c%c/%s", repo->qgitdir, hex[0],
+               hex[1], &hex[2]) >= PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+
+  if (zlib_compressf(buf, buflen, path) == -1)
+    return -1;
+
   return 0;
 }
