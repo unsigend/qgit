@@ -31,7 +31,7 @@ static int check_type(enum obj_type type)
   return 0;
 }
 
-struct obj *obj_open_buf(unsigned char *buf, size_t buflen, enum obj_type type)
+struct obj *obj_create(unsigned char *buf, size_t buflen, enum obj_type type)
 {
   if (buflen && !buf)
     return NULL;

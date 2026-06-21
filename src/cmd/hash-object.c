@@ -89,7 +89,7 @@ int cmd_hash_object(int argc, char **argv)
   unsigned char hex[SHA1_HEXLEN];
 
   map_buf(path, &buf, &buflen);
-  if (!(obj = obj_open_buf(buf, buflen, obj_type_from_str(type))))
+  if (!(obj = obj_create(buf, buflen, obj_type_from_str(type))))
     die_errno();
   if (buf)
     munmap(buf, buflen);

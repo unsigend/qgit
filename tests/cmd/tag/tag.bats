@@ -107,6 +107,30 @@ load "helpers/tag.bash"
     assert_failure
 }
 
+@test "qgit tag: create without tag name fails" {
+    setup_branch_head "missing tag name"
+    run_tag -f
+    assert_failure
+}
+
+@test "qgit tag: multiple tags at different commits" {
+    local first second third
+
+    first=$(setup_branch_head "first release")
+    second=$(make_commit "second release")
+    third=$(make_commit "third release")
+    run_tag v1.0.0 "$first"
+    assert_success
+    run_tag v1.1.0 "$second"
+    assert_success
+    run_tag v1.2.0 "$third"
+    assert_success
+    assert_tag_ref_equals "v1.0.0" "$first"
+    assert_tag_ref_equals "v1.1.0" "$second"
+    assert_tag_ref_equals "v1.2.0" "$third"
+    assert_matches_git_tag_list_ordered
+}
+
 # -d
 
 @test "qgit tag -d: delete existing tag" {
@@ -326,6 +350,79 @@ load "helpers/tag.bash"
     run_tag -l alpha
     assert_success
     assert_output_equals "alpha"
+}
+
+# list order
+
+@test "qgit tag: list version tags in lexicographic order matches git" {
+    local sha
+
+    sha=$(setup_branch_head "version tag order")
+    run_tag v1.3.0 "$sha"
+    assert_success
+    run_tag v1.0.0 "$sha"
+    assert_success
+    run_tag v1.1.0 "$sha"
+    assert_success
+    run_tag v2.0.0 "$sha"
+    assert_success
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag: list version tags from git create matches git order" {
+    local sha
+
+    sha=$(setup_branch_head "git version tag order")
+    git_tag v1.3.0 "$sha"
+    git_tag v1.0.0 "$sha"
+    git_tag v1.1.0 "$sha"
+    git_tag v2.0.0 "$sha"
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag: list preserves git order after out-of-order creates" {
+    local sha
+
+    sha=$(setup_branch_head "out of order creates")
+    run_tag v10.0.0 "$sha"
+    assert_success
+    run_tag v1.0.0 "$sha"
+    assert_success
+    run_tag v2.0.0 "$sha"
+    assert_success
+    run_tag v1.10.0 "$sha"
+    assert_success
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag: list remaining tags after delete matches git order" {
+    local sha
+
+    sha=$(setup_branch_head "list after delete")
+    run_tag v1.0.0 "$sha"
+    assert_success
+    run_tag v1.1.0 "$sha"
+    assert_success
+    run_tag v1.2.0 "$sha"
+    assert_success
+    run_tag v2.0.0 "$sha"
+    assert_success
+    run_tag -d v1.1.0
+    assert_success
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag -l: list version tags in lexicographic order matches git" {
+    local sha
+
+    sha=$(setup_branch_head "version tag order flag")
+    run_tag v1.3.0 "$sha"
+    assert_success
+    run_tag v1.0.0 "$sha"
+    assert_success
+    run_tag v1.1.0 "$sha"
+    assert_success
+    assert_matches_git_tag_list_ordered -l
 }
 
 # -h

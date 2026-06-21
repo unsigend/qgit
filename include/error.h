@@ -27,6 +27,7 @@
 #define QE_INVALIDOBJ 5
 #define QE_EXISTSTAG 6
 #define QE_BADSIGN 7
+#define QE_IDENTITY 8
 
 /* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
 extern int *qerrno_location(void);

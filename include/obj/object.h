@@ -54,6 +54,8 @@ extern struct obj *obj_find(struct repo *repo, const char *name);
 
 extern int obj_parse(struct obj *obj);
 extern void obj_close(struct obj *obj);
+extern struct obj *obj_create(unsigned char *buf, size_t buflen,
+                              enum obj_type type);
 extern int obj_write(struct obj *obj, struct repo *repo);
 
 extern int obj_fprintf(struct obj *obj, FILE *fp);
@@ -62,10 +64,6 @@ extern enum obj_type obj_type_from_str(const char *str);
 extern const char *obj_type_to_str(enum obj_type type);
 
 /* internal functions */
-
-/* open object from payload buffer with raw file content. */
-extern struct obj *obj_open_buf(unsigned char *buf, size_t buflen,
-                                enum obj_type type);
 
 /* write "type <size>\0<payload>" to buffer. */
 extern int obj_write_buf(struct obj *obj, void **buf, size_t *buflen);

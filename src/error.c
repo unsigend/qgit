@@ -28,6 +28,7 @@ static const char *errstr[] = {
     [QE_AMBIGUOUS] = "ambiguous argument",
     [QE_EXISTSTAG] = "tag already exists",
     [QE_BADSIGN] = "bad signature field",
+    [QE_IDENTITY] = "identity is required",
 };
 
 const char *qerror_str(int error)

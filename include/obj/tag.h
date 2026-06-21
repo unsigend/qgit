@@ -47,4 +47,6 @@ extern int tag_parse(struct obj *obj);
 extern void tag_close(struct tag *tag);
 extern int tag_fprintf(struct obj *obj, FILE *fp);
 
+extern struct obj *tag_create(const struct tag *tag);
+
 #endif

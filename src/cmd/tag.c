@@ -19,9 +19,11 @@
 #include <limits.h>
 
 #include "argparse.h"
+#include "config.h"
 #include "die.h"
 #include "error.h"
 #include "fs.h"
+#include "iniparse.h"
 #include "ref.h"
 #include "repo.h"
 #include "sha1.h"
@@ -40,10 +42,11 @@ static int printtag(const char *refname, unsigned char *sha1)
 
 int cmd_tag(int argc, char **argv)
 {
-  int l, d, f;
-  l = d = f = 0;
+  int l, d, f, a;
+  l = d = f = a = 0;
   const char *tagname = NULL;
   const char *commit = "HEAD";
+  const char *msg = NULL;
 
   struct argparse ctx;
   struct argparse_opt opts[] = {
@@ -51,6 +54,8 @@ int cmd_tag(int argc, char **argv)
       OPT_BOOL('l', "list", "list all tags", &l),
       OPT_BOOL('d', "delete", "delete the tag", &d),
       OPT_BOOL('f', "force", "force overwrite existing tag", &f),
+      OPT_STR('m', "message", "use the given tag message", &msg, OPT_REQUIRED),
+      OPT_BOOL('a', "annotate", "make an annotated tag", &a),
       OPT_END(),
   };
 
@@ -122,8 +127,44 @@ int cmd_tag(int argc, char **argv)
       errno = ENAMETOOLONG;
       die_errno();
     }
-    if (ref_update(repo, buf, sha1) == -1)
-      die_errno();
+
+    if (a) /* annotated tag */
+    {
+      if (!msg)
+        die("missing tag message");
+
+      struct iniFILE *lcfg = NULL;
+      struct iniFILE *gcfg = NULL;
+      const char *name, *email;
+
+      if (!(lcfg = config_repo(repo)))
+        die_errno();
+      gcfg = config_global();
+
+      name = iniparse_get(lcfg, "user", "name");
+      email = iniparse_get(lcfg, "user", "email");
+
+      if (!name && gcfg)
+        name = iniparse_get(gcfg, "user", "name");
+      if (!email && gcfg)
+        email = iniparse_get(gcfg, "user", "email");
+
+      if (!name || !email)
+        die("Author identity unknown\n\n Run\n  qgit config --global "
+            "user.email <email>\n  qgit config --global user.name "
+            "<name>\n\nOmit --global to set the identity only in this "
+            "repository.");
+
+      /* TODO: create tag object */
+
+      iniparse_close(lcfg);
+      iniparse_close(gcfg);
+
+    } else /* lightweight tag */
+    {
+      if (ref_update(repo, buf, sha1) == -1)
+        die_errno();
+    }
   }
 
   repo_close(repo);

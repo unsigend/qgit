@@ -99,6 +99,30 @@ assert_sorted_output_equals() {
     fi
 }
 
+assert_ordered_output_equals() {
+    local expected="$1"
+    local expected_trimmed actual_trimmed
+
+    expected_trimmed=$(printf '%s\n' "$expected" | sed '/^$/d')
+    actual_trimmed=$(printf '%s\n' "$output" | sed '/^$/d')
+    if [ "$expected_trimmed" != "$actual_trimmed" ]; then
+        echo "Expected (ordered):"
+        printf '%s\n' "$expected_trimmed"
+        echo "Actual (ordered):"
+        printf '%s\n' "$actual_trimmed"
+        return 1
+    fi
+}
+
+assert_matches_git_tag_list_ordered() {
+    local expected
+
+    expected=$(git_tag "$@")
+    run_tag "$@"
+    assert_success
+    assert_ordered_output_equals "$expected"
+}
+
 assert_matches_git_tag_list() {
     local expected
 
