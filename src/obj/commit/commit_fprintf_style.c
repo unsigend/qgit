@@ -28,34 +28,14 @@
 
 #define INDENT_WIDTH 4
 
-static int date_fmt(time_t time, const char *zone, char *buf, size_t buflen)
-{
-  if (!zone || !buf || !buflen)
-    return -1;
-
-  struct tm tm;
-  int off, sign, oh, om;
-  time_t adj;
-
-  sign = (zone[0] == '-') ? -1 : 1;
-  oh = (zone[1] - '0') * 10 + (zone[2] - '0');
-  om = (zone[3] - '0') * 10 + (zone[4] - '0');
-  off = sign * (oh * 60 * 60 + om * 60);
-
-  adj = time + off;
-  gmtime_r(&adj, &tm);
-  strftime(buf, buflen, "%a %b %e %H:%M:%S %Y", &tm);
-  return 0;
-}
-
 static int print_default(struct obj *obj, FILE *fp)
 {
   unsigned char hex[SHA1_HEXLEN];
   int istty = isatty(fileno(fp));
-  char datebuf[64];
   struct slist_iter it;
   unsigned char *sha1 = NULL;
   const char *str = obj->commit.msg;
+  struct sign *authorsign = &obj->commit.author;
 
   if (sha1_to_hex(obj->sha1, hex) == -1)
     return -1;
@@ -84,18 +64,14 @@ static int print_default(struct obj *obj, FILE *fp)
   }
 
   /* author */
-  if (obj->commit.author) {
-    if (fprintf(fp, "Author: %s\n", obj->commit.author) < 0)
-      return -1;
-  }
+  if (fprintf(fp, "Author: ") < 0 || sign_fprintf_name(authorsign, fp) == -1 ||
+      fputc('\n', fp) == EOF)
+    return -1;
+
   /* date */
-  if (obj->commit.azone) {
-    if (date_fmt(obj->commit.atime, obj->commit.azone, datebuf,
-                 sizeof(datebuf)) == -1)
-      return -1;
-    if (fprintf(fp, "Date:   %s %s\n", datebuf, obj->commit.azone) < 0)
-      return -1;
-  }
+  if (fprintf(fp, "Date:   ") < 0 || sign_fprintf_date(authorsign, fp) == -1 ||
+      fputc('\n', fp) == EOF)
+    return -1;
 
   if (fputc('\n', fp) == EOF)
     return -1;
@@ -120,6 +96,8 @@ static int print_default(struct obj *obj, FILE *fp)
       str++;
     }
   }
+  if (str && fputc('\n', fp) == EOF)
+    return -1;
   return 0;
 }
 

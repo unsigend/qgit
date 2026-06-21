@@ -19,8 +19,8 @@
 #define OBJ_TAG_H
 
 #include <stdio.h>
-#include <time.h>
 
+#include "obj/sign.h"
 #include "sha1.h"
 
 struct obj;
@@ -39,9 +39,7 @@ struct tag {
   unsigned char object[SHA1_DIGLEN];
   const char *type;
   const char *name;
-  const char *tagger;
-  time_t time;
-  const char *timezone;
+  struct sign tagger;
   const char *msg;
 };
 

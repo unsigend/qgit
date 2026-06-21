@@ -15,41 +15,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 
-#include "obj/object.h"
 #include "obj/sign.h"
-#include "obj/tag.h"
-#include "sha1.h"
 
-int tag_fprintf(struct obj *obj, FILE *fp)
+static int date_fmt(time_t time, const char *zone, char *buf, size_t buflen)
 {
-  if (!obj || !fp)
+  if (!zone || !buf || !buflen)
     return -1;
 
-  unsigned char hex[SHA1_HEXLEN];
-
-  if (sha1_to_hex(obj->tag.object, hex) == -1)
+  if (strlen(zone) < 5 || (zone[0] != '-' && zone[0] != '+'))
     return -1;
 
-  if (fprintf(fp, "object %s\n", hex) < 0)
+  struct tm tm;
+  int off, sign, oh, om;
+  time_t adj;
+
+  sign = (zone[0] == '-') ? -1 : 1;
+  oh = (zone[1] - '0') * 10 + (zone[2] - '0');
+  om = (zone[3] - '0') * 10 + (zone[4] - '0');
+  off = sign * (oh * 60 * 60 + om * 60);
+
+  adj = time + off;
+  if (!gmtime_r(&adj, &tm))
     return -1;
-  if (fprintf(fp, "type %s\n", obj->tag.type) < 0)
-    return -1;
-  if (fprintf(fp, "tag %s\n", obj->tag.name) < 0)
+  strftime(buf, buflen, "%a %b %e %H:%M:%S %Y", &tm);
+  return 0;
+}
+
+int sign_fprintf_date(struct sign *sign, FILE *fp)
+{
+  if (!sign || !fp || !sign->zone)
     return -1;
 
-  if (fprintf(fp, "tagger ") < 0 ||
-      sign_fprintf_name(&obj->tag.tagger, fp) == -1 ||
-      fprintf(fp, " %ld %s\n", obj->tag.tagger.time, obj->tag.tagger.zone) < 0)
+  char datebuf[64];
+
+  if (date_fmt(sign->time, sign->zone, datebuf, sizeof(datebuf)) == -1)
     return -1;
 
-  if (fputc('\n', fp) < 0)
+  if (fprintf(fp, "%s %s", datebuf, sign->zone) < 0)
     return -1;
-  if (obj->tag.msg) {
-    if (fprintf(fp, "%s", obj->tag.msg) < 0)
-      return -1;
-  }
 
   return 0;
 }

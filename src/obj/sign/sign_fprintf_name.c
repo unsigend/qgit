@@ -15,25 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "error.h"
+#include <stdio.h>
 
-static int __qerrno = 0;
+#include "obj/sign.h"
 
-int *qerrno_location(void) { return &__qerrno; }
-
-static const char *errstr[] = {
-    [QE_NOTINREPO] = "not inside a qgit repository",
-    [QE_BADOBJFILE] = "bad object file",
-    [QE_INTERNAL] = "internal error",
-    [QE_AMBIGUOUS] = "ambiguous argument",
-    [QE_EXISTSTAG] = "tag already exists",
-    [QE_BADSIGN] = "bad signature field",
-};
-
-const char *qerror_str(int error)
+int sign_fprintf_name(struct sign *sign, FILE *fp)
 {
-  if (error < 1 || error >= (int)(sizeof(errstr) / sizeof(errstr[0])))
-    return "unknown error";
+  if (!sign || !fp || !sign->name || !sign->email)
+    return -1;
+  if (fprintf(fp, "%s <%s>", sign->name, sign->email) < 0)
+    return -1;
 
-  return errstr[error];
+  return 0;
 }

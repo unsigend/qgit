@@ -27,6 +27,8 @@ int commit_fprintf(struct obj *obj, FILE *fp)
 
   unsigned char hex[SHA1_HEXLEN];
   struct slist_iter iter;
+  struct sign *authorsign = &obj->commit.author;
+  struct sign *comsign = &obj->commit.committer;
 
   if (sha1_to_hex(obj->commit.tree, hex) == -1)
     return -1;
@@ -45,14 +47,14 @@ int commit_fprintf(struct obj *obj, FILE *fp)
     slist_iter_inc(&iter);
   }
 
-  if (obj->commit.author && obj->commit.azone) {
-    if (fprintf(fp, "author %s %ld %s\n", obj->commit.author, obj->commit.atime,
-                obj->commit.azone) < 0)
+  if (authorsign->name && authorsign->email && authorsign->zone) {
+    if (fprintf(fp, "author ") < 0 || sign_fprintf_name(authorsign, fp) == -1 ||
+        fprintf(fp, " %ld %s\n", authorsign->time, authorsign->zone) < 0)
       return -1;
   }
-  if (obj->commit.committer && obj->commit.czone) {
-    if (fprintf(fp, "committer %s %ld %s\n", obj->commit.committer,
-                obj->commit.ctime, obj->commit.czone) < 0)
+  if (comsign->name && comsign->email && comsign->zone) {
+    if (fprintf(fp, "committer ") < 0 || sign_fprintf_name(comsign, fp) == -1 ||
+        fprintf(fp, " %ld %s\n", comsign->time, comsign->zone) < 0)
       return -1;
   }
   if (fputc('\n', fp) < 0)

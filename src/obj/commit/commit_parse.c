@@ -24,51 +24,6 @@
 #include "obj/object.h"
 #include "sha1.h"
 
-/* parse signature: <name> <email> <timestamp> <timezone> */
-static char *parse_sign(char *buf, char *end, const char **name, time_t *time,
-                        const char **zone)
-{
-  char *cur = buf, *endstr;
-
-  *name = cur;
-  while (cur < end && *cur != '>')
-    cur++;
-  if (cur + 2 >= end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-  *(++cur) = '\0'; /* skip '>' */
-  cur++;
-
-  errno = 0;
-  *time = strtoul(cur, &endstr, 10);
-  if (errno || endstr == cur || endstr >= end || *endstr != ' ') {
-    if (!errno)
-      setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-
-  while (cur < end && *cur != ' ') /* skip time */
-    cur++;
-  if (cur == end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-  *cur++ = '\0';
-  *zone = cur;
-
-  while (cur < end && *cur != '\n')
-    cur++;
-
-  if (cur == end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-
-  *cur++ = '\0';
-  return cur;
-}
-
 static int parse_header(struct obj *obj, char *cur, char *end)
 {
   int has_tree = 0;
@@ -115,23 +70,21 @@ static int parse_header(struct obj *obj, char *cur, char *end)
       }
       cur += SHA1_HEXLEN;
     } else if (strncmp(cur, "author ", 7) == 0) {
-      if (obj->commit.author) {
+      if (obj->commit.author.name) {
         setqerrno(QE_BADOBJFILE);
         return -1;
       }
       cur += 7;
-      cur = parse_sign(cur, end, &obj->commit.author, &obj->commit.atime,
-                       &obj->commit.azone);
+      cur = sign_parse(&obj->commit.author, cur, end);
       if (!cur)
         return -1;
     } else if (strncmp(cur, "committer ", 10) == 0) {
-      if (obj->commit.committer) {
+      if (obj->commit.committer.name) {
         setqerrno(QE_BADOBJFILE);
         return -1;
       }
       cur += 10;
-      cur = parse_sign(cur, end, &obj->commit.committer, &obj->commit.ctime,
-                       &obj->commit.czone);
+      cur = sign_parse(&obj->commit.committer, cur, end);
       if (!cur)
         return -1;
     } else {
@@ -139,7 +92,7 @@ static int parse_header(struct obj *obj, char *cur, char *end)
       return -1;
     }
   }
-  if (!has_tree || !obj->commit.author || !obj->commit.committer) {
+  if (!has_tree || !obj->commit.author.name || !obj->commit.committer.name) {
     setqerrno(QE_BADOBJFILE);
     return -1;
   }

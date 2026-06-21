@@ -15,25 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "error.h"
+#ifndef OBJ_SIGN_H
+#define OBJ_SIGN_H
 
-static int __qerrno = 0;
+#include <stdio.h>
+#include <time.h>
 
-int *qerrno_location(void) { return &__qerrno; }
-
-static const char *errstr[] = {
-    [QE_NOTINREPO] = "not inside a qgit repository",
-    [QE_BADOBJFILE] = "bad object file",
-    [QE_INTERNAL] = "internal error",
-    [QE_AMBIGUOUS] = "ambiguous argument",
-    [QE_EXISTSTAG] = "tag already exists",
-    [QE_BADSIGN] = "bad signature field",
+struct sign {
+  const char *name;
+  const char *email;
+  time_t time;
+  const char *zone;
 };
 
-const char *qerror_str(int error)
-{
-  if (error < 1 || error >= (int)(sizeof(errstr) / sizeof(errstr[0])))
-    return "unknown error";
+/* parse signature inplace from buffer: <name> <email> <timestamp> <timezone>,
+   return next pointer */
+extern char *sign_parse(struct sign *sign, char *buf, char *bufend);
 
-  return errstr[error];
-}
+extern int sign_fprintf_date(struct sign *sign, FILE *fp);
+extern int sign_fprintf_name(struct sign *sign, FILE *fp);
+
+#endif

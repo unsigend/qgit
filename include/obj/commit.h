@@ -24,6 +24,7 @@
 #include "collection/heap.h"
 #include "collection/set.h"
 #include "collection/slist.h"
+#include "obj/sign.h"
 #include "sha1.h"
 
 struct obj;
@@ -41,13 +42,9 @@ struct repo;
 struct commit {
   unsigned char tree[SHA1_DIGLEN];
   struct slist parents; /* sha1 strings */
-  const char *author;
-  const char *committer;
+  struct sign author;
+  struct sign committer;
   const char *msg;
-  time_t atime;      /* author time */
-  time_t ctime;      /* committer time */
-  const char *azone; /* author timezone */
-  const char *czone; /* committer timezone */
 };
 
 enum commit_print_style {

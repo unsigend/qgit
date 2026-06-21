@@ -23,51 +23,6 @@
 #include "obj/tag.h"
 #include "sha1.h"
 
-/* parse signature: <name> <email> <timestamp> <timezone> */
-static char *parse_sign(char *buf, char *end, const char **name, time_t *time,
-                        const char **zone)
-{
-  char *cur = buf, *endstr;
-
-  *name = cur;
-  while (cur < end && *cur != '>')
-    cur++;
-  if (cur + 2 >= end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-  *(++cur) = '\0'; /* skip '>' */
-  cur++;
-
-  errno = 0;
-  *time = strtoul(cur, &endstr, 10);
-  if (errno || endstr == cur || endstr >= end || *endstr != ' ') {
-    if (!errno)
-      setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-
-  while (cur < end && *cur != ' ') /* skip time */
-    cur++;
-  if (cur == end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-  *cur++ = '\0';
-  *zone = cur;
-
-  while (cur < end && *cur != '\n')
-    cur++;
-
-  if (cur == end) {
-    setqerrno(QE_BADOBJFILE);
-    return NULL;
-  }
-
-  *cur++ = '\0';
-  return cur;
-}
-
 static int parse_header(struct obj *obj, char *cur, char *end)
 {
   int has_object = 0;
@@ -131,13 +86,12 @@ static int parse_header(struct obj *obj, char *cur, char *end)
       *cur++ = '\0';
 
     } else if (strncmp(cur, "tagger ", 7) == 0) {
-      if (obj->tag.tagger) {
+      if (obj->tag.tagger.name) {
         setqerrno(QE_BADOBJFILE);
         return -1;
       }
       cur += 7;
-      cur = parse_sign(cur, end, &obj->tag.tagger, &obj->tag.time,
-                       &obj->tag.timezone);
+      cur = sign_parse(&obj->tag.tagger, cur, end);
       if (!cur)
         return -1;
     } else {
@@ -145,7 +99,8 @@ static int parse_header(struct obj *obj, char *cur, char *end)
       return -1;
     }
   }
-  if (!has_object || !obj->tag.type || !obj->tag.name || !obj->tag.tagger) {
+  if (!has_object || !obj->tag.type || !obj->tag.name ||
+      !obj->tag.tagger.name) {
     setqerrno(QE_BADOBJFILE);
     return -1;
   }

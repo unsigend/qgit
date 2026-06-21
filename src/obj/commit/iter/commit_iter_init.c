@@ -27,9 +27,10 @@ static int pq_cmp(void *lhs, void *rhs)
 {
   struct obj *obj1 = *(struct obj **)lhs;
   struct obj *obj2 = *(struct obj **)rhs;
-  if (obj1->commit.ctime > obj2->commit.ctime)
+  struct sign *comsign = &obj1->commit.committer; /* committer sign */
+  if (comsign->time > obj2->commit.committer.time)
     return -1;
-  else if (obj1->commit.ctime < obj2->commit.ctime)
+  else if (comsign->time < obj2->commit.committer.time)
     return 1;
   else
     return 0;
