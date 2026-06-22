@@ -64,6 +64,14 @@ void *vec_at(const struct vector *vec, size_t idx)
   return GET(vec, vec->buf, idx);
 }
 
+void vec_sort(struct vector *vec, int (*cmp)(const void *, const void *))
+{
+  if (!vec || !cmp)
+    return;
+  if (vec->sz)
+    qsort(vec->buf, vec->sz, vec->elesz, cmp);
+}
+
 void vec_clear(struct vector *vec)
 {
   if (!vec)

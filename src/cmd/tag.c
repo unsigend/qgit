@@ -17,6 +17,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <string.h>
 
 #include "argparse.h"
 #include "config.h"
@@ -38,6 +39,12 @@ static int printtag(const char *refname, unsigned char *sha1)
   }
   printf("%s\n", tagname);
   return 0;
+}
+
+static int ref_name_cmp(const void *a, const void *b)
+{
+  const struct ref *ra = a, *rb = b;
+  return strcmp(ra->name, rb->name);
 }
 
 int cmd_tag(int argc, char **argv)
@@ -87,6 +94,8 @@ int cmd_tag(int argc, char **argv)
     if (argparse_getremargc(&ctx) < 1)
       die("missing tag name");
     tagname = argparse_getremargv(&ctx)[0];
+    if (tagname[0] == '.' || tagname[0] == '/')
+      die("invalid tag name");
 
     if (snprintf(buf, PATH_MAX, "%s/refs/tags/%s", repo->qgitdir, tagname) >=
         PATH_MAX) {
@@ -97,15 +106,36 @@ int cmd_tag(int argc, char **argv)
     if (remove(buf) == -1)
       die_errno();
 
-  } else if (l || (!d && !l && !argparse_getremargc(&ctx))) /* list mode */
+  } else if (l ||
+             (!argparse_getremargc(&ctx) && !f && !a && !msg)) /* list mode */
   {
-    if (ref_foreach(repo, REF_SCOPE_TAGS, printtag) == -1)
+    struct vector_iter iter;
+    struct refs refs;
+    struct ref *ref = NULL;
+
+    if (refs_init(&refs, repo) == -1)
       die_errno();
+
+    if (vec_iter_init(&iter, &refs.tags) == -1)
+      die_errno();
+
+    vec_sort(&refs.tags, ref_name_cmp);
+    while (vec_iter_get(&iter)) {
+      ref = vec_iter_get(&iter);
+      if (printtag(ref->name, ref->sha1) == -1)
+        die_errno();
+      vec_iter_inc(&iter);
+    }
+
+    refs_fini(&refs);
+
   } else if (!d && !l) /* create mode */
   {
     if (argparse_getremargc(&ctx) < 1)
       die("missing tag name");
     tagname = argparse_getremargv(&ctx)[0];
+    if (tagname[0] == '.' || tagname[0] == '/')
+      die("invalid tag name");
     if (argparse_getremargc(&ctx) >= 2)
       commit = argparse_getremargv(&ctx)[1];
 

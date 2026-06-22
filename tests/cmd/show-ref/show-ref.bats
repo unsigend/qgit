@@ -238,6 +238,59 @@ load "helpers/show-ref.bash"
     assert_matches_git_show_ref
 }
 
+# output order
+
+@test "qgit show-ref: output order matches git for mixed branches and tags" {
+    setup_out_of_order_refs
+    assert_matches_git_show_ref_order
+}
+
+@test "qgit show-ref --branches: output order matches git" {
+    setup_out_of_order_refs
+    assert_matches_git_show_ref_order --branches
+}
+
+@test "qgit show-ref --tags: output order matches git" {
+    setup_out_of_order_refs
+    assert_matches_git_show_ref_order --tags
+}
+
+@test "qgit show-ref --branches --tags: output order matches git" {
+    setup_out_of_order_refs
+    assert_matches_git_show_ref_order --branches --tags
+}
+
+@test "qgit show-ref --head: output order matches git" {
+    setup_out_of_order_refs
+    write_ref "refs/heads/$SHOW_REF_BRANCH" "$SHOW_REF_SHA_ALPHA"
+    set_symref_head "$SHOW_REF_BRANCH"
+    assert_matches_git_show_ref_order --head
+}
+
+@test "qgit show-ref --head --branches: output order matches git" {
+    setup_out_of_order_refs
+    write_ref "refs/heads/$SHOW_REF_BRANCH" "$SHOW_REF_SHA_ALPHA"
+    set_symref_head "$SHOW_REF_BRANCH"
+    assert_matches_git_show_ref_order --head --branches
+}
+
+@test "qgit show-ref --head --tags: output order matches git" {
+    setup_out_of_order_refs
+    write_ref "refs/heads/$SHOW_REF_BRANCH" "$SHOW_REF_SHA_ALPHA"
+    set_symref_head "$SHOW_REF_BRANCH"
+    assert_matches_git_show_ref_order --head --tags
+}
+
+@test "qgit show-ref: nested branch output order matches git" {
+    setup_nested_out_of_order_refs
+    assert_matches_git_show_ref_order --branches
+}
+
+@test "qgit show-ref: nested tag output order matches git" {
+    setup_multi_tag_refs
+    assert_matches_git_show_ref_order --tags
+}
+
 # output format
 
 @test "qgit show-ref: prints oid and refname separated by space" {

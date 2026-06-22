@@ -50,6 +50,7 @@ int vec_pushback(struct vector *vec, void *ele);
 int vec_popback(struct vector *vec, void *dest);
 int vec_insert(struct vector *vec, size_t idx, void *ele);
 int vec_remove(struct vector *vec, size_t idx, void *dest);
+void vec_sort(struct vector *vec, int (*cmp)(const void *, const void *));
 void vec_clear(struct vector *vec);
 
 struct vector_iter {

@@ -99,6 +99,15 @@ assert_matches_git_show_ref() {
     assert_sorted_output_equals "$expected"
 }
 
+assert_matches_git_show_ref_order() {
+    local expected
+
+    expected=$(git_show_ref "$@")
+    run_show_ref "$@"
+    assert_success
+    assert_output_equals "$expected"
+}
+
 ref_line() {
     printf '%s %s' "$1" "$2"
 }
@@ -121,4 +130,29 @@ setup_multi_tag_refs() {
     write_ref "refs/heads/$SHOW_REF_BRANCH" "$SHOW_REF_SHA_MAIN"
     write_ref "refs/tags/v1.0.0" "$SHOW_REF_SHA_TAG"
     write_ref "refs/tags/release/v2.0.0" "$SHOW_REF_SHA_TAG2"
+}
+
+# Write refs in reverse lexicographic order so readdir order differs from git.
+setup_out_of_order_refs() {
+    init_repo
+    SHOW_REF_SHA_ZEBRA=$(make_commit "zebra commit")
+    SHOW_REF_SHA_MIDDLE=$(make_commit "middle commit")
+    SHOW_REF_SHA_ALPHA=$(make_commit "alpha commit")
+    SHOW_REF_SHA_TAG_Z=$(make_commit "tag z commit")
+    SHOW_REF_SHA_TAG_A=$(make_commit "tag a commit")
+    write_ref "refs/heads/zebra" "$SHOW_REF_SHA_ZEBRA"
+    write_ref "refs/heads/middle" "$SHOW_REF_SHA_MIDDLE"
+    write_ref "refs/heads/alpha" "$SHOW_REF_SHA_ALPHA"
+    write_ref "refs/tags/z-release" "$SHOW_REF_SHA_TAG_Z"
+    write_ref "refs/tags/a-release" "$SHOW_REF_SHA_TAG_A"
+}
+
+setup_nested_out_of_order_refs() {
+    init_repo
+    SHOW_REF_SHA_TRUNK=$(make_commit "trunk commit")
+    SHOW_REF_SHA_NESTED_Z=$(make_commit "nested z commit")
+    SHOW_REF_SHA_NESTED_A=$(make_commit "nested a commit")
+    write_ref "refs/heads/trunk" "$SHOW_REF_SHA_TRUNK"
+    write_ref "refs/heads/feature/zeta" "$SHOW_REF_SHA_NESTED_Z"
+    write_ref "refs/heads/feature/alpha" "$SHOW_REF_SHA_NESTED_A"
 }

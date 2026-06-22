@@ -18,20 +18,29 @@
 #ifndef REF_H
 #define REF_H
 
+#include "collection/vector.h"
+#include "sha1.h"
+
 struct repo;
+struct ref;
+struct refs;
+
+extern int refs_init(struct refs *refs, struct repo *repo);
+extern void refs_fini(struct refs *refs);
+
+struct ref {
+  char *name;
+  unsigned char sha1[SHA1_DIGLEN];
+};
+
+struct refs {
+  struct vector branches;
+  struct vector tags;
+  struct repo *repo;
+};
 
 extern int ref_resolve(struct repo *repo, const char *refname,
                        unsigned char *sha1);
-enum ref_scope {
-  REF_SCOPE_ALL,
-  REF_SCOPE_BRANCHES,
-  REF_SCOPE_TAGS,
-};
-
-typedef int (*ref_foreach_cb)(const char *refname, unsigned char *sha1);
-
-extern int ref_foreach(struct repo *repo, enum ref_scope scope,
-                       ref_foreach_cb cb);
 
 /* resolve HEAD */
 extern int ref_resolve_head(struct repo *repo, unsigned char *sha1);

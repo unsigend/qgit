@@ -19,22 +19,29 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
+#include "collection/vector.h"
 #include "ref.h"
 #include "repo.h"
-#include "sha1.h"
 
-static int foreach (struct repo *repo, const char *path, ref_foreach_cb cb)
+enum scope {
+  BRANCHES,
+  TAGS,
+};
+
+/* path for the ref dir like refs/heads or refs/tags */
+static int foreach (struct refs *refs, const char *path, enum scope scope)
 {
   char buf[PATH_MAX];
   DIR *dir = NULL;
   struct dirent *ent = NULL;
-  unsigned char sha1[SHA1_DIGLEN];
   struct stat st;
+  struct ref ref;
 
-  if (snprintf(buf, PATH_MAX, "%s/%s", repo->qgitdir, path) >= PATH_MAX) {
+  if (snprintf(buf, PATH_MAX, "%s/%s", refs->repo->qgitdir, path) >= PATH_MAX) {
     errno = ENAMETOOLONG;
     return -1;
   }
@@ -49,8 +56,8 @@ static int foreach (struct repo *repo, const char *path, ref_foreach_cb cb)
     if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
       continue;
 
-    if (snprintf(buf, PATH_MAX, "%s/%s/%s", repo->qgitdir, path, ent->d_name) >=
-        PATH_MAX) { /* full path */
+    if (snprintf(buf, PATH_MAX, "%s/%s/%s", refs->repo->qgitdir, path,
+                 ent->d_name) >= PATH_MAX) { /* full path */
       errno = ENAMETOOLONG;
       closedir(dir);
       return -1;
@@ -70,21 +77,41 @@ static int foreach (struct repo *repo, const char *path, ref_foreach_cb cb)
 
     if (S_ISDIR(st.st_mode)) /* recursive for dir */
     {
-      if (foreach (repo, buf, cb) == -1) {
+      if (foreach (refs, buf, scope) == -1) {
         closedir(dir);
         return -1;
       }
 
-    } else /* regular ref*/
+    } else if (!S_ISREG(st.st_mode)) /* not a regular file */
+      continue;
+    else /* regular ref */
     {
-      if (ref_resolve_path(repo, buf, sha1) == -1) {
+      ref.name = strdup(buf);
+      if (!ref.name) {
         closedir(dir);
         return -1;
       }
 
-      if (cb(buf, sha1) == -1) {
+      if (ref_resolve_path(refs->repo, buf, ref.sha1) == -1) {
+        free(ref.name);
         closedir(dir);
         return -1;
+      }
+
+      if (scope == BRANCHES) /* branches */
+      {
+        if (vec_pushback(&refs->branches, &ref) == -1) {
+          free(ref.name);
+          closedir(dir);
+          return -1;
+        }
+      } else /* tags */
+      {
+        if (vec_pushback(&refs->tags, &ref) == -1) {
+          free(ref.name);
+          closedir(dir);
+          return -1;
+        }
       }
     }
   }
@@ -93,19 +120,33 @@ static int foreach (struct repo *repo, const char *path, ref_foreach_cb cb)
   return 0;
 }
 
-int ref_foreach(struct repo *repo, enum ref_scope scope, ref_foreach_cb cb)
+static void ref_destroy(void *ele)
 {
-  if (!repo || !cb)
+  struct ref *ref = (struct ref *)ele;
+  free(ref->name);
+}
+
+int refs_init(struct refs *refs, struct repo *repo)
+{
+  if (!refs || !repo)
     return -1;
 
-  if (scope == REF_SCOPE_ALL || scope == REF_SCOPE_BRANCHES) {
-    if (foreach (repo, "refs/heads", cb) == -1)
-      return -1;
+  if (vec_init(&refs->branches, sizeof(struct ref), ref_destroy) == -1)
+    return -1;
+  if (vec_init(&refs->tags, sizeof(struct ref), ref_destroy) == -1) {
+    vec_fini(&refs->branches);
+    return -1;
   }
 
-  if (scope == REF_SCOPE_ALL || scope == REF_SCOPE_TAGS) {
-    if (foreach (repo, "refs/tags", cb) == -1)
-      return -1;
+  refs->repo = repo;
+
+  if (foreach (refs, "refs/heads", BRANCHES) == -1) {
+    refs_fini(refs);
+    return -1;
+  }
+  if (foreach (refs, "refs/tags", TAGS) == -1) {
+    refs_fini(refs);
+    return -1;
   }
 
   return 0;

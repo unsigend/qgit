@@ -16,8 +16,10 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "argparse.h"
+#include "collection/vector.h"
 #include "die.h"
 #include "ref.h"
 #include "repo.h"
@@ -30,6 +32,12 @@ static int printref(const char *refname, unsigned char *sha1)
     return -1;
   printf("%s %s\n", hex, refname);
   return 0;
+}
+
+static int ref_name_cmp(const void *a, const void *b)
+{
+  const struct ref *ra = a, *rb = b;
+  return strcmp(ra->name, rb->name);
 }
 
 int cmd_show_ref(int argc, char **argv)
@@ -62,10 +70,16 @@ int cmd_show_ref(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
 
   struct repo *repo = NULL;
+  struct refs refs;
+  struct vector_iter iter;
+  struct ref *ref;
   int show_branches = branches || (!branches && !tags);
   int show_tags = tags || (!branches && !tags);
 
   if (!((repo = repo_findcwd())))
+    die_errno();
+
+  if (refs_init(&refs, repo) == -1)
     die_errno();
 
   if (head) {
@@ -76,14 +90,29 @@ int cmd_show_ref(int argc, char **argv)
       die_errno();
   }
   if (show_branches) {
-    if (ref_foreach(repo, REF_SCOPE_BRANCHES, printref) == -1)
+    vec_sort(&refs.branches, ref_name_cmp);
+    if (vec_iter_init(&iter, &refs.branches) == -1)
       die_errno();
+    while (vec_iter_get(&iter)) {
+      ref = vec_iter_get(&iter);
+      if (printref(ref->name, ref->sha1) == -1)
+        die_errno();
+      vec_iter_inc(&iter);
+    }
   }
   if (show_tags) {
-    if (ref_foreach(repo, REF_SCOPE_TAGS, printref) == -1)
+    vec_sort(&refs.tags, ref_name_cmp);
+    if (vec_iter_init(&iter, &refs.tags) == -1)
       die_errno();
+    while (vec_iter_get(&iter)) {
+      ref = vec_iter_get(&iter);
+      if (printref(ref->name, ref->sha1) == -1)
+        die_errno();
+      vec_iter_inc(&iter);
+    }
   }
 
+  refs_fini(&refs);
   repo_close(repo);
   argparse_fini(&ctx);
   return 0;
