@@ -15,41 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <time.h>
+#include <string.h>
 
-#include "obj/object.h"
 #include "obj/sign.h"
-#include "obj/tag.h"
-#include "sha1.h"
 
-int tag_fprintf(struct obj *obj, FILE *fp)
+int sign_init(struct sign *sign, const char *name, const char *email,
+              time_t time, const char *zone)
 {
-  if (!obj || !fp)
+  if (!sign || !name || !email || !zone)
     return -1;
 
-  unsigned char hex[SHA1_HEXLEN];
-
-  if (sha1_to_hex(obj->tag.object, hex) == -1)
+  if (strlen(zone) != SIGN_ZONE_LEN || (zone[0] != '-' && zone[0] != '+'))
     return -1;
 
-  if (fprintf(fp, "object %s\n", hex) < 0)
-    return -1;
-  if (fprintf(fp, "type %s\n", obj->tag.type) < 0)
-    return -1;
-  if (fprintf(fp, "tag %s\n", obj->tag.name) < 0)
-    return -1;
-
-  if (fprintf(fp, "tagger %s <%s> %ld %s\n", obj->tag.tagger.name,
-              obj->tag.tagger.email, obj->tag.tagger.time,
-              obj->tag.tagger.zone) < 0)
-    return -1;
-
-  if (fputc('\n', fp) < 0)
-    return -1;
-  if (obj->tag.msg) {
-    if (fprintf(fp, "%s", obj->tag.msg) < 0)
-      return -1;
-  }
-
+  sign->name = name;
+  sign->email = email;
+  sign->time = time;
+  memcpy(sign->zone, zone, SIGN_ZONE_LEN);
+  sign->zone[SIGN_ZONE_LEN] = '\0';
   return 0;
 }

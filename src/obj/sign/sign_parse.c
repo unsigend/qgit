@@ -60,14 +60,17 @@ char *sign_parse(struct sign *sign, char *buf, char *bufend)
     return NULL;
   }
 
-  while (cur < bufend && *cur != ' ') /* skip time */
-    cur++;
-  if (cur == bufend) {
+  cur = endstr + 1;
+  if (cur + SIGN_ZONE_LEN >= bufend) {
     setqerrno(QE_BADSIGN);
     return NULL;
   }
-  *cur++ = '\0';
-  sign->zone = cur;
+  if (cur[0] != '-' && cur[0] != '+') {
+    setqerrno(QE_BADSIGN);
+    return NULL;
+  }
+  memcpy(sign->zone, cur, SIGN_ZONE_LEN);
+  sign->zone[SIGN_ZONE_LEN] = '\0';
 
   while (cur < bufend && *cur != '\n')
     cur++;

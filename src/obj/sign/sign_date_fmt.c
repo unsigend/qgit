@@ -16,15 +16,29 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #include "obj/sign.h"
 
-int sign_fprintf_name(struct sign *sign, FILE *fp)
+int sign_date_fmt(const struct sign *sign, char *buf, size_t buflen)
 {
-  if (!sign || !fp || !sign->name || !sign->email)
-    return -1;
-  if (fprintf(fp, "%s <%s>", sign->name, sign->email) < 0)
+  if (!sign || !buf || !buflen)
     return -1;
 
+  struct tm tm;
+  int off, s, oh, om;
+  time_t adj;
+
+  s = (sign->zone[0] == '-') ? -1 : 1;
+  oh = (sign->zone[1] - '0') * 10 + (sign->zone[2] - '0');
+  om = (sign->zone[3] - '0') * 10 + (sign->zone[4] - '0');
+  off = s * (oh * 60 * 60 + om * 60);
+
+  adj = sign->time + off;
+  if (!gmtime_r(&adj, &tm))
+    return -1;
+  if (!strftime(buf, buflen, "%a %b %e %H:%M:%S %Y", &tm))
+    return -1;
   return 0;
 }

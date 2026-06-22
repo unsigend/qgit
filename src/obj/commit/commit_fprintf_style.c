@@ -21,6 +21,7 @@
 
 #include "obj/commit.h"
 #include "obj/object.h"
+#include "obj/sign.h"
 #include "sha1.h"
 
 #define ASCII_YELLOW "\033[33m"
@@ -36,6 +37,7 @@ static int print_default(struct obj *obj, FILE *fp)
   unsigned char *sha1 = NULL;
   const char *str = obj->commit.msg;
   struct sign *authorsign = &obj->commit.author;
+  char datebuf[64];
 
   if (sha1_to_hex(obj->sha1, hex) == -1)
     return -1;
@@ -64,15 +66,14 @@ static int print_default(struct obj *obj, FILE *fp)
   }
 
   /* author */
-  if (fprintf(fp, "Author: ") < 0 || sign_fprintf_name(authorsign, fp) == -1 ||
-      fputc('\n', fp) == EOF)
+  if (fprintf(fp, "Author: %s <%s>\n", authorsign->name, authorsign->email) < 0)
     return -1;
 
   /* date */
-  if (fprintf(fp, "Date:   ") < 0 || sign_fprintf_date(authorsign, fp) == -1 ||
-      fputc('\n', fp) == EOF)
+  if (sign_date_fmt(authorsign, datebuf, sizeof(datebuf)) == -1)
     return -1;
-
+  if (fprintf(fp, "Date:   %s %s\n", datebuf, authorsign->zone) < 0)
+    return -1;
   if (fputc('\n', fp) == EOF)
     return -1;
 

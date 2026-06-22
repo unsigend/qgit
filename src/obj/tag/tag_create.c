@@ -60,7 +60,7 @@ struct obj *tag_create(const struct tag *tag)
 {
   if (!tag || !tag->type || !tag->name)
     return NULL;
-  if (!tag->tagger.name || !tag->tagger.email || !tag->tagger.zone)
+  if (!tag->tagger.name || !tag->tagger.email)
     return NULL;
 
   struct obj *obj = NULL;

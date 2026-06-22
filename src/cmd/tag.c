@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <time.h>
 
 #include "argparse.h"
 #include "config.h"
@@ -25,6 +26,8 @@
 #include "error.h"
 #include "fs.h"
 #include "iniparse.h"
+#include "obj/object.h"
+#include "obj/tag.h"
 #include "ref.h"
 #include "repo.h"
 #include "sha1.h"
@@ -153,6 +156,7 @@ int cmd_tag(int argc, char **argv)
 
     if (ref_resolve(repo, commit, sha1) == -1)
       die_errno();
+
     if (snprintf(buf, PATH_MAX, "refs/tags/%s", tagname) >= PATH_MAX) {
       errno = ENAMETOOLONG;
       die_errno();
@@ -185,8 +189,37 @@ int cmd_tag(int argc, char **argv)
             "<name>\n\nOmit --global to set the identity only in this "
             "repository.");
 
-      /* TODO: create tag object */
+      struct tag tag;
+      struct sign tagger;
+      struct obj *obj = NULL, *refobj = NULL;
 
+      if (!(refobj = obj_open(repo, sha1)))
+        die_errno();
+      if (refobj->type != OBJ_COMMIT) {
+        obj_close(refobj);
+        die("qgit annotated tag must refer to a commit");
+      }
+      obj_close(refobj);
+
+      if (sign_init_now(&tagger, name, email) == -1)
+        die_errno();
+
+      tag.msg = msg;
+      tag.type = "commit";
+      tag.name = tagname;
+      tag.tagger = tagger;
+
+      sha1_copy(sha1, tag.object);
+
+      if (!(obj = tag_create(&tag)))
+        die_errno();
+      if (obj_write(obj, repo) == -1)
+        die_errno();
+
+      if (ref_update(repo, buf, obj->sha1) == -1)
+        die_errno();
+
+      obj_close(obj);
       iniparse_close(lcfg);
       iniparse_close(gcfg);
 

@@ -47,16 +47,18 @@ int commit_fprintf(struct obj *obj, FILE *fp)
     slist_iter_inc(&iter);
   }
 
-  if (authorsign->name && authorsign->email && authorsign->zone) {
-    if (fprintf(fp, "author ") < 0 || sign_fprintf_name(authorsign, fp) == -1 ||
-        fprintf(fp, " %ld %s\n", authorsign->time, authorsign->zone) < 0)
+  if (authorsign->name && authorsign->email) {
+    if (fprintf(fp, "author %s <%s> %ld %s\n", authorsign->name,
+                authorsign->email, authorsign->time, authorsign->zone) < 0)
       return -1;
   }
-  if (comsign->name && comsign->email && comsign->zone) {
-    if (fprintf(fp, "committer ") < 0 || sign_fprintf_name(comsign, fp) == -1 ||
-        fprintf(fp, " %ld %s\n", comsign->time, comsign->zone) < 0)
+
+  if (comsign->name && comsign->email) {
+    if (fprintf(fp, "committer %s <%s> %ld %s\n", comsign->name, comsign->email,
+                comsign->time, comsign->zone) < 0)
       return -1;
   }
+
   if (fputc('\n', fp) < 0)
     return -1;
   if (obj->commit.msg) {

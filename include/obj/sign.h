@@ -18,21 +18,28 @@
 #ifndef OBJ_SIGN_H
 #define OBJ_SIGN_H
 
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+
+#define SIGN_ZONE_LEN 5
 
 struct sign {
   const char *name;
   const char *email;
   time_t time;
-  const char *zone;
+  char zone[SIGN_ZONE_LEN + 1]; /* +HHMM or -HHMM */
 };
 
 /* parse signature inplace from buffer: <name> <email> <timestamp> <timezone>,
    return next pointer */
 extern char *sign_parse(struct sign *sign, char *buf, char *bufend);
 
-extern int sign_fprintf_date(struct sign *sign, FILE *fp);
-extern int sign_fprintf_name(struct sign *sign, FILE *fp);
+extern int sign_init(struct sign *sign, const char *name, const char *email,
+                     time_t time, const char *zone);
+extern int sign_init_now(struct sign *sign, const char *name,
+                         const char *email);
+
+extern int sign_date_fmt(const struct sign *sign, char *buf, size_t buflen);
 
 #endif
