@@ -46,7 +46,8 @@ void obj_close(struct obj *obj)
     return;
   if (obj->payload)
     free(obj->payload);
-  delegate(obj);
+  if (obj->parsed)
+    delegate(obj);
   memset(obj, 0, sizeof(struct obj));
   free(obj);
 }

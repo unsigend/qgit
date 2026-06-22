@@ -15,35 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <limits.h>
+#ifndef OBJ_OBJ_INTERNAL_H
+#define OBJ_OBJ_INTERNAL_H
+
 #include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "obj/obj_internal.h"
-#include "obj/object.h"
+struct obj;
+struct repo;
 
-int obj_write(struct obj *obj, struct repo *repo)
-{
-  if (!obj || !repo)
-    return -1;
+/* internal plumbing functions, these functions handle raw bytes buffer
+   "type <size>\0<payload>" */
 
-  void *buf = NULL;
-  size_t buflen = 0;
+extern int obj_write_buf(struct obj *obj, void **buf, size_t *buflen);
+extern int obj_store(struct repo *repo, const unsigned char *sha1,
+                     const void *buf, size_t buflen);
 
-  if (obj_write_buf(obj, &buf, &buflen) == -1)
-    return -1;
-
-  if (sha1(buf, buflen, obj->sha1) == -1) {
-    free(buf);
-    return -1;
-  }
-
-  if (obj_store(repo, obj->sha1, buf, buflen) == -1) {
-    free(buf);
-    return -1;
-  }
-
-  free(buf);
-  return 0;
-}
+#endif

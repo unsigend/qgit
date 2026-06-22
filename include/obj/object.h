@@ -36,11 +36,23 @@ enum obj_type {
   OBJ_NONE = -1,
 };
 
+/* qgit object model: asymmetric read/write object model, optimized for reads
+   with zero copy.
+   Read path: after parse, parsed is set and subtype heap data is owned by the
+   union.
+   Write path: parsed is unset, only payload is owned by struct obj. Free
+   function will only free the payload.
+
+   delegate functions with polymorphic design philosophy: obj_close,
+   obj_fprintf, obj_parse
+*/
+
 struct obj {
   size_t payloadsz;
   void *payload;
   enum obj_type type;
   unsigned char sha1[SHA1_DIGLEN];
+  unsigned parsed : 1;
   union {
     struct commit commit;
     struct blob blob;
@@ -53,23 +65,15 @@ extern struct obj *obj_open(struct repo *repo, unsigned char *sha1);
 extern struct obj *obj_find(struct repo *repo, const char *name);
 
 extern int obj_parse(struct obj *obj);
-extern void obj_close(struct obj *obj);
+extern int obj_fprintf(struct obj *obj, FILE *fp);
+
 extern struct obj *obj_create(unsigned char *buf, size_t buflen,
                               enum obj_type type);
 extern int obj_write(struct obj *obj, struct repo *repo);
 
-extern int obj_fprintf(struct obj *obj, FILE *fp);
+extern void obj_close(struct obj *obj);
 
 extern enum obj_type obj_type_from_str(const char *str);
 extern const char *obj_type_to_str(enum obj_type type);
-
-/* internal functions */
-
-/* write "type <size>\0<payload>" to buffer. */
-extern int obj_write_buf(struct obj *obj, void **buf, size_t *buflen);
-
-/* store "type <size>\0<payload>" to repository. */
-extern int obj_store(struct repo *repo, const unsigned char *sha1,
-                     const void *buf, size_t buflen);
 
 #endif

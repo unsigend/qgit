@@ -18,10 +18,12 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "compress.h"
 #include "fs.h"
-#include "obj/object.h"
+#include "repo.h"
+#include "sha1.h"
 
 static mode_t dirmode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 

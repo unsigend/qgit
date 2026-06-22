@@ -22,19 +22,31 @@ int obj_parse(struct obj *obj)
 {
   if (!obj)
     return -1;
+  if (obj->parsed)
+    return 0;
 
   switch (obj->type) {
   case OBJ_COMMIT:
-    return commit_parse(obj);
+    if (commit_parse(obj) == -1)
+      return -1;
+    break;
   case OBJ_BLOB:
-    return blob_parse(obj);
+    if (blob_parse(obj) == -1)
+      return -1;
+    break;
   case OBJ_TREE:
-    return tree_parse(obj);
+    if (tree_parse(obj) == -1)
+      return -1;
+    break;
   case OBJ_TAG:
-    return tag_parse(obj);
+    if (tag_parse(obj) == -1)
+      return -1;
+    break;
   default: {
     setqerrno(QE_INVALIDOBJ);
     return -1;
   }
   }
+  obj->parsed = 1;
+  return 0;
 }

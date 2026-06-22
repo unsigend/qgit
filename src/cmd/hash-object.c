@@ -25,6 +25,7 @@
 
 #include "argparse.h"
 #include "die.h"
+#include "obj/obj_internal.h"
 #include "obj/object.h"
 
 static void map_buf(const char *path, void **buf, size_t *buflen)
