@@ -590,6 +590,38 @@ load "helpers/log.bash"
     assert_failure
 }
 
+# peel suffix
+
+@test "qgit log: annotated tag name matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_log v1.0
+}
+
+@test "qgit log: annotated tag^{commit} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_log "v1.0^{commit}"
+}
+
+@test "qgit log: annotated tag^{} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_log "v1.0^{}"
+}
+
+@test "qgit log: nested annotated tag name matches git" {
+    setup_annotated_tag_on_tip release/v1.0 "Nested release" >/dev/null
+    assert_matches_git_log release/v1.0
+}
+
+@test "qgit log: HEAD^{commit} matches git" {
+    setup_linear_history 2 >/dev/null
+    assert_matches_git_log "HEAD^{commit}"
+}
+
+@test "qgit log: annotated tag^{tag} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_log "v1.0^{tag}"
+}
+
 # -h
 
 @test "qgit log -h: shows help" {

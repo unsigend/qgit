@@ -406,6 +406,48 @@ load "helpers/ls-tree.bash"
     [ "$plain" = "$with_t" ] || return 1
 }
 
+# peel suffix
+
+@test "qgit ls-tree: annotated tag name matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree v1.0
+}
+
+@test "qgit ls-tree: annotated tag^{tree} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree "v1.0^{tree}"
+}
+
+@test "qgit ls-tree: annotated tag^{} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree "v1.0^{}"
+}
+
+@test "qgit ls-tree -r: annotated tag name matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree -r v1.0
+}
+
+@test "qgit ls-tree -r: annotated tag^{tree} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree -r "v1.0^{tree}"
+}
+
+@test "qgit ls-tree -r: annotated tag^{} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree -r "v1.0^{}"
+}
+
+@test "qgit ls-tree -r -t: nested annotated tag matches git" {
+    setup_annotated_tag_on_tip release/v1.0 "Nested release" >/dev/null
+    assert_matches_git_ls_tree -r -t release/v1.0
+}
+
+@test "qgit ls-tree: annotated tag^{tag} matches git" {
+    setup_annotated_tag_on_tip v1.0 >/dev/null
+    assert_matches_git_ls_tree "v1.0^{tag}"
+}
+
 # errors
 
 @test "qgit ls-tree: missing tree-ish fails" {

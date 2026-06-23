@@ -15,29 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef REV_H
+#define REV_H
 
-#include <errno.h>
+#include "obj/object.h"
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
-#define QE_EXISTSTAG 6
-#define QE_BADSIGN 7
-#define QE_IDENTITY 8
-#define QE_PEEL 9
-#define QE_BADREV 10
+enum rev_peel_mode { REV_PEEL_NONE, REV_PEEL_TO, REV_PEEL_DEREF };
 
-/* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
-extern int *qerrno_location(void);
-#define qerrno (*qerrno_location())
-#define setqerrno(code)                                                        \
-  errno = 0;                                                                   \
-  qerrno = code;
-
-extern const char *qerror_str(int error);
+extern int rev_parse(const char *name, char *base, enum obj_type *peel,
+                     enum rev_peel_mode *mode);
 
 #endif

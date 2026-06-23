@@ -59,12 +59,10 @@ load "helpers/rev-parse.bash"
     assert_failure
 }
 
-@test "qgit rev-parse: full sha1 resolves without object check" {
-    local sha
-
+@test "qgit rev-parse: full sha1 with no object fails" {
     setup_branch_head >/dev/null
-    sha="0000000000000000000000000000000000000001"
-    assert_matches_git_rev_parse "$sha"
+    run_rev_parse "0000000000000000000000000000000000000001"
+    assert_failure
 }
 
 @test "qgit rev-parse: 39 character hex is not treated as full sha1" {
@@ -299,6 +297,151 @@ load "helpers/rev-parse.bash"
 @test "qgit rev-parse: annotated tag matches git for bare name and refs path" {
     setup_annotated_tag_ref release/v2.0 >/dev/null
     assert_matches_git_rev_parse release/v2.0 refs/tags/release/v2.0
+}
+
+# peel suffix
+
+@test "qgit rev-parse: annotated tag^{commit} resolves to tagged commit" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    assert_matches_git_rev_parse "v1.0^{commit}"
+    assert_output_equals "$REV_PARSE_PEEL_COMMIT"
+}
+
+@test "qgit rev-parse: annotated tag^{tree} resolves to commit tree" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    assert_matches_git_rev_parse "v1.0^{tree}"
+    assert_output_equals "$REV_PARSE_PEEL_TREE"
+}
+
+@test "qgit rev-parse: annotated tag^{tag} resolves to tag object" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    assert_matches_git_rev_parse "v1.0^{tag}"
+    assert_output_equals "$REV_PARSE_PEEL_TAG"
+}
+
+@test "qgit rev-parse: annotated tag^{} dereferences to tagged commit" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    assert_matches_git_rev_parse "v1.0^{}"
+    assert_output_equals "$REV_PARSE_PEEL_COMMIT"
+}
+
+@test "qgit rev-parse: refs/tags path with^{commit} resolves to tagged commit" {
+    setup_annotated_peel_fixture release/v1.0 "Nested peel tag" >/dev/null
+    assert_matches_git_rev_parse "refs/tags/release/v1.0^{commit}"
+    assert_output_equals "$REV_PARSE_PEEL_COMMIT"
+}
+
+@test "qgit rev-parse: lightweight tag^{} resolves to commit" {
+    local sha
+
+    sha=$(setup_branch_head)
+    setup_lightweight_tag_ref release "$sha"
+    assert_matches_git_rev_parse "release^{}"
+    assert_output_equals "$sha"
+}
+
+@test "qgit rev-parse: lightweight tag^{commit} resolves to commit" {
+    local sha
+
+    sha=$(setup_branch_head)
+    setup_lightweight_tag_ref release "$sha"
+    assert_matches_git_rev_parse "release^{commit}"
+    assert_output_equals "$sha"
+}
+
+@test "qgit rev-parse: HEAD^{commit} resolves to branch tip" {
+    local sha
+
+    sha=$(setup_branch_head)
+    assert_matches_git_rev_parse "HEAD^{commit}"
+    assert_output_equals "$sha"
+}
+
+@test "qgit rev-parse: HEAD^{tree} resolves to branch tip tree" {
+    local sha tree_sha
+
+    sha=$(setup_branch_head)
+    tree_sha=$(git_rev_parse "$sha^{tree}")
+    assert_matches_git_rev_parse "HEAD^{tree}"
+    assert_output_equals "$tree_sha"
+}
+
+@test "qgit rev-parse: branch name^{tree} resolves to commit tree" {
+    local sha tree_sha
+
+    sha=$(setup_branch_head)
+    tree_sha=$(git_rev_parse "$sha^{tree}")
+    assert_matches_git_rev_parse "$REV_PARSE_BRANCH^{tree}"
+    assert_output_equals "$tree_sha"
+}
+
+@test "qgit rev-parse: full sha1^{commit} resolves to itself" {
+    local sha
+
+    sha=$(setup_branch_head)
+    assert_matches_git_rev_parse "$sha^{commit}"
+    assert_output_equals "$sha"
+}
+
+@test "qgit rev-parse: full sha1^{tree} resolves to commit tree" {
+    local sha tree_sha
+
+    sha=$(setup_branch_head)
+    tree_sha=$(git_rev_parse "$sha^{tree}")
+    assert_matches_git_rev_parse "$sha^{tree}"
+    assert_output_equals "$tree_sha"
+}
+
+@test "qgit rev-parse: nested annotated tag^{} dereferences to commit" {
+    setup_nested_annotated_tags
+    assert_matches_git_rev_parse "outer^{}"
+    assert_output_equals "$REV_PARSE_NESTED_COMMIT"
+}
+
+@test "qgit rev-parse: nested annotated tag^{commit} resolves to commit" {
+    setup_nested_annotated_tags
+    assert_matches_git_rev_parse "outer^{commit}"
+    assert_output_equals "$REV_PARSE_NESTED_COMMIT"
+}
+
+@test "qgit rev-parse: nested annotated tag^{tag} resolves to outer tag object" {
+    setup_nested_annotated_tags
+    assert_matches_git_rev_parse "outer^{tag}"
+    assert_output_equals "$REV_PARSE_NESTED_OUTER"
+}
+
+@test "qgit rev-parse: nested annotated inner^{commit} resolves to commit" {
+    setup_nested_annotated_tags
+    assert_matches_git_rev_parse "inner^{commit}"
+    assert_output_equals "$REV_PARSE_NESTED_COMMIT"
+}
+
+@test "qgit rev-parse: peel suffix with invalid type fails" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    run_rev_parse "v1.0^{foo}"
+    assert_failure
+}
+
+@test "qgit rev-parse: peel suffix with trailing text fails" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    run_rev_parse "v1.0^{commit}extra"
+    assert_failure
+}
+
+@test "qgit rev-parse: annotated tag^{blob} fails when tag points at commit" {
+    setup_annotated_peel_fixture v1.0 >/dev/null
+    run_rev_parse "v1.0^{blob}"
+    assert_failure
+    run env GIT_DIR="$(qgit_meta_dir)" "$GIT" rev-parse "v1.0^{blob}"
+    assert_failure
+}
+
+@test "qgit rev-parse: commit^{blob} fails" {
+    local sha
+
+    sha=$(setup_branch_head)
+    run_rev_parse "$sha^{blob}"
+    assert_failure
 }
 
 # branch and tag same name

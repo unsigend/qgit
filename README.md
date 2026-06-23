@@ -373,9 +373,13 @@ Resolves each revision argument to a full 40-character object name and prints on
 
 With no arguments, qgit exits successfully and prints nothing.
 
-Arguments are resolved in this order: a full 40-character hex SHA-1, `HEAD`, a full reference path such as `refs/heads/main` or `refs/tags/v1.0`, a branch or tag name, then an abbreviated SHA-1 of at least four hex digits. When the same bare name exists as both a branch and a tag, both references must point at the same object.
+Each argument must resolve to an object that exists in the repository. qgit does not accept a well-formed SHA-1 unless the object is present in `.qgit/objects/`.
 
-qgit does not support Git porcelain flags yet such as `--verify`, `--short`, or revision suffixes like `^{commit}`.
+Arguments are resolved in this order: a full 40-character hex SHA-1, `HEAD`, a full reference path such as `refs/heads/main` or `refs/tags/v1.0`, a branch or tag name, then an abbreviated SHA-1 of at least seven hex digits. When the same bare name exists as both a branch and a tag, both references must point at the same object.
+
+Revision arguments may include an optional peel suffix: `^{}`, `^{commit}`, `^{tree}`, `^{tag}`, or `^{blob}`. The suffix peels annotated tags and commits as needed and prints the resulting object name. For example, `v1.0^{commit}` on an annotated tag resolves to the tagged commit.
+
+qgit does not support Git porcelain flags yet such as `--verify` or `--short`.
 
 #### Options
 
@@ -438,7 +442,7 @@ Show the working tree status.
 
 Create, list, or delete tags.
 
-qgit supports lightweight tags only. Annotated tags, signing, and verification are not supported.
+qgit supports lightweight and annotated tags. Annotated tags require a message and may only point at commits. Signing and verification are not supported.
 
 #### Synopsis
 
@@ -449,11 +453,15 @@ qgit tag [options] -d <tagname>
 
 #### Description
 
-Create, list, or delete tag references in `refs/tags/`. The command must be run inside a qgit repository.
+Add a tag reference in `refs/tags/`, unless `-d` or `-l` is given to delete or list tags. The command must be run inside a qgit repository.
 
-With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a lightweight tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. With `-d`, qgit deletes the named tag.
+Unless `-f` is given, the named tag must not yet exist.
 
-Creating a tag with an existing name fails unless `-f` is given.
+If `-a` is passed, qgit creates an annotated tag object and requires `-m`. The tagger name and email come from `user.name` and `user.email` in the repository or global config. Annotated tags must refer to a commit.
+
+Otherwise, qgit creates a lightweight tag that points directly at the given object.
+
+With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. With `-d`, qgit deletes the named tag.
 
 #### Options
 
@@ -470,12 +478,22 @@ List tags. Running `qgit tag` with no arguments also lists tags.
 `-d`
 `--delete`
 
-Delete the tag with the given name.
+Delete existing tags with the given names.
 
 `-f`
 `--force`
 
-Replace an existing tag if `<tagname>` is already present.
+Replace an existing tag with the given name instead of failing.
+
+`-a`
+`--annotate`
+
+Make an unsigned, annotated tag object.
+
+`-m` `<msg>`
+`--message=` `<msg>`
+
+Use the given tag message. Required when creating an annotated tag with `-a`.
 
 `<tagname>`
 

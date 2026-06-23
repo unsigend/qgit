@@ -79,7 +79,7 @@ int cmd_cat_file(int argc, char **argv)
       die("auto mode requires <object>");
     name = argparse_getremargv(&ctx)[0];
 
-    if (!((obj = obj_find(repo, name))))
+    if (!((obj = obj_find(repo, name, OBJ_NONE))))
       die_errno();
 
     if (p) {
@@ -106,7 +106,7 @@ int cmd_cat_file(int argc, char **argv)
     if (obj_type_from_str(expect) == OBJ_NONE)
       die_errno();
 
-    if (!((obj = obj_find(repo, name))))
+    if (!((obj = obj_find(repo, name, OBJ_NONE))))
       die_errno();
 
     if (obj->type != obj_type_from_str(expect))

@@ -142,3 +142,34 @@ assert_matches_git_annotated_tag_rev_parse() {
     assert_matches_git_rev_parse "$1"
     assert_output_not_equals "$REV_PARSE_ANNOTATED_COMMIT"
 }
+
+setup_lightweight_tag_ref() {
+    local tagname="$1"
+    local sha="$2"
+
+    write_ref "refs/tags/$tagname" "$sha"
+}
+
+setup_annotated_peel_fixture() {
+    local tagname="${1:-v1.0}"
+
+    setup_annotated_tag_ref "$tagname" "${2:-Release version 1.0}" >/dev/null
+    REV_PARSE_PEEL_COMMIT="$REV_PARSE_ANNOTATED_COMMIT"
+    REV_PARSE_PEEL_TAG="$REV_PARSE_ANNOTATED_TAG"
+    REV_PARSE_PEEL_TREE=$(git_rev_parse "$REV_PARSE_PEEL_COMMIT^{tree}")
+}
+
+setup_nested_annotated_tags() {
+    local commit_sha inner_tag outer_tag
+
+    init_repo
+    commit_sha=$(make_commit "nested tag commit")
+    setup_git_identity
+    git_tag -a inner -m "inner tag" "$commit_sha"
+    inner_tag=$(git_rev_parse inner)
+    git_tag -a outer -m "outer tag" inner
+    outer_tag=$(git_rev_parse outer)
+    REV_PARSE_NESTED_COMMIT="$commit_sha"
+    REV_PARSE_NESTED_INNER="$inner_tag"
+    REV_PARSE_NESTED_OUTER="$outer_tag"
+}

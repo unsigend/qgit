@@ -419,3 +419,35 @@ EOF
 
     finalize_ls_tree_repo "$commit_sha"
 }
+
+setup_git_tag_identity() {
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" config user.name "Test User"
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" config user.email "test@example.com"
+}
+
+write_tag_ref() {
+    local tagname="$1"
+    local sha="$2"
+    local dir
+
+    dir=$(dirname "$tagname")
+    mkdir -p "$TEST_DIR/.git/refs/tags/$dir" "$TEST_DIR/.qgit/refs/tags/$dir"
+    printf '%s\n' "$sha" >"$TEST_DIR/.git/refs/tags/$tagname"
+    printf '%s\n' "$sha" >"$TEST_DIR/.qgit/refs/tags/$tagname"
+}
+
+setup_annotated_tag_on_tip() {
+    local tagname="${1:-v1.0}"
+    local message="${2:-Release tag}"
+    local tip_sha tag_obj_sha
+
+    tip_sha=$(setup_nested_tree_commit)
+    setup_git_tag_identity
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" tag -a "$tagname" -m "$message" "$tip_sha"
+    copy_loose_objects
+    tag_obj_sha=$(env GIT_DIR="$TEST_DIR/.git" "$GIT" rev-parse "refs/tags/$tagname")
+    write_tag_ref "$tagname" "$tag_obj_sha"
+    LS_TREE_PEEL_TAG="$tagname"
+    LS_TREE_PEEL_TIP="$tip_sha"
+    printf '%s\n' "$tip_sha"
+}

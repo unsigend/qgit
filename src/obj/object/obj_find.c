@@ -15,18 +15,73 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
+
 #include "obj/object.h"
 #include "ref.h"
 #include "repo.h"
+#include "rev.h"
 
-struct obj *obj_find(struct repo *repo, const char *name)
+struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
 {
   if (!repo || !name)
     return NULL;
 
+  char base[NAME_MAX];
+  enum obj_type peel;
+  enum rev_peel_mode mode;
   unsigned char sha1[SHA1_DIGLEN];
-  if (ref_resolve(repo, name, sha1) == -1)
+  struct obj *obj = NULL, *peeled = NULL;
+
+  if (rev_parse(name, base, &peel, &mode) == -1)
     return NULL;
 
-  return obj_open(repo, sha1);
+  if (ref_resolve(repo, base, sha1) == -1)
+    return NULL;
+
+  if (!(obj = obj_open(repo, sha1)))
+    return NULL;
+
+  if (mode == REV_PEEL_TO) {
+    want = peel; /* suffix have higher precedence than want */
+
+    if (want == obj->type)
+      return obj;
+    if (!(peeled = obj_peel(repo, obj, want))) {
+      obj_close(obj);
+      return NULL;
+    }
+    if (peeled != obj)
+      obj_close(obj);
+    return peeled;
+
+  } else if (mode == REV_PEEL_DEREF) /* dereference tags */
+  {
+    while (obj->type == OBJ_TAG) {
+      if (!obj->parsed && obj_parse(obj) == -1) {
+        obj_close(obj);
+        return NULL;
+      }
+      if (!(peeled = obj_open(repo, obj->tag.object))) {
+        obj_close(obj);
+        return NULL;
+      }
+      obj_close(obj);
+      obj = peeled;
+    }
+    return obj;
+
+  } else /* REV_PEEL_NONE */
+  {
+    if (want == OBJ_NONE || want == obj->type)
+      return obj;
+
+    if (!(peeled = obj_peel(repo, obj, want))) {
+      obj_close(obj);
+      return NULL;
+    }
+    if (peeled != obj)
+      obj_close(obj);
+    return peeled;
+  }
 }

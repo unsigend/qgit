@@ -21,7 +21,6 @@
 #include "obj/tree.h"
 #include "ref.h"
 #include "repo.h"
-#include "sha1.h"
 
 int cmd_ls_tree(int argc, char **argv)
 {
@@ -59,28 +58,24 @@ int cmd_ls_tree(int argc, char **argv)
   name = argparse_getremargv(&ctx)[0];
 
   struct repo *repo = NULL;
-  unsigned char sha1[SHA1_DIGLEN];
   struct obj *obj = NULL;
   enum tree_print_style style = TREE_PRINT_STYLE_DEFAULT;
 
   if (!((repo = repo_findcwd())))
     die_errno();
 
-  if (!((obj = obj_find(repo, name))))
+  if (!((obj = obj_find(repo, name, OBJ_TREE))))
     die_errno();
 
   if (obj->type != OBJ_TREE) {
-    if (obj->type != OBJ_COMMIT)
-      die("not a tree or commit");
-
-    if (obj_parse(obj) == -1)
+    struct obj *peeled = obj_peel(repo, obj, OBJ_TREE);
+    if (!peeled)
       die_errno();
-
-    sha1_copy(obj->commit.tree, sha1);
-    obj_close(obj);
-    if (!((obj = obj_open(repo, sha1))))
-      die_errno();
+    if (peeled != obj)
+      obj_close(obj);
+    obj = peeled;
   }
+
   if (obj_parse(obj) == -1)
     die_errno();
 

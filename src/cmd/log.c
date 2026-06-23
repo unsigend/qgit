@@ -19,9 +19,7 @@
 #include "die.h"
 #include "obj/commit.h"
 #include "obj/object.h"
-#include "ref.h"
 #include "repo.h"
-#include "sha1.h"
 
 #define UNLIMITED -1
 
@@ -72,9 +70,16 @@ int cmd_log(int argc, char **argv)
   if (!(repo = repo_findcwd()))
     die_errno();
 
-  if (!((obj = obj_find(repo, name))))
+  if (!((obj = obj_find(repo, name, OBJ_COMMIT))))
     die_errno();
-
+  if (obj->type != OBJ_COMMIT) {
+    struct obj *peeled = obj_peel(repo, obj, OBJ_COMMIT);
+    if (!peeled)
+      die_errno();
+    if (peeled != obj)
+      obj_close(obj);
+    obj = peeled;
+  }
   if (obj_parse(obj) == -1)
     die_errno();
 

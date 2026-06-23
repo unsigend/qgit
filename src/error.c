@@ -29,6 +29,8 @@ static const char *errstr[] = {
     [QE_EXISTSTAG] = "tag already exists",
     [QE_BADSIGN] = "bad signature field",
     [QE_IDENTITY] = "identity is required",
+    [QE_PEEL] = "could not peel object",
+    [QE_BADREV] = "bad revision",
 };
 
 const char *qerror_str(int error)

@@ -306,3 +306,51 @@ load "helpers/cat-file-tag.bash"
     setup_annotated_tag_by_name release/v1.0 "Nested release tag" >/dev/null
     assert_matches_git_cat_p_by_ref release/v1.0
 }
+
+# peel suffix by ref name
+
+@test "qgit cat-file -t: annotated tag^{} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -t "v1.0^{}"
+}
+
+@test "qgit cat-file -t: annotated tag^{commit} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -t "v1.0^{commit}"
+}
+
+@test "qgit cat-file -t: annotated tag^{tag} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -t "v1.0^{tag}"
+}
+
+@test "qgit cat-file -t: annotated tag^{tree} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -t "v1.0^{tree}"
+}
+
+@test "qgit cat-file -p: annotated tag^{commit} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat_p_by_ref "v1.0^{commit}"
+}
+
+@test "qgit cat-file -p: annotated tag^{} matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat_p_by_ref "v1.0^{}"
+}
+
+@test "qgit cat-file tag: annotated tag^{commit} raw mode matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat commit "v1.0^{commit}"
+}
+
+@test "qgit cat-file tag: annotated tag by ref without peel matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat tag v1.0
+}
+
+@test "qgit cat-file commit: annotated tag by ref without peel fails" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    run_cat_file commit v1.0
+    assert_failure
+}

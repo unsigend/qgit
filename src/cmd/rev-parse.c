@@ -19,9 +19,9 @@
 
 #include "argparse.h"
 #include "die.h"
+#include "obj/object.h"
 #include "ref.h"
 #include "repo.h"
-#include "sha1.h"
 
 int cmd_rev_parse(int argc, char **argv)
 {
@@ -48,7 +48,7 @@ int cmd_rev_parse(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
 
   struct repo *repo = NULL;
-  unsigned char sha1[SHA1_DIGLEN];
+  struct obj *obj = NULL;
   unsigned char hex[SHA1_HEXLEN];
   const char *refname = NULL;
 
@@ -57,11 +57,12 @@ int cmd_rev_parse(int argc, char **argv)
       die_errno();
     for (size_t i = 0; i < argparse_getremargc(&ctx); i++) {
       refname = argparse_getremargv(&ctx)[i];
-      if (ref_resolve(repo, refname, sha1) == -1)
+      if (!((obj = obj_find(repo, refname, OBJ_NONE))))
         die_errno();
-      if (sha1_to_hex(sha1, hex) == -1)
+      if (sha1_to_hex(obj->sha1, hex) == -1)
         die_errno();
       printf("%s\n", hex);
+      obj_close(obj);
     }
   }
 

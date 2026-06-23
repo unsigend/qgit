@@ -62,7 +62,10 @@ struct obj {
 };
 
 extern struct obj *obj_open(struct repo *repo, unsigned char *sha1);
-extern struct obj *obj_find(struct repo *repo, const char *name);
+extern struct obj *obj_find(struct repo *repo, const char *name,
+                            enum obj_type want);
+extern struct obj *obj_peel(struct repo *repo, struct obj *obj,
+                            enum obj_type want);
 
 extern int obj_parse(struct obj *obj);
 extern int obj_fprintf(struct obj *obj, FILE *fp);
