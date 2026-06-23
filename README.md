@@ -5,7 +5,8 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
 ## Table of Contents
 
 1. [Build](#build)
-2. [Commands](#commands)
+2. [Revision Syntax](#revision-syntax)
+3. [Commands](#commands)
    * [add](#add)
    * [cat-file](#cat-file)
    * [check-ignore](#check-ignore)
@@ -24,7 +25,7 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
    * [status](#status)
    * [tag](#tag)
    * [version](#version)
-3. [Contribution](#contribution)
+4. [Contribution](#contribution)
 
 ## Build
 
@@ -56,6 +57,34 @@ make unit      build and run unit tests
 make unit-NAME run one unit test
 make help      show usage message
 ```
+
+## Revision Syntax
+
+Most qgit commands that accept an object name use a common resolution order. Given a bare name, qgit tries each of the following in turn:
+
+1. A full 40-character hex SHA-1.
+2. `HEAD`.
+3. A full reference path such as `refs/heads/main` or `refs/tags/v1.0`.
+4. A branch or tag name under `refs/heads` or `refs/tags`.
+5. An abbreviated SHA-1 of at least seven hex digits.
+
+When the same bare name exists as both a branch and a tag, both references must point at the same object.
+
+### Peel suffix
+
+A name may include an optional peel suffix to dereference the resolved object:
+
+| Suffix | Effect |
+|--------|--------|
+| `^{}` | Dereference all annotated tags to reach the underlying non-tag object. |
+| `^{commit}` | Peel to a commit. |
+| `^{tree}` | Peel to a tree. |
+| `^{tag}` | Resolve to the tag object itself. |
+| `^{blob}` | Peel to a blob. |
+
+For example, `v1.0^{commit}` on an annotated tag resolves to the tagged commit.
+
+---
 
 ## Commands
 
@@ -375,11 +404,9 @@ With no arguments, qgit exits successfully and prints nothing.
 
 Each argument must resolve to an object that exists in the repository. qgit does not accept a well-formed SHA-1 unless the object is present in `.qgit/objects/`.
 
-Arguments are resolved in this order: a full 40-character hex SHA-1, `HEAD`, a full reference path such as `refs/heads/main` or `refs/tags/v1.0`, a branch or tag name, then an abbreviated SHA-1 of at least seven hex digits. When the same bare name exists as both a branch and a tag, both references must point at the same object.
+Name resolution order and peel suffix syntax follow the rules described in [Revision Syntax](#revision-syntax).
 
-Revision arguments may include an optional peel suffix: `^{}`, `^{commit}`, `^{tree}`, `^{tag}`, or `^{blob}`. The suffix peels annotated tags and commits as needed and prints the resulting object name. For example, `v1.0^{commit}` on an annotated tag resolves to the tagged commit.
-
-qgit does not support Git porcelain flags yet such as `--verify` or `--short`.
+qgit does not support Git porcelain flags such as `--verify` or `--short`.
 
 #### Options
 

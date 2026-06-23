@@ -67,6 +67,9 @@ int cmd_ls_tree(int argc, char **argv)
   if (!((obj = obj_find(repo, name, OBJ_TREE))))
     die_errno();
 
+  if (obj_parse(obj) == -1)
+    die_errno();
+
   if (obj->type != OBJ_TREE) {
     struct obj *peeled = obj_peel(repo, obj, OBJ_TREE);
     if (!peeled)

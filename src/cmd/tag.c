@@ -191,25 +191,23 @@ int cmd_tag(int argc, char **argv)
 
       struct tag tag;
       struct sign tagger;
-      struct obj *obj = NULL, *refobj = NULL;
+      struct obj *obj = NULL;
 
-      if (!(refobj = obj_open(repo, sha1)))
+      if (!((obj = obj_find(repo, commit, OBJ_NONE))))
         die_errno();
-      if (refobj->type != OBJ_COMMIT) {
-        obj_close(refobj);
-        die("qgit annotated tag must refer to a commit");
-      }
-      obj_close(refobj);
+      if (obj_parse(obj) == -1)
+        die_errno();
 
       if (sign_init_now(&tagger, name, email) == -1)
         die_errno();
 
       tag.msg = msg;
-      tag.type = "commit"; /* only support commit for tag types */
+      tag.type = obj_type_to_str(obj->type);
       tag.name = tagname;
       tag.tagger = tagger;
 
-      sha1_copy(sha1, tag.object);
+      sha1_copy(obj->sha1, tag.object);
+      obj_close(obj);
 
       if (!(obj = tag_create(&tag)))
         die_errno();

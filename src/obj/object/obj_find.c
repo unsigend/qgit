@@ -47,6 +47,12 @@ struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
 
     if (want == obj->type)
       return obj;
+
+    if (obj_parse(obj) == -1) {
+      obj_close(obj);
+      return NULL;
+    }
+
     if (!(peeled = obj_peel(repo, obj, want))) {
       obj_close(obj);
       return NULL;
@@ -76,6 +82,10 @@ struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
     if (want == OBJ_NONE || want == obj->type)
       return obj;
 
+    if (obj_parse(obj) == -1) {
+      obj_close(obj);
+      return NULL;
+    }
     if (!(peeled = obj_peel(repo, obj, want))) {
       obj_close(obj);
       return NULL;

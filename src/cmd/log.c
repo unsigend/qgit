@@ -72,6 +72,10 @@ int cmd_log(int argc, char **argv)
 
   if (!((obj = obj_find(repo, name, OBJ_COMMIT))))
     die_errno();
+
+  if (obj_parse(obj) == -1)
+    die_errno();
+
   if (obj->type != OBJ_COMMIT) {
     struct obj *peeled = obj_peel(repo, obj, OBJ_COMMIT);
     if (!peeled)
