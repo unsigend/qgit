@@ -425,6 +425,212 @@ load "helpers/tag.bash"
     assert_matches_git_tag_list_ordered -l
 }
 
+# -a annotated
+
+@test "qgit tag -a: create annotated tag at HEAD" {
+    local sha
+
+    sha=$(setup_branch_head "annotated head")
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.0.0
+    assert_success
+    assert_output_empty
+    assert_annotated_tag_points_at_commit "v1.0.0" "$sha"
+    assert_tag_message_in_object "v1.0.0" "$TAG_ANNOTATED_MESSAGE"
+}
+
+@test "qgit tag -a: create annotated tag at explicit commit" {
+    local sha other
+
+    sha=$(setup_branch_head "annotated explicit base")
+    other=$(make_commit "annotated explicit target")
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" release "$other"
+    assert_success
+    assert_annotated_tag_points_at_commit "release" "$other"
+}
+
+@test "qgit tag --annotate: create annotated tag with long flag" {
+    local sha
+
+    sha=$(setup_branch_head "annotated long flag")
+    setup_user_identity
+    run_tag --annotate -m "$TAG_ANNOTATED_MESSAGE" v1.0.0
+    assert_success
+    assert_annotated_tag_points_at_commit "v1.0.0" "$sha"
+}
+
+@test "qgit tag --message: create annotated tag with long message flag" {
+    local sha
+
+    sha=$(setup_branch_head "annotated long message flag")
+    setup_user_identity
+    run_tag -a --message "$TAG_ANNOTATED_MESSAGE" v1.0.0
+    assert_success
+    assert_annotated_tag_points_at_commit "v1.0.0" "$sha"
+}
+
+@test "qgit tag -a: multiline message is stored in tag object" {
+    local sha message=$'First line\n\nThird line'
+
+    sha=$(setup_branch_head "annotated multiline")
+    setup_user_identity
+    run_tag -a -m "$message" v2.0.0
+    assert_success
+    assert_annotated_tag_points_at_commit "v2.0.0" "$sha"
+    assert_tag_message_in_object "v2.0.0" "First line"
+    assert_tag_message_in_object "v2.0.0" "Third line"
+}
+
+@test "qgit tag -a: annotated tag ref points at tag object not commit" {
+    local sha tag_ref_sha
+
+    sha=$(setup_branch_head "annotated ref target")
+    setup_qgit_annotated_tag v1.0.0 "$sha"
+    tag_ref_sha=$(read_tag_ref "v1.0.0")
+    assert_tag_ref_not_equals "v1.0.0" "$sha"
+    assert_tag_object_type "$tag_ref_sha"
+}
+
+@test "qgit tag -a: missing message fails" {
+    setup_branch_head "annotated missing message"
+    setup_user_identity
+    run_tag -a v1.0.0
+    assert_failure
+    [ ! -f "$(tag_ref_file v1.0.0)" ]
+}
+
+@test "qgit tag -a: empty message creates annotated tag" {
+    local sha
+
+    sha=$(setup_branch_head "annotated empty message")
+    setup_user_identity
+    run_tag -a -m "" v1.0.0
+    assert_success
+    assert_output_empty
+    assert_annotated_tag_points_at_commit "v1.0.0" "$sha"
+}
+
+@test "qgit tag -a: fails without user identity" {
+    setup_branch_head "annotated missing identity"
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.0.0
+    assert_failure
+    [ ! -f "$(tag_ref_file v1.0.0)" ]
+}
+
+@test "qgit tag -a: fails when target is not a commit" {
+    local blob_sha
+
+    setup_branch_head "annotated non-commit base"
+    setup_user_identity
+    blob_sha=$(make_blob)
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.0.0 "$blob_sha"
+    assert_failure
+    [ ! -f "$(tag_ref_file v1.0.0)" ]
+}
+
+@test "qgit tag -a: fails when HEAD does not resolve" {
+    init_repo
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.0.0
+    assert_failure
+}
+
+@test "qgit tag -a: duplicate annotated tag without force fails" {
+    local sha second
+
+    sha=$(setup_branch_head "annotated duplicate first")
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" stable "$sha"
+    assert_success
+    second=$(make_commit "annotated duplicate second")
+    run_tag -a -m "other message" stable "$second"
+    assert_failure
+    assert_annotated_tag_points_at_commit "stable" "$sha"
+}
+
+@test "qgit tag -f: force overwrite annotated tag" {
+    local sha second
+
+    sha=$(setup_branch_head "annotated force first")
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" stable "$sha"
+    assert_success
+    second=$(make_commit "annotated force second")
+    run_tag -f -a -m "forced release" stable "$second"
+    assert_success
+    assert_annotated_tag_points_at_commit "stable" "$second"
+    assert_tag_message_in_object "stable" "forced release"
+}
+
+@test "qgit tag -d: delete annotated tag" {
+    local sha
+
+    sha=$(setup_branch_head "annotated delete")
+    setup_qgit_annotated_tag v1.0.0 "$sha"
+    run_tag -d v1.0.0
+    assert_success
+    assert_output_empty
+    [ ! -f "$(tag_ref_file v1.0.0)" ]
+}
+
+@test "qgit tag: list includes annotated tag names only" {
+    local sha
+
+    sha=$(setup_branch_head "annotated list")
+    setup_qgit_annotated_tag v1.0.0 "$sha"
+    run_tag lightweight "$sha"
+    assert_success
+    run_tag
+    assert_success
+    assert_output_contains "v1.0.0"
+    assert_output_contains "lightweight"
+    assert_output_not_contains "refs/tags/"
+}
+
+@test "qgit tag: list mixed lightweight and annotated tags matches git" {
+    local sha
+
+    sha=$(setup_branch_head "annotated git list mix")
+    setup_git_identity
+    git_tag -a alpha -m "$TAG_ANNOTATED_MESSAGE" "$sha"
+    run_tag beta "$sha"
+    assert_success
+    setup_user_identity
+    run_tag -a -m "beta annotated" gamma "$sha"
+    assert_success
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag: list annotated tags in lexicographic order matches git" {
+    local sha
+
+    sha=$(setup_branch_head "annotated list order")
+    setup_git_identity
+    git_tag -a v1.3.0 -m "$TAG_ANNOTATED_MESSAGE" "$sha"
+    setup_user_identity
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.0.0 "$sha"
+    assert_success
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v1.1.0 "$sha"
+    assert_success
+    run_tag -a -m "$TAG_ANNOTATED_MESSAGE" v2.0.0 "$sha"
+    assert_success
+    assert_matches_git_tag_list_ordered
+}
+
+@test "qgit tag -d: matches git delete for annotated tag" {
+    local sha
+
+    sha=$(setup_branch_head "git delete annotated")
+    setup_git_identity
+    git_tag -a alpha -m "$TAG_ANNOTATED_MESSAGE" "$sha"
+    git_tag -a beta -m "$TAG_ANNOTATED_MESSAGE" "$sha"
+    git_tag -d alpha
+    run_tag -d beta
+    assert_success
+    assert_matches_git_tag_list
+}
+
 # -h
 
 @test "qgit tag -h: shows help" {
@@ -434,6 +640,8 @@ load "helpers/tag.bash"
     assert_output_contains "-d"
     assert_output_contains "-l"
     assert_output_contains "-f"
+    assert_output_contains "-a"
+    assert_output_contains "-m"
     assert_output_contains "<tagname>"
 }
 

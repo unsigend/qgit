@@ -112,3 +112,33 @@ make_ambiguous_short_prefix() {
     cp "$src" "$dst"
     printf '%s\n' "${sha:0:$prefix_len}"
 }
+
+setup_git_identity() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.name "Test User"
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.email "test@example.com"
+}
+
+git_tag() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" tag "$@"
+}
+
+setup_annotated_tag_ref() {
+    local tagname="${1:-v1.0}"
+    local message="${2:-Release version 1.0}"
+    local commit_sha tag_obj_sha
+
+    init_repo
+    commit_sha=$(make_commit "annotated tag commit")
+    setup_git_identity
+    git_tag -a "$tagname" -m "$message" "$commit_sha"
+    tag_obj_sha=$(git_rev_parse "$tagname")
+    REV_PARSE_ANNOTATED_COMMIT="$commit_sha"
+    REV_PARSE_ANNOTATED_TAG="$tag_obj_sha"
+    printf '%s\n' "$commit_sha" "$tag_obj_sha"
+}
+
+assert_matches_git_annotated_tag_rev_parse() {
+    setup_annotated_tag_ref "$1" "${2:-Release version 1.0}" >/dev/null
+    assert_matches_git_rev_parse "$1"
+    assert_output_not_equals "$REV_PARSE_ANNOTATED_COMMIT"
+}

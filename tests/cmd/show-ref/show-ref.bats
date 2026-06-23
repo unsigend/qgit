@@ -291,6 +291,43 @@ load "helpers/show-ref.bash"
     assert_matches_git_show_ref_order --tags
 }
 
+# annotated tags
+
+@test "qgit show-ref: lists annotated tag with tag object oid" {
+    setup_annotated_tag_ref v1.0.0 >/dev/null
+    assert_matches_git_show_ref --tags
+}
+
+@test "qgit show-ref: annotated tag oid differs from commit oid" {
+    setup_annotated_tag_ref release/v1.0.0 >/dev/null
+    assert_matches_git_show_ref
+}
+
+@test "qgit show-ref --tags: annotated tag matches git output" {
+    setup_annotated_tag_ref v1.0.0 >/dev/null
+    assert_matches_git_show_ref --tags
+}
+
+@test "qgit show-ref: mixed lightweight and annotated tags match git output" {
+    setup_mixed_lightweight_annotated_refs >/dev/null
+    assert_matches_git_show_ref --tags
+}
+
+@test "qgit show-ref: mixed lightweight and annotated tags in default listing match git" {
+    setup_mixed_lightweight_annotated_refs >/dev/null
+    assert_matches_git_show_ref
+}
+
+@test "qgit show-ref --tags: annotated tag output order matches git" {
+    setup_out_of_order_annotated_tag_refs
+    assert_matches_git_show_ref_order --tags
+}
+
+@test "qgit show-ref --tags: nested annotated tag matches git output" {
+    setup_annotated_tag_ref release/v2.0.0 "Nested annotated tag" >/dev/null
+    assert_matches_git_show_ref --tags
+}
+
 # output format
 
 @test "qgit show-ref: prints oid and refname separated by space" {

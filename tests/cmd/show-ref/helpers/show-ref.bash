@@ -156,3 +156,59 @@ setup_nested_out_of_order_refs() {
     write_ref "refs/heads/feature/zeta" "$SHOW_REF_SHA_NESTED_Z"
     write_ref "refs/heads/feature/alpha" "$SHOW_REF_SHA_NESTED_A"
 }
+
+setup_git_identity() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.name "Test User"
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.email "test@example.com"
+}
+
+git_tag() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" tag "$@"
+}
+
+git_rev_parse() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" rev-parse "$@"
+}
+
+setup_annotated_tag_ref() {
+    local tagname="${1:-v1.0.0}"
+    local message="${2:-Release version 1.0}"
+    local commit_sha tag_obj_sha
+
+    init_repo
+    commit_sha=$(make_commit "annotated tag commit")
+    setup_git_identity
+    git_tag -a "$tagname" -m "$message" "$commit_sha"
+    tag_obj_sha=$(git_rev_parse "$tagname")
+    SHOW_REF_SHA_ANNOTATED_COMMIT="$commit_sha"
+    SHOW_REF_SHA_ANNOTATED_TAG="$tag_obj_sha"
+    printf '%s\n' "$commit_sha" "$tag_obj_sha"
+}
+
+setup_mixed_lightweight_annotated_refs() {
+    local commit_sha tag_obj_sha commit_sha2 tag_obj_sha2
+
+    init_repo
+    commit_sha=$(make_commit "mixed tag commit one")
+    commit_sha2=$(make_commit "mixed tag commit two")
+    setup_git_identity
+    git_tag -a v1.0.0 -m "Release version 1.0" "$commit_sha"
+    tag_obj_sha=$(git_rev_parse v1.0.0)
+    write_ref "refs/tags/lightweight" "$commit_sha2"
+    SHOW_REF_SHA_MAIN=$(make_commit "mixed refs main")
+    write_ref "refs/heads/$SHOW_REF_BRANCH" "$SHOW_REF_SHA_MAIN"
+    SHOW_REF_SHA_TAG="$tag_obj_sha"
+    SHOW_REF_SHA_TAG2="$commit_sha2"
+    printf '%s\n' "$tag_obj_sha" "$commit_sha2"
+}
+
+setup_out_of_order_annotated_tag_refs() {
+    init_repo
+    SHOW_REF_SHA_ZEBRA=$(make_commit "zebra commit")
+    SHOW_REF_SHA_ALPHA=$(make_commit "alpha commit")
+    setup_git_identity
+    git_tag -a z-release -m "z release" "$SHOW_REF_SHA_ZEBRA"
+    git_tag -a a-release -m "a release" "$SHOW_REF_SHA_ALPHA"
+    SHOW_REF_SHA_TAG_Z=$(git_rev_parse z-release)
+    SHOW_REF_SHA_TAG_A=$(git_rev_parse a-release)
+}

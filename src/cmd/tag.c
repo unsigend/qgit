@@ -185,7 +185,7 @@ int cmd_tag(int argc, char **argv)
 
       if (!name || !email)
         die("Author identity unknown\n\n Run\n  qgit config --global "
-            "user.email <email>\n  qgit config --global user.name "
+            "--set user.email <email>\n  qgit config --global --set user.name "
             "<name>\n\nOmit --global to set the identity only in this "
             "repository.");
 
@@ -205,7 +205,7 @@ int cmd_tag(int argc, char **argv)
         die_errno();
 
       tag.msg = msg;
-      tag.type = "commit";
+      tag.type = "commit"; /* only support commit for tag types */
       tag.name = tagname;
       tag.tagger = tagger;
 

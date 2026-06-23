@@ -287,3 +287,28 @@ EOF
     sync_git_to_qgit
     echo "$tag_sha"
 }
+
+setup_annotated_tag_by_name() {
+    local tagname="${1:-v1.0}"
+    local message="${2:-Release version 1.0}"
+    local commit_sha tag_sha
+
+    commit_sha=$(setup_root_commit)
+    env GIT_DIR="$TEST_DIR/.git" "$GIT" tag -a "$tagname" -m "$message" "$commit_sha"
+    tag_sha=$(env GIT_DIR="$TEST_DIR/.git" "$GIT" rev-parse "$tagname")
+    sync_git_to_qgit
+    ANNOTATED_TAG_COMMIT="$commit_sha"
+    ANNOTATED_TAG_OBJECT="$tag_sha"
+    ANNOTATED_TAG_NAME="$tagname"
+    printf '%s\n' "$commit_sha" "$tag_sha"
+}
+
+assert_matches_git_cat_p_by_ref() {
+    local name="$1"
+    local expected
+
+    expected=$(git_cat -p "$name")
+    run_cat_file -p "$name"
+    assert_success
+    assert_output_normalized_equals "$expected" "$output"
+}

@@ -279,3 +279,30 @@ load "helpers/cat-file-tag.bash"
     run_cat_file -s -t "$hash"
     assert_failure
 }
+
+# annotated tag by ref name
+
+@test "qgit cat-file -p: annotated tag by ref name matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat_p_by_ref v1.0
+}
+
+@test "qgit cat-file -t: annotated tag by ref name matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -t v1.0
+}
+
+@test "qgit cat-file -s: annotated tag by ref name matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat -s v1.0
+}
+
+@test "qgit cat-file tag: annotated tag by ref name matches git" {
+    setup_annotated_tag_by_name v1.0 >/dev/null
+    assert_matches_git_cat tag v1.0
+}
+
+@test "qgit cat-file -p: nested annotated tag by ref name matches git" {
+    setup_annotated_tag_by_name release/v1.0 "Nested release tag" >/dev/null
+    assert_matches_git_cat_p_by_ref release/v1.0
+}

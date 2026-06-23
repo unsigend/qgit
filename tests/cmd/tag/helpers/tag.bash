@@ -1,7 +1,15 @@
 TAG_BRANCH="${QGIT_DEFAULT_BRANCH}"
+TAG_USER_NAME="Test User"
+TAG_USER_EMAIL="test@example.com"
+TAG_ANNOTATED_MESSAGE="Release version 1.0"
 
 init_repo() {
     "$QGIT_BIN" init -q
+}
+
+setup_user_identity() {
+    "$QGIT_BIN" config --set user.name "$TAG_USER_NAME"
+    "$QGIT_BIN" config --set user.email "$TAG_USER_EMAIL"
 }
 
 run_tag() {
@@ -142,4 +150,97 @@ assert_matches_git_tag_create() {
     assert_success
     assert_output_empty
     assert_tag_ref_equals "$tagname" "$expected_sha"
+}
+
+git_rev_parse() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" rev-parse "$@"
+}
+
+setup_git_identity() {
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.name "$TAG_USER_NAME"
+    env GIT_DIR="$(qgit_meta_dir)" "$GIT" config user.email "$TAG_USER_EMAIL"
+}
+
+setup_git_annotated_tag() {
+    local tagname="$1"
+    local commit_sha="$2"
+    local message="${3:-$TAG_ANNOTATED_MESSAGE}"
+    local tag_obj_sha
+
+    setup_git_identity
+    git_tag -a "$tagname" -m "$message" "$commit_sha"
+    tag_obj_sha=$(git_rev_parse "$tagname")
+    printf '%s\n' "$commit_sha" "$tag_obj_sha"
+}
+
+setup_qgit_annotated_tag() {
+    local tagname="$1"
+    local commit_sha="$2"
+    local message="${3:-$TAG_ANNOTATED_MESSAGE}"
+
+    setup_user_identity
+    run_tag -a -m "$message" "$tagname" "$commit_sha"
+    assert_success
+    assert_output_empty
+}
+
+assert_tag_ref_not_equals() {
+    local name="$1"
+    local sha="$2"
+    local actual
+
+    actual=$(read_tag_ref "$name")
+    if [ "$actual" = "$sha" ]; then
+        echo "Expected tag ref to differ from: $sha"
+        echo "Actual tag ref: $actual"
+        return 1
+    fi
+}
+
+assert_tag_object_type() {
+    local tag_ref_sha="$1"
+    local type
+
+    type=$("$QGIT_BIN" cat-file -t "$tag_ref_sha")
+    if [ "$type" != "tag" ]; then
+        echo "Expected tag object type, got: $type"
+        return 1
+    fi
+}
+
+assert_annotated_tag_points_at_commit() {
+    local tagname="$1"
+    local commit_sha="$2"
+    local tag_ref_sha object_sha
+
+    tag_ref_sha=$(read_tag_ref "$tagname")
+    assert_tag_ref_not_equals "$tagname" "$commit_sha"
+    assert_tag_object_type "$tag_ref_sha"
+    object_sha=$("$QGIT_BIN" cat-file tag "$tag_ref_sha" | awk '/^object / { print $2; exit }')
+    if [ "$object_sha" != "$commit_sha" ]; then
+        echo "Expected annotated tag object to point at: $commit_sha"
+        echo "Actual object line: $object_sha"
+        return 1
+    fi
+}
+
+assert_tag_message_in_object() {
+    local tagname="$1"
+    local message="$2"
+    local tag_sha
+
+    tag_sha=$(read_tag_ref "$tagname")
+    run "$QGIT_BIN" cat-file -p "$tag_sha"
+    assert_success
+    assert_output_contains "$message"
+}
+
+make_blob() {
+    local blob_file="$TEST_DIR/tag-blob-only-$$.txt"
+    local blob_sha
+
+    printf 'blob content\n' >"$blob_file"
+    blob_sha=$(env GIT_DIR="$(qgit_meta_dir)" "$GIT" hash-object -w "$blob_file")
+    rm -f "$blob_file"
+    printf '%s\n' "$blob_sha"
 }

@@ -275,6 +275,32 @@ load "helpers/rev-parse.bash"
     assert_output_equals "$sha"
 }
 
+# annotated tags
+
+@test "qgit rev-parse: annotated tag name resolves to tag object oid" {
+    assert_matches_git_annotated_tag_rev_parse v1.0
+}
+
+@test "qgit rev-parse: nested annotated tag name resolves to tag object oid" {
+    assert_matches_git_annotated_tag_rev_parse release/v1.0 "Nested annotated tag"
+}
+
+@test "qgit rev-parse: refs/tags path resolves annotated tag to tag object oid" {
+    setup_annotated_tag_ref v1.0 >/dev/null
+    assert_matches_git_rev_parse refs/tags/v1.0
+}
+
+@test "qgit rev-parse: annotated tag oid differs from tagged commit oid" {
+    setup_annotated_tag_ref v1.0 >/dev/null
+    assert_matches_git_rev_parse v1.0
+    assert_output_not_equals "$REV_PARSE_ANNOTATED_COMMIT"
+}
+
+@test "qgit rev-parse: annotated tag matches git for bare name and refs path" {
+    setup_annotated_tag_ref release/v2.0 >/dev/null
+    assert_matches_git_rev_parse release/v2.0 refs/tags/release/v2.0
+}
+
 # branch and tag same name
 
 @test "qgit rev-parse: branch and tag same name same sha succeeds" {
