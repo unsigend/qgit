@@ -21,8 +21,7 @@
 #include "obj/object.h"
 #include "obj/tag.h"
 
-/* format payload to buffer, for dry run mode ignore buf and buflen */
-int fmt_payload(const struct tag *tag, void *buf, size_t buflen)
+int fmt_tag(const struct tag *tag, void *buf, size_t buflen)
 {
   if (!tag)
     return -1;
@@ -32,27 +31,14 @@ int fmt_payload(const struct tag *tag, void *buf, size_t buflen)
   if (sha1_to_hex(tag->object, hex) == -1)
     return -1;
 
-  if (buf && buflen) {
-    n = snprintf(buf, buflen,
-                 "object %s\ntype %s\ntag %s\ntagger %s <%s> %ld %s\n\n%s", hex,
-                 tag->type, tag->name, tag->tagger.name, tag->tagger.email,
-                 tag->tagger.time, tag->tagger.zone, tag->msg ? tag->msg : "");
-
-    if (n < 0 || (size_t)n >= buflen)
-      return -1;
-    else
-      return n;
-
-  } else /* dry run mode */
-  {
-    if ((n = snprintf(
-             NULL, 0, "object %s\ntype %s\ntag %s\ntagger %s <%s> %ld %s\n\n%s",
-             hex, tag->type, tag->name, tag->tagger.name, tag->tagger.email,
-             tag->tagger.time, tag->tagger.zone, tag->msg ? tag->msg : "")) < 0)
-      return -1;
-    else
-      return n;
-  }
+  n = snprintf(buf, buflen,
+               "object %s\ntype %s\ntag %s\ntagger %s <%s> %ld %s\n\n%s", hex,
+               tag->type, tag->name, tag->tagger.name, tag->tagger.email,
+               tag->tagger.time, tag->tagger.zone, tag->msg ? tag->msg : "");
+  if (n < 0)
+    return -1;
+  if (buflen && n >= (int)buflen)
+    return -1;
   return n;
 }
 
@@ -67,13 +53,13 @@ struct obj *tag_create(const struct tag *tag)
   int payloadsz = 0;
   void *payload = NULL;
 
-  if ((payloadsz = fmt_payload(tag, NULL, 0)) < 0)
+  if ((payloadsz = fmt_tag(tag, NULL, 0)) < 0)
     return NULL;
 
   if (!(payload = malloc(payloadsz + 1)))
     return NULL;
 
-  if (fmt_payload(tag, payload, payloadsz + 1) < 0) {
+  if (fmt_tag(tag, payload, payloadsz + 1) < 0) {
     free(payload);
     return NULL;
   }

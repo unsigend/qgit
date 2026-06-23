@@ -53,6 +53,7 @@ typedef int (*tree_foreach_cb)(struct tree_entry *entry, const char *prefix,
                                void *arg);
 
 extern int tree_parse(struct obj *obj);
+extern struct obj *tree_create(const struct tree *tree);
 extern void tree_close(struct tree *tree);
 extern int tree_fprintf(struct obj *obj, FILE *fp);
 extern int tree_fprintf_style(struct obj *obj, FILE *fp, struct repo *repo,

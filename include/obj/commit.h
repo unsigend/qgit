@@ -54,6 +54,7 @@ enum commit_print_style {
 };
 
 extern int commit_parse(struct obj *obj);
+extern struct obj *commit_create(const struct commit *commit);
 extern void commit_close(struct commit *commit);
 extern int commit_fprintf(struct obj *obj, FILE *fp);
 extern int commit_fprintf_style(struct obj *obj, FILE *fp,

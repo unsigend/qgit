@@ -15,19 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OBJ_BLOB_H
-#define OBJ_BLOB_H
+#include "obj/blob.h"
+#include "obj/object.h"
 
-#include <stdio.h>
-
-struct obj;
-
-struct blob {
-};
-
-extern int blob_parse(struct obj *obj);
-extern void blob_close(struct blob *blob);
-extern struct obj *blob_create(unsigned char *buf, size_t buflen);
-extern int blob_fprintf(struct obj *obj, FILE *fp);
-
-#endif
+struct obj *blob_create(unsigned char *buf, size_t buflen)
+{
+  return obj_create(buf, buflen, OBJ_BLOB);
+}
