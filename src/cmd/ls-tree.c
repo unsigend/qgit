@@ -70,18 +70,6 @@ int cmd_ls_tree(int argc, char **argv)
   if (obj_parse(obj) == -1)
     die_errno();
 
-  if (obj->type != OBJ_TREE) {
-    struct obj *peeled = obj_peel(repo, obj, OBJ_TREE);
-    if (!peeled)
-      die_errno();
-    if (peeled != obj)
-      obj_close(obj);
-    obj = peeled;
-  }
-
-  if (obj_parse(obj) == -1)
-    die_errno();
-
   if (r) {
     if (t)
       style = TREE_PRINT_STYLE_SHOW_TREE;

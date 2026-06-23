@@ -76,17 +76,6 @@ int cmd_log(int argc, char **argv)
   if (obj_parse(obj) == -1)
     die_errno();
 
-  if (obj->type != OBJ_COMMIT) {
-    struct obj *peeled = obj_peel(repo, obj, OBJ_COMMIT);
-    if (!peeled)
-      die_errno();
-    if (peeled != obj)
-      obj_close(obj);
-    obj = peeled;
-  }
-  if (obj_parse(obj) == -1)
-    die_errno();
-
   if (commit_iter_init(&iter, repo, obj,
                        first_parent ? COMMIT_WALK_FPARENT : COMMIT_WALK_ALL) ==
       -1)

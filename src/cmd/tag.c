@@ -183,11 +183,10 @@ int cmd_tag(int argc, char **argv)
       if (!email && gcfg)
         email = iniparse_get(gcfg, "user", "email");
 
-      if (!name || !email)
-        die("Author identity unknown\n\n Run\n  qgit config --global "
-            "--set user.email <email>\n  qgit config --global --set user.name "
-            "<name>\n\nOmit --global to set the identity only in this "
-            "repository.");
+      if (!name || !email) {
+        setqerrno(QE_NOIDENTITY);
+        die_errno();
+      }
 
       struct tag tag;
       struct sign tagger;

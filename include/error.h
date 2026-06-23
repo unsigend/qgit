@@ -30,6 +30,7 @@
 #define QE_IDENTITY 8
 #define QE_PEEL 9
 #define QE_BADREV 10
+#define QE_NOIDENTITY 11
 
 /* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
 extern int *qerrno_location(void);
