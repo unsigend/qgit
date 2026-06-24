@@ -37,6 +37,7 @@ extern int exec_cmd(int argc, char **argv);
 
 /* Subcommand functions */
 extern int cmd_add(int argc, char **argv);
+extern int cmd_branch(int argc, char **argv);
 extern int cmd_cat_file(int argc, char **argv);
 extern int cmd_check_ignore(int argc, char **argv);
 extern int cmd_checkout(int argc, char **argv);

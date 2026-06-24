@@ -8,6 +8,7 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
 2. [Revision Syntax](#revision-syntax)
 3. [Commands](#commands)
    * [add](#add)
+   * [branch](#branch)
    * [cat-file](#cat-file)
    * [check-ignore](#check-ignore)
    * [checkout](#checkout)
@@ -93,6 +94,63 @@ Command documentation is in progress. Each entry below matches Git usage at a hi
 ### add
 
 Add file contents to the index.
+
+---
+
+### branch
+
+List, create, or delete branches.
+
+qgit reads and writes loose refs under `refs/heads` only. Remote branches, `packed-refs`, and merge checks on delete are not supported. Use `qgit show-ref --branches` to list branch refs with commit IDs.
+
+#### Synopsis
+
+```
+qgit branch [options] [<branchname> [<start-point>]]
+qgit branch [options] -d <branchname>
+```
+
+#### Description
+
+Add a branch reference in `refs/heads/`, unless `-d` or `-l` is given to delete or list branches. The command must be run inside a qgit repository.
+
+With no arguments, qgit lists local branch names. The current branch is marked with an asterisk. Running `qgit branch` with `-l` lists branches in the same way.
+
+Unless `-f` is given, the named branch must not yet exist when creating a branch.
+
+With `<branchname>`, qgit creates a branch pointing at `<start-point>`, or at `HEAD` when `<start-point>` is omitted. `<start-point>` must resolve to a commit using [Revision Syntax](#revision-syntax). Annotated tags are peeled to the tagged commit. qgit does not switch the working tree to the new branch.
+
+With `-d`, qgit deletes the named branch. qgit does not check whether the branch is fully merged. Deleting the current branch requires `-f`.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-l`
+`--list`
+
+List branches. Running `qgit branch` with no arguments also lists branches.
+
+`-d`
+`--delete`
+
+Delete the branch with the given name.
+
+`-f`
+`--force`
+
+When creating a branch, replace an existing branch with the given name instead of failing. When deleting with `-d`, allow deleting the current branch.
+
+`<branchname>`
+
+The name of the branch to create, list, or delete.
+
+`<start-point>`
+
+The commit that the new branch will point at. Defaults to `HEAD`.
 
 ---
 

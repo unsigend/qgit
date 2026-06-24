@@ -42,8 +42,9 @@ struct refs {
 extern int ref_resolve(struct repo *repo, const char *refname,
                        unsigned char *sha1);
 
-/* resolve HEAD */
+/* resolve or read HEAD */
 extern int ref_resolve_head(struct repo *repo, unsigned char *sha1);
+extern int ref_read_head(struct repo *repo, char *buf, size_t buflen);
 
 /* resolve a ref from full name like refs/heads/main */
 extern int ref_resolve_path(struct repo *repo, const char *path,

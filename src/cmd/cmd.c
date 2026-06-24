@@ -24,6 +24,7 @@ const struct subcmd subcmds[] = {
     {"add", "Add file contents to the index", cmd_add},
     {"cat-file", "Provide contents or details of repository objects",
      cmd_cat_file},
+    {"branch", "List, create, or delete branches", cmd_branch},
     {"check-ignore", "Debug gitignore / exclude files", cmd_check_ignore},
     {"checkout", "Switch branches or restore working tree files", cmd_checkout},
     {"commit", "Record changes to the repository", cmd_commit},

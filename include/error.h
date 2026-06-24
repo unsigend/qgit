@@ -31,6 +31,7 @@
 #define QE_PEEL 9
 #define QE_BADREV 10
 #define QE_NOIDENTITY 11
+#define QE_EXISTBRANCH 12
 
 /* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
 extern int *qerrno_location(void);

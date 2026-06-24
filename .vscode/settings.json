@@ -5,6 +5,7 @@
         "decompressf",
         "DIGESTLEN",
         "DIGLEN",
+        "EXISTBRANCH",
         "existd",
         "existdir",
         "existf",

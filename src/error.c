@@ -31,6 +31,7 @@ static const char *errstr[] = {
     [QE_IDENTITY] = "identity is required",
     [QE_PEEL] = "could not peel object",
     [QE_BADREV] = "bad revision",
+    [QE_EXISTBRANCH] = "branch already exists",
     [QE_NOIDENTITY] = "Author identity unknown.\n\nRun\n  qgit config --global "
                       "--set user.email "
                       "<email>\n  qgit config --global --set user.name "

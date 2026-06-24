@@ -18,6 +18,7 @@
 #ifndef REPO_H
 #define REPO_H
 
+#include <stddef.h>
 #include <stdio.h>
 
 struct repo {
