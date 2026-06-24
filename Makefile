@@ -176,7 +176,7 @@ help:
 	@echo "  make docker    - build and run development container"
 	@echo "  make install   - install executable globally"
 	@echo "  make test      - run all tests"
-	@echo "  make test-NAME - run one BATS file or directory (e.g. test-init, test-cat-file/cat-file-tag)"
+	@echo "  make test-NAME - run one BATS file or directory"
 	@echo "  make unit      - build and run unit tests"
 	@echo "  make unit-NAME - run one unit test"
 	@echo "  make help      - this message\n"
