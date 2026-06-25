@@ -90,12 +90,12 @@ static int fmt_commit(const struct commit *commit, void *buf, size_t buflen)
   return sz;
 }
 
-struct obj *commit_create(const struct commit *commit)
+struct object *commit_create(const struct commit *commit)
 {
   if (!commit || !commit->author.name || !commit->author.email)
     return NULL;
 
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   int payloadsz = 0;
   void *payload = NULL;
 

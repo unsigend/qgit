@@ -18,7 +18,7 @@
 #include "error.h"
 #include "obj/object.h"
 
-int obj_fprintf(struct obj *obj, FILE *fp)
+int obj_fprintf(struct object *obj, FILE *fp)
 {
   if (!obj || !fp)
     return -1;

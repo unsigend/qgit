@@ -43,7 +43,7 @@ static int print_tree(struct tree_entry *entry, const char *prefix, void *arg)
   return 0;
 }
 
-int tree_fprintf_style(struct obj *obj, FILE *fp, struct repo *repo,
+int tree_fprintf_style(struct object *obj, FILE *fp, struct repo *repo,
                        enum tree_print_style style)
 {
   if (!obj || !fp || obj->type != OBJ_TREE)

@@ -23,7 +23,7 @@
 #include "obj/obj_internal.h"
 #include "obj/object.h"
 
-int obj_write(struct obj *obj, struct repo *repo)
+int obj_write(struct object *obj, struct repo *repo)
 {
   if (!obj || !repo)
     return -1;

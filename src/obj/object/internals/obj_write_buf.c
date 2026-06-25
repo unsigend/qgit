@@ -20,7 +20,7 @@
 
 #include "obj/object.h"
 
-int obj_write_buf(struct obj *obj, void **buf, size_t *buflen)
+int obj_write_buf(struct object *obj, void **buf, size_t *buflen)
 {
   if (!obj || !buf || !buflen)
     return -1;

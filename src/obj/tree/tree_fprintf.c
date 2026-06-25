@@ -20,7 +20,7 @@
 #include "obj/object.h"
 #include "obj/tree.h"
 
-int tree_fprintf(struct obj *obj, FILE *fp)
+int tree_fprintf(struct object *obj, FILE *fp)
 {
   if (!obj || !fp || obj->type != OBJ_TREE)
     return -1;

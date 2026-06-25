@@ -26,7 +26,7 @@
 #include "repo.h"
 
 /* parse payload from "type <size>\0<payload>". */
-static struct obj *parse_payload(unsigned char *buf, size_t buflen)
+static struct object *parse_payload(unsigned char *buf, size_t buflen)
 {
   if (!buf || !buflen)
     return NULL;
@@ -36,7 +36,7 @@ static struct obj *parse_payload(unsigned char *buf, size_t buflen)
   size_t len, payloadsz;
   char *endstr = NULL;
   enum obj_type type = OBJ_NONE;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
 
   while (cur < end && *cur != ' ')
     cur++;
@@ -83,7 +83,7 @@ static struct obj *parse_payload(unsigned char *buf, size_t buflen)
     return NULL;
   }
 
-  if (!(obj = calloc(1, sizeof(struct obj))))
+  if (!(obj = calloc(1, sizeof(struct object))))
     return NULL;
 
   obj->type = type;
@@ -103,7 +103,7 @@ static struct obj *parse_payload(unsigned char *buf, size_t buflen)
   return obj;
 }
 
-struct obj *obj_open(struct repo *repo, unsigned char *sha1)
+struct object *obj_open(struct repo *repo, unsigned char *sha1)
 {
   if (!repo || !sha1)
     return NULL;
@@ -111,7 +111,7 @@ struct obj *obj_open(struct repo *repo, unsigned char *sha1)
   void *buf = NULL;
   size_t buflen = 0;
   char path[PATH_MAX];
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   unsigned char hex[SHA1_HEXLEN];
 
   if (sha1_to_hex(sha1, hex) == -1)

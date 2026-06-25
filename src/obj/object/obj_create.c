@@ -31,17 +31,17 @@ static int check_type(enum obj_type type)
   return 0;
 }
 
-struct obj *obj_create(unsigned char *buf, size_t buflen, enum obj_type type)
+struct object *obj_create(unsigned char *buf, size_t buflen, enum obj_type type)
 {
   if (buflen && !buf)
     return NULL;
   if (check_type(type) == -1)
     return NULL;
 
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   size_t payloadsz = buflen + 1; /* always null terminated */
 
-  if (!(obj = calloc(1, sizeof(struct obj))))
+  if (!(obj = calloc(1, sizeof(struct object))))
     return NULL;
   obj->type = OBJ_NONE;
 

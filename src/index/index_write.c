@@ -110,7 +110,7 @@ int index_write(struct index *index)
     return -1;
   }
 
-  if (!(fp = fopen(path, "w")))
+  if (!(fp = fopen(path, "w+")))
     return -1;
 
   /* write header */

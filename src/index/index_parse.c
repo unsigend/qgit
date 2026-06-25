@@ -112,10 +112,9 @@ int index_parse(struct index *index, const char *buf, size_t buflen)
   for (size_t i = 0; i < n; i++) {
     struct index_entry entry;
     const char *next = parse_entry(&entry, buf, checksum);
-    if (!next) {
-      free(entry.path);
+    if (!next)
       return -1;
-    }
+
     buf = next;
     if (vec_pushback(&index->entries, &entry) == -1) {
       free(entry.path);

@@ -62,7 +62,7 @@ int cmd_cat_file(int argc, char **argv)
   if (argparse_parse(&ctx, argc, argv) == -1)
     die("%s", argparse_strerror(&ctx));
 
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   struct repo *repo = NULL;
   const char *name = NULL;
 

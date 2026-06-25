@@ -23,7 +23,7 @@
 #include "obj/sign.h"
 #include "sha1.h"
 
-struct obj;
+struct object;
 
 /* Raw payload format for annotated tag:
      object <sha1-40>\n
@@ -41,10 +41,10 @@ struct tag {
   const char *msg;
 };
 
-extern int tag_parse(struct obj *obj);
+extern int tag_parse(struct object *obj);
 extern void tag_close(struct tag *tag);
-extern int tag_fprintf(struct obj *obj, FILE *fp);
+extern int tag_fprintf(struct object *obj, FILE *fp);
 
-extern struct obj *tag_create(const struct tag *tag);
+extern struct object *tag_create(const struct tag *tag);
 
 #endif

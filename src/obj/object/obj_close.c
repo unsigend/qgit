@@ -20,7 +20,7 @@
 
 #include "obj/object.h"
 
-static void delegate(struct obj *obj)
+static void delegate(struct object *obj)
 {
   switch (obj->type) {
   case OBJ_COMMIT:
@@ -40,7 +40,7 @@ static void delegate(struct obj *obj)
   }
 }
 
-void obj_close(struct obj *obj)
+void obj_close(struct object *obj)
 {
   if (!obj)
     return;
@@ -48,6 +48,6 @@ void obj_close(struct obj *obj)
     free(obj->payload);
   if (obj->parsed)
     delegate(obj);
-  memset(obj, 0, sizeof(struct obj));
+  memset(obj, 0, sizeof(struct object));
   free(obj);
 }

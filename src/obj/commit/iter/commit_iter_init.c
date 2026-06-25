@@ -22,11 +22,11 @@
 #include "obj/object.h"
 
 /* priority queue store struct obj* and compare by commit time */
-static void pq_destroy(void *obj) { obj_close(*(struct obj **)obj); };
+static void pq_destroy(void *obj) { obj_close(*(struct object **)obj); };
 static int pq_cmp(void *lhs, void *rhs)
 {
-  struct obj *obj1 = *(struct obj **)lhs;
-  struct obj *obj2 = *(struct obj **)rhs;
+  struct object *obj1 = *(struct object **)lhs;
+  struct object *obj2 = *(struct object **)rhs;
   struct sign *comsign = &obj1->commit.committer; /* committer sign */
   if (comsign->time > obj2->commit.committer.time)
     return -1;
@@ -43,7 +43,7 @@ static int set_cmp(void *lhs, void *rhs)
 }
 
 int commit_iter_init(struct commit_iter *iter, struct repo *repo,
-                     struct obj *start, enum commit_walk_t type)
+                     struct object *start, enum commit_walk_t type)
 {
   if (!iter || !repo || !start || start->type != OBJ_COMMIT)
     return -1;
@@ -53,7 +53,8 @@ int commit_iter_init(struct commit_iter *iter, struct repo *repo,
   iter->repo = repo;
 
   if (iter->type == COMMIT_WALK_ALL) {
-    if (heap_init(&iter->pq, sizeof(struct obj *), pq_cmp, pq_destroy) == -1) {
+    if (heap_init(&iter->pq, sizeof(struct object *), pq_cmp, pq_destroy) ==
+        -1) {
       obj_close(iter->cur);
       return -1;
     }

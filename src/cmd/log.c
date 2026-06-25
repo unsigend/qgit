@@ -58,7 +58,7 @@ int cmd_log(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
 
   struct repo *repo = NULL;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   struct commit_iter iter;
 
   if (argparse_getremargc(&ctx) > 0)

@@ -24,7 +24,7 @@
 static int iter_inc_first(struct commit_iter *iter)
 {
 
-  struct obj *next = NULL;
+  struct object *next = NULL;
   unsigned char *sha1 = NULL;
 
   if (slist_empty(&iter->cur->commit.parents))
@@ -49,10 +49,10 @@ static int iter_inc_first(struct commit_iter *iter)
 
 static int iter_inc_all(struct commit_iter *iter)
 {
-  struct obj *next = NULL;
+  struct object *next = NULL;
   unsigned char *sha1 = NULL;
   struct slist_iter it;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
 
   if (!slist_empty(&iter->cur->commit.parents)) {
     if (slist_iter_init(&it, &iter->cur->commit.parents) == -1)

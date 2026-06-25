@@ -20,14 +20,14 @@
 
 #include <stdio.h>
 
-struct obj;
+struct object;
 
 struct blob {
 };
 
-extern int blob_parse(struct obj *obj);
+extern int blob_parse(struct object *obj);
 extern void blob_close(struct blob *blob);
-extern struct obj *blob_create(unsigned char *buf, size_t buflen);
-extern int blob_fprintf(struct obj *obj, FILE *fp);
+extern struct object *blob_create(unsigned char *buf, size_t buflen);
+extern int blob_fprintf(struct object *obj, FILE *fp);
 
 #endif

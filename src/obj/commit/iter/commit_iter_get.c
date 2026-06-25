@@ -17,7 +17,7 @@
 
 #include "obj/commit.h"
 
-struct obj *commit_iter_get(struct commit_iter *iter)
+struct object *commit_iter_get(struct commit_iter *iter)
 {
   if (!iter)
     return NULL;

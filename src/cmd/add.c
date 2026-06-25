@@ -15,9 +15,61 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stddef.h>
+
+#include "argparse.h"
+#include "die.h"
+#include "index.h"
+#include "repo.h"
+#include "worktree.h"
+
 int cmd_add(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  struct argparse ctx;
+  struct argparse_opt opts[] = {
+      OPT_HELP(),
+      OPT_END(),
+  };
+
+  static const char *usages[] = {
+      "qgit add [<path>...]",
+  };
+
+  struct argparse_desc desc = {
+      .prog = "qgit add",
+      .desc = "Add file contents to the index",
+      .usages = usages,
+      .nusages = sizeof(usages) / sizeof(usages[0]),
+  };
+
+  if (argparse_init(&ctx, opts, &desc) == -1)
+    die("%s", argparse_strerror(&ctx));
+  if (argparse_parse(&ctx, argc, argv) == -1)
+    die("%s", argparse_strerror(&ctx));
+
+  if (argparse_getremargc(&ctx) == 0)
+    die("Nothing specified, nothing added.");
+
+  struct repo *repo = NULL;
+  struct index *index = NULL;
+
+  if (!((repo = repo_findcwd())))
+    die_errno();
+
+  if (!((index = index_open(repo))))
+    die_errno();
+
+  for (size_t i = 0; i < argparse_getremargc(&ctx); i++) {
+    const char *path = argparse_getremargv(&ctx)[i];
+    if (worktree_add_to_index(index, path) == -1)
+      die_errno();
+  }
+
+  if (index_write(index) == -1)
+    die_errno();
+
+  argparse_fini(&ctx);
+  index_close(index);
+  repo_close(repo);
   return 0;
 }

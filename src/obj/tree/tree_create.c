@@ -84,12 +84,12 @@ static int fmt_tree(const struct tree *tree, void *buf, size_t buflen)
   return sz;
 }
 
-struct obj *tree_create(const struct tree *tree)
+struct object *tree_create(const struct tree *tree)
 {
   if (!tree)
     return NULL;
 
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   int payloadsz = 0;
   void *payload = NULL;
 

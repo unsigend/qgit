@@ -70,6 +70,11 @@
 #define IDXE_TYPE_SYMLINK 0b1010
 #define IDXE_TYPE_GITLINK 0b1110
 
+#define IDXE_STAGE_NORMAL 0 /* base stage */
+#define IDXE_STAGE_BASE 1   /* merge base stage */
+#define IDXE_STAGE_OURS 2
+#define IDXE_STAGE_THEIRS 3
+
 struct repo;
 
 struct index_entry {

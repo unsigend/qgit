@@ -47,7 +47,7 @@ enum obj_type {
    obj_fprintf, obj_parse
 */
 
-struct obj {
+struct object {
   size_t payloadsz;
   void *payload;
   enum obj_type type;
@@ -61,20 +61,20 @@ struct obj {
   };
 };
 
-extern struct obj *obj_open(struct repo *repo, unsigned char *sha1);
-extern struct obj *obj_find(struct repo *repo, const char *name,
-                            enum obj_type want);
-extern struct obj *obj_peel(struct repo *repo, struct obj *obj,
-                            enum obj_type want);
+extern struct object *obj_open(struct repo *repo, unsigned char *sha1);
+extern struct object *obj_find(struct repo *repo, const char *name,
+                               enum obj_type want);
+extern struct object *obj_peel(struct repo *repo, struct object *obj,
+                               enum obj_type want);
 
-extern int obj_parse(struct obj *obj);
-extern int obj_fprintf(struct obj *obj, FILE *fp);
+extern int obj_parse(struct object *obj);
+extern int obj_fprintf(struct object *obj, FILE *fp);
 
-extern struct obj *obj_create(unsigned char *buf, size_t buflen,
-                              enum obj_type type);
-extern int obj_write(struct obj *obj, struct repo *repo);
+extern struct object *obj_create(unsigned char *buf, size_t buflen,
+                                 enum obj_type type);
+extern int obj_write(struct object *obj, struct repo *repo);
 
-extern void obj_close(struct obj *obj);
+extern void obj_close(struct object *obj);
 
 extern enum obj_type obj_type_from_str(const char *str);
 extern const char *obj_type_to_str(enum obj_type type);

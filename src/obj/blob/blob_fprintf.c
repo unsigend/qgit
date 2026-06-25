@@ -18,7 +18,7 @@
 #include "obj/blob.h"
 #include "obj/object.h"
 
-int blob_fprintf(struct obj *obj, FILE *fp)
+int blob_fprintf(struct object *obj, FILE *fp)
 {
   if (!obj || !fp)
     return -1;

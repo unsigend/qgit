@@ -20,7 +20,8 @@
 #include "error.h"
 #include "obj/object.h"
 
-struct obj *obj_peel(struct repo *repo, struct obj *obj, enum obj_type want)
+struct object *obj_peel(struct repo *repo, struct object *obj,
+                        enum obj_type want)
 {
   if (!repo || !obj)
     return NULL;
@@ -38,7 +39,7 @@ struct obj *obj_peel(struct repo *repo, struct obj *obj, enum obj_type want)
     if (strcmp(obj->tag.type, type) == 0)
       return obj_open(repo, obj->tag.object);
 
-    struct obj *next = obj_open(repo, obj->tag.object);
+    struct object *next = obj_open(repo, obj->tag.object);
     if (!next)
       return NULL;
 
@@ -47,7 +48,7 @@ struct obj *obj_peel(struct repo *repo, struct obj *obj, enum obj_type want)
       return NULL;
     }
 
-    struct obj *peeled = obj_peel(repo, next, want);
+    struct object *peeled = obj_peel(repo, next, want);
     if (!peeled) {
       obj_close(next);
       return NULL;

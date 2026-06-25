@@ -20,7 +20,7 @@
 #include "obj/object.h"
 #include "sha1.h"
 
-int commit_fprintf(struct obj *obj, FILE *fp)
+int commit_fprintf(struct object *obj, FILE *fp)
 {
   if (!obj || !fp || obj->type != OBJ_COMMIT)
     return -1;

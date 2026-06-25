@@ -22,7 +22,7 @@
 #include "obj/tag.h"
 #include "sha1.h"
 
-int tag_fprintf(struct obj *obj, FILE *fp)
+int tag_fprintf(struct object *obj, FILE *fp)
 {
   if (!obj || !fp)
     return -1;

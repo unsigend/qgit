@@ -21,7 +21,7 @@
 #include "obj/object.h"
 #include "obj/tree.h"
 
-static int foreach (struct obj *obj, struct repo * repo, tree_foreach_cb cb,
+static int foreach (struct object *obj, struct repo * repo, tree_foreach_cb cb,
                     void *arg, const char *prefix)
 {
   struct vector_iter iter;
@@ -67,7 +67,7 @@ static int foreach (struct obj *obj, struct repo * repo, tree_foreach_cb cb,
   return 0;
 }
 
-int tree_foreach(struct obj *obj, struct repo *repo, tree_foreach_cb cb,
+int tree_foreach(struct object *obj, struct repo *repo, tree_foreach_cb cb,
                  void *arg)
 {
   if (!obj || !repo || !cb || obj->type != OBJ_TREE)

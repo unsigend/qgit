@@ -84,7 +84,7 @@ int cmd_hash_object(int argc, char **argv)
   path = argparse_getremargv(&ctx)[0];
 
   struct repo *repo = NULL;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   void *buf = NULL;
   size_t buflen = 0;
   unsigned char hex[SHA1_HEXLEN];

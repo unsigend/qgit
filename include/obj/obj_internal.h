@@ -20,13 +20,13 @@
 
 #include <stddef.h>
 
-struct obj;
+struct object;
 struct repo;
 
 /* internal plumbing functions, these functions handle raw bytes buffer
    "type <size>\0<payload>" */
 
-extern int obj_write_buf(struct obj *obj, void **buf, size_t *buflen);
+extern int obj_write_buf(struct object *obj, void **buf, size_t *buflen);
 extern int obj_store(struct repo *repo, const unsigned char *sha1,
                      const void *buf, size_t buflen);
 

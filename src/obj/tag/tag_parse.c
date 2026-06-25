@@ -23,7 +23,7 @@
 #include "obj/tag.h"
 #include "sha1.h"
 
-static int parse_header(struct obj *obj, char *cur, char *end)
+static int parse_header(struct object *obj, char *cur, char *end)
 {
   int has_object = 0;
   while (cur < end) {
@@ -107,7 +107,7 @@ static int parse_header(struct obj *obj, char *cur, char *end)
   return 0;
 }
 
-int tag_parse(struct obj *obj)
+int tag_parse(struct object *obj)
 {
   if (!obj || obj->type != OBJ_TAG)
     return -1;

@@ -18,7 +18,7 @@
 #include "obj/blob.h"
 #include "obj/object.h"
 
-struct obj *blob_create(unsigned char *buf, size_t buflen)
+struct object *blob_create(unsigned char *buf, size_t buflen)
 {
   return obj_create(buf, buflen, OBJ_BLOB);
 }

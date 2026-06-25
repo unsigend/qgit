@@ -29,7 +29,7 @@
 
 #define INDENT_WIDTH 4
 
-static int print_default(struct obj *obj, FILE *fp)
+static int print_default(struct object *obj, FILE *fp)
 {
   unsigned char hex[SHA1_HEXLEN];
   int istty = isatty(fileno(fp));
@@ -102,7 +102,7 @@ static int print_default(struct obj *obj, FILE *fp)
   return 0;
 }
 
-static int print_oneline(struct obj *obj, FILE *fp)
+static int print_oneline(struct object *obj, FILE *fp)
 {
   unsigned char hex[SHA1_HEXLEN];
   int istty = isatty(fileno(fp));
@@ -125,7 +125,7 @@ static int print_oneline(struct obj *obj, FILE *fp)
   return 0;
 }
 
-int commit_fprintf_style(struct obj *obj, FILE *fp,
+int commit_fprintf_style(struct object *obj, FILE *fp,
                          enum commit_print_style style)
 {
   if (!obj || !fp || obj->type != OBJ_COMMIT)

@@ -24,7 +24,7 @@
 #include "collection/vector.h"
 #include "sha1.h"
 
-struct obj;
+struct object;
 struct repo;
 
 /* Raw payload format for tree:
@@ -52,14 +52,14 @@ enum tree_print_style {
 typedef int (*tree_foreach_cb)(struct tree_entry *entry, const char *prefix,
                                void *arg);
 
-extern int tree_parse(struct obj *obj);
-extern struct obj *tree_create(const struct tree *tree);
+extern int tree_parse(struct object *obj);
+extern struct object *tree_create(const struct tree *tree);
 extern void tree_close(struct tree *tree);
-extern int tree_fprintf(struct obj *obj, FILE *fp);
-extern int tree_fprintf_style(struct obj *obj, FILE *fp, struct repo *repo,
+extern int tree_fprintf(struct object *obj, FILE *fp);
+extern int tree_fprintf_style(struct object *obj, FILE *fp, struct repo *repo,
                               enum tree_print_style style);
-extern int tree_foreach(struct obj *obj, struct repo *repo, tree_foreach_cb cb,
-                        void *arg);
+extern int tree_foreach(struct object *obj, struct repo *repo,
+                        tree_foreach_cb cb, void *arg);
 
 /* internal functions */
 extern int tree_entry_fprintf(struct tree_entry *entry, const char *prefix,

@@ -48,7 +48,7 @@ int cmd_rev_parse(int argc, char **argv)
     die("%s", argparse_strerror(&ctx));
 
   struct repo *repo = NULL;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   unsigned char hex[SHA1_HEXLEN];
   const char *refname = NULL;
 

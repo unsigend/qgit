@@ -190,7 +190,7 @@ int cmd_tag(int argc, char **argv)
 
       struct tag tag;
       struct sign tagger;
-      struct obj *obj = NULL;
+      struct object *obj = NULL;
 
       if (!((obj = obj_find(repo, commit, OBJ_NONE))))
         die_errno();

@@ -18,7 +18,7 @@
 #include "error.h"
 #include "obj/object.h"
 
-int obj_parse(struct obj *obj)
+int obj_parse(struct object *obj)
 {
   if (!obj)
     return -1;

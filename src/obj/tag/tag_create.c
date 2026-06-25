@@ -42,14 +42,14 @@ int fmt_tag(const struct tag *tag, void *buf, size_t buflen)
   return n;
 }
 
-struct obj *tag_create(const struct tag *tag)
+struct object *tag_create(const struct tag *tag)
 {
   if (!tag || !tag->type || !tag->name)
     return NULL;
   if (!tag->tagger.name || !tag->tagger.email)
     return NULL;
 
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   int payloadsz = 0;
   void *payload = NULL;
 

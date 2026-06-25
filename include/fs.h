@@ -18,6 +18,7 @@
 #ifndef FS_H
 #define FS_H
 
+#include <sys/stat.h>
 #include <sys/types.h>
 
 /* Read or Write all data from/to a file descriptor. Retry on EINTR or EAGAIN.
@@ -58,5 +59,30 @@ extern int fabspath(const char *path, char *buf);
 /* Get the basename of a given path. Return the basename on success, NULL on
    error and set errno. Compatible with POSIX and BSD. */
 extern char *fbasename(const char *path, char *buf);
+
+/* Crossplatform function to get the nanoseconds of the ctime */
+__attribute__((always_inline)) inline long
+stat_ctime_nsec(const struct stat *st)
+{
+#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  return st->st_ctimespec.tv_nsec;
+#elif defined(__linux__)
+  return st->st_ctim.tv_nsec;
+#else
+  return 0;
+#endif
+}
+/* Crossplatform function to get the nanoseconds of the mtime */
+__attribute__((always_inline)) inline long
+stat_mtime_nsec(const struct stat *st)
+{
+#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  return st->st_mtimespec.tv_nsec;
+#elif defined(__linux__)
+  return st->st_mtim.tv_nsec;
+#else
+  return 0;
+#endif
+}
 
 #endif

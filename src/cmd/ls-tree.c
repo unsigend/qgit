@@ -58,7 +58,7 @@ int cmd_ls_tree(int argc, char **argv)
   name = argparse_getremargv(&ctx)[0];
 
   struct repo *repo = NULL;
-  struct obj *obj = NULL;
+  struct object *obj = NULL;
   enum tree_print_style style = TREE_PRINT_STYLE_DEFAULT;
 
   if (!((repo = repo_findcwd())))

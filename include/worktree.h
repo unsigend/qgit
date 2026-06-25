@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "obj/blob.h"
+#ifndef WORKTREE_H
+#define WORKTREE_H
 
-int blob_parse(struct object *obj)
-{
-  if (!obj)
-    return -1;
+/* this file is used to manage between worktree and index */
 
-  /* nothing to parse for blob. */
-  return 0;
-}
+struct index;
+
+extern int worktree_add_to_index(struct index *index, const char *path);
+
+#endif

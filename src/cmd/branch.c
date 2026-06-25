@@ -167,7 +167,7 @@ int cmd_branch(int argc, char **argv)
       start = argparse_getremargv(&ctx)[1];
 
     char buf[PATH_MAX];
-    struct obj *obj = NULL;
+    struct object *obj = NULL;
 
     if (!(obj = obj_find(repo, start, OBJ_COMMIT))) {
       if (errno || qerrno)

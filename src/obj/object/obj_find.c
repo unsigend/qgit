@@ -22,7 +22,7 @@
 #include "repo.h"
 #include "rev.h"
 
-struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
+struct object *obj_find(struct repo *repo, const char *name, enum obj_type want)
 {
   if (!repo || !name)
     return NULL;
@@ -31,7 +31,7 @@ struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
   enum obj_type peel;
   enum rev_peel_mode mode;
   unsigned char sha1[SHA1_DIGLEN];
-  struct obj *obj = NULL, *peeled = NULL, *cur = NULL;
+  struct object *obj = NULL, *peeled = NULL, *cur = NULL;
 
   if (rev_parse(name, base, &peel, &mode) == -1)
     return NULL;
@@ -83,7 +83,7 @@ struct obj *obj_find(struct repo *repo, const char *name, enum obj_type want)
     return NULL;
   }
 
-  struct obj *final = obj_peel(repo, cur, want);
+  struct object *final = obj_peel(repo, cur, want);
   if (!final) {
     obj_close(cur);
     return NULL;

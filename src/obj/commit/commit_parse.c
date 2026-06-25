@@ -24,7 +24,7 @@
 #include "obj/object.h"
 #include "sha1.h"
 
-static int parse_header(struct obj *obj, char *cur, char *end)
+static int parse_header(struct object *obj, char *cur, char *end)
 {
   int has_tree = 0;
   while (cur < end) {
@@ -99,7 +99,7 @@ static int parse_header(struct obj *obj, char *cur, char *end)
   return 0;
 }
 
-int commit_parse(struct obj *obj)
+int commit_parse(struct object *obj)
 {
   if (!obj || obj->type != OBJ_COMMIT)
     return -1;

@@ -95,6 +95,35 @@ Command documentation is in progress. Each entry below matches Git usage at a hi
 
 Add file contents to the index.
 
+qgit stages regular files only. Directories are added recursively. `.gitignore` rules are not applied. At least one path is required.
+
+#### Synopsis
+
+```
+qgit add [<path>...]
+```
+
+#### Description
+
+Adds the contents of new or changed files to the index. The command must be run inside a qgit repository.
+
+For each `<path>`, qgit reads the working tree file, writes a blob object, and records or updates an index entry. When `<path>` is a directory, qgit adds every regular file under that directory recursively. Entries for `.qgit` and `.git` are never added.
+
+If an index entry already exists and the file stat information is unchanged, qgit skips re-reading the file contents. After all paths are processed, qgit writes the index to `.qgit/index`.
+
+qgit does not support Git flags such as `-A`, `-u`, `-f`, or interactive modes.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`<path>`
+
+File or directory to add. One or more paths are required.
+
 ---
 
 ### branch

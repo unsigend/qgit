@@ -56,7 +56,7 @@ static char *parse_entry(char *buf, char *end, struct tree_entry *entry)
   return cur;
 }
 
-int tree_parse(struct obj *obj)
+int tree_parse(struct object *obj)
 {
   if (!obj || obj->type != OBJ_TREE)
     return -1;
