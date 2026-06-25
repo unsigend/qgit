@@ -20,6 +20,8 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "collection/vector.h"
@@ -27,7 +29,7 @@
 #include "index.h"
 #include "repo.h"
 
-extern int index_parse(struct index *index);
+extern int index_parse(struct index *index, const char *buf, size_t buflen);
 
 static void index_entry_destroy(void *p)
 {
@@ -43,10 +45,10 @@ struct index *index_open(struct repo *repo)
   if (!repo)
     return NULL;
 
-  char buf[PATH_MAX];
+  char path[PATH_MAX];
   struct index *index;
 
-  if (snprintf(buf, PATH_MAX, "%s/index", repo->qgitdir) >= PATH_MAX) {
+  if (snprintf(path, PATH_MAX, "%s/index", repo->qgitdir) >= PATH_MAX) {
     errno = ENAMETOOLONG;
     return NULL;
   }
@@ -62,15 +64,46 @@ struct index *index_open(struct repo *repo)
 
   index->repo = repo;
 
-  if (!file_exists(buf)) {
+  if (!file_exists(path)) /* not exists empty index */
+  {
     index->version = IDX_FMT_VERSION;
     return index;
   }
 
-  if (index_parse(index) == -1) {
+  int fd = open(path, O_RDONLY);
+  struct stat st;
+
+  if (fd == -1) {
     index_close(index);
     return NULL;
   }
 
+  if (fstat(fd, &st) == -1) {
+    close(fd);
+    index_close(index);
+    return NULL;
+  }
+
+  if (st.st_size == 0) /* empty index */
+  {
+    close(fd);
+    index->version = IDX_FMT_VERSION;
+    return index;
+  }
+
+  void *buf = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (buf == MAP_FAILED) {
+    close(fd);
+    index_close(index);
+    return NULL;
+  }
+  close(fd);
+
+  if (index_parse(index, buf, st.st_size) == -1) {
+    munmap(buf, st.st_size);
+    index_close(index);
+    return NULL;
+  }
+  munmap(buf, st.st_size);
   return index;
 }

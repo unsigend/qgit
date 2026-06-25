@@ -20,18 +20,23 @@
 
 #include <errno.h>
 
-#define QE_NOTINREPO 1
-#define QE_BADOBJFILE 2
-#define QE_INTERNAL 3
-#define QE_AMBIGUOUS 4
-#define QE_INVALIDOBJ 5
-#define QE_EXISTSTAG 6
-#define QE_BADSIGN 7
-#define QE_IDENTITY 8
-#define QE_PEEL 9
-#define QE_BADREV 10
-#define QE_NOIDENTITY 11
-#define QE_EXISTBRANCH 12
+#define QE_NOTINREPO 1       /* not inside a qgit repository */
+#define QE_BADOBJFILE 2      /* bad object file */
+#define QE_INTERNAL 3        /* internal error */
+#define QE_AMBIGUOUS 4       /* ambiguous argument */
+#define QE_INVALIDOBJ 5      /* invalid object */
+#define QE_EXISTSTAG 6       /* tag already exists */
+#define QE_BADSIGN 7         /* bad signature field */
+#define QE_IDENTITY 8        /* identity is required */
+#define QE_PEEL 9            /* could not peel object */
+#define QE_BADREV 10         /* bad revision */
+#define QE_NOIDENTITY 11     /* author identity unknown */
+#define QE_EXISTBRANCH 12    /* branch already exists */
+#define QE_BADIDXMAGIC 13    /* bad index magic number */
+#define QE_BADIDXVERSION 14  /* bad index version */
+#define QE_BADIDX 15         /* bad index file */
+#define QE_IDXSUPPORTS 16    /* index format not supported */
+#define QE_BADIDXCHECKSUM 17 /* bad index checksum */
 
 /* wrapper for get_qerror(), follow ANSI/ISO C errno design pattern.*/
 extern int *qerrno_location(void);

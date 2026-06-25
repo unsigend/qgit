@@ -25,7 +25,7 @@
 
 /* Git index file format design: https://git-scm.com/docs/index-format.
 
-   qgit index file binary format (big endian)
+   qgit index file binary format (big endian) v2
 
    header:
      4 bytes signature: {'D', 'I', 'R', 'C'} dircache
@@ -61,6 +61,7 @@
 */
 
 #define IDX_SIGNATURE "DIRC"
+#define IDX_HEADER_SIZE 12
 #define IDX_FMT_VERSION 2
 
 #define IDXE_ALIGN 8
@@ -81,7 +82,7 @@ struct index_entry {
   uint32_t mode;
   uint32_t uid;
   uint32_t gid;
-  uint32_t size;
+  uint32_t size;                   /* file size */
   unsigned char sha1[SHA1_DIGLEN]; /* 20 bytes */
   uint16_t assume_valid : 1;
   uint16_t extended : 1; /* must be 0 in version 2 */
