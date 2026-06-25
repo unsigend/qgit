@@ -399,7 +399,46 @@ Start listing from this commit. Defaults to `HEAD`.
 
 ### ls-files
 
-Show information about files in the index and working tree.
+Show information about files in the index and the working tree.
+
+qgit lists index entries only. It does not compare the index to the working tree. Optional `<path>` is a repository relative prefix match, not a full Git pathspec.
+
+#### Synopsis
+
+```
+qgit ls-files [-c --cached] [-s --stage] [<path>]
+```
+
+#### Description
+
+Shows files recorded in the index. The command must be run inside a qgit repository.
+
+With no options, qgit prints each cached path on its own line. This is the same output as with `-c` or `--cached`.
+
+With `-s` or `--stage`, qgit prints one line per index entry in the form `mode SP object SP stage TAB path`, where `mode` is a six digit octal file mode, `object` is the full 40 character blob SHA-1, and `stage` is the merge stage number.
+
+When `<path>` is given, qgit limits the listing to entries whose path equals the prefix or starts with the prefix followed by `/`. Only one path argument is supported.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-c`
+`--cached`
+
+Show cached files in the index. This is the default when `-s` is not given.
+
+`-s`
+`--stage`
+
+Show staged contents mode bits, object name, and stage number in the output.
+
+`<path>`
+
+Limit the listing to entries under this path prefix.
 
 ---
 
