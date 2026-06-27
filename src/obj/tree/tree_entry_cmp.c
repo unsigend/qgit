@@ -15,14 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WORKTREE_H
-#define WORKTREE_H
+#include <sys/stat.h>
 
-/* this file is used to manage between worktree and index */
+#include "obj/tree.h"
 
-struct index;
+int tree_entry_cmp(const void *a, const void *b)
+{
+  const struct tree_entry *e1 = (const struct tree_entry *)a;
+  const struct tree_entry *e2 = (const struct tree_entry *)b;
+  const char *p1 = e1->path, *p2 = e2->path;
 
-/* add a file or directory to the index */
-extern int worktree_add_to_index(struct index *index, const char *path);
+  while (*p1 && *p2 && *p1 == *p2)
+    p1++, p2++;
 
-#endif
+  char c1 = *p1 ? *p1 : (S_ISDIR(e1->mode) ? '/' : '\0');
+  char c2 = *p2 ? *p2 : (S_ISDIR(e2->mode) ? '/' : '\0');
+  return (unsigned char)c1 - (unsigned char)c2;
+}

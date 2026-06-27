@@ -23,20 +23,6 @@
 #include "obj/tree.h"
 #include "sha1.h"
 
-static int tree_entry_cmp(const void *a, const void *b)
-{
-  const struct tree_entry *e1 = (const struct tree_entry *)a;
-  const struct tree_entry *e2 = (const struct tree_entry *)b;
-  const char *p1 = e1->path, *p2 = e2->path;
-
-  while (*p1 && *p2 && *p1 == *p2)
-    p1++, p2++;
-
-  char c1 = *p1 ? *p1 : (S_ISDIR(e1->mode) ? '/' : '\0');
-  char c2 = *p2 ? *p2 : (S_ISDIR(e2->mode) ? '/' : '\0');
-  return (unsigned char)c1 - (unsigned char)c2;
-}
-
 static int fmt_entry(const struct tree_entry *entry, void *buf, size_t buflen)
 {
   if (!entry)

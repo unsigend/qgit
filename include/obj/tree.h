@@ -65,4 +65,7 @@ extern int tree_foreach(struct object *obj, struct repo *repo,
 extern int tree_entry_fprintf(struct tree_entry *entry, const char *prefix,
                               FILE *fp);
 
+/* tree sort comparator */
+extern int tree_entry_cmp(const void *a, const void *b);
+
 #endif

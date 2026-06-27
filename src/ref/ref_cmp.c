@@ -15,14 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WORKTREE_H
-#define WORKTREE_H
+#include <string.h>
 
-/* this file is used to manage between worktree and index */
+#include "ref.h"
 
-struct index;
-
-/* add a file or directory to the index */
-extern int worktree_add_to_index(struct index *index, const char *path);
-
-#endif
+int ref_cmp(const void *a, const void *b)
+{
+  const struct ref *ra = a, *rb = b;
+  return strcmp(ra->name, rb->name);
+}

@@ -111,4 +111,6 @@ extern struct index_entry *index_find(struct index *index, const char *path,
 extern int index_add(struct index *index, struct index_entry *entry);
 extern int index_rm(struct index *index, const char *path, uint16_t stage);
 
+extern int index_entry_cmp(const void *a, const void *b);
+
 #endif

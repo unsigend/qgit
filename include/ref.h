@@ -28,6 +28,8 @@ struct refs;
 extern int refs_init(struct refs *refs, struct repo *repo);
 extern void refs_fini(struct refs *refs);
 
+extern int ref_cmp(const void *a, const void *b);
+
 struct ref {
   char *name;
   unsigned char sha1[SHA1_DIGLEN];

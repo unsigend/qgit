@@ -34,12 +34,6 @@ static int printref(const char *refname, unsigned char *sha1)
   return 0;
 }
 
-static int ref_name_cmp(const void *a, const void *b)
-{
-  const struct ref *ra = a, *rb = b;
-  return strcmp(ra->name, rb->name);
-}
-
 int cmd_show_ref(int argc, char **argv)
 {
   int head = 0;
@@ -90,7 +84,7 @@ int cmd_show_ref(int argc, char **argv)
       die_errno();
   }
   if (show_branches) {
-    vec_sort(&refs.branches, ref_name_cmp);
+    vec_sort(&refs.branches, ref_cmp);
     if (vec_iter_init(&iter, &refs.branches) == -1)
       die_errno();
     while (vec_iter_get(&iter)) {
@@ -101,7 +95,7 @@ int cmd_show_ref(int argc, char **argv)
     }
   }
   if (show_tags) {
-    vec_sort(&refs.tags, ref_name_cmp);
+    vec_sort(&refs.tags, ref_cmp);
     if (vec_iter_init(&iter, &refs.tags) == -1)
       die_errno();
     while (vec_iter_get(&iter)) {

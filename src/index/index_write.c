@@ -31,16 +31,6 @@
 
 #define ALIGN(size, align) (((size) + (align - 1)) & ~(align - 1))
 
-static int entry_cmp(const void *a, const void *b)
-{
-  const struct index_entry *e1 = (const struct index_entry *)a;
-  const struct index_entry *e2 = (const struct index_entry *)b;
-  int r = strcmp(e1->path, e2->path);
-  if (r)
-    return r;
-  return (int)e1->stage - (int)e2->stage;
-}
-
 static int write_entry(struct index_entry *entry, void **buf, size_t *buflen)
 {
   if (!entry || !buf || !buflen || !entry->path)
@@ -97,7 +87,7 @@ int index_write(struct index *index)
   if (!index || !index->repo)
     return -1;
 
-  vec_sort(&index->entries, entry_cmp);
+  vec_sort(&index->entries, index_entry_cmp);
 
   char path[PATH_MAX];
   char header[IDX_HEADER_SIZE];
