@@ -12,6 +12,7 @@
         "existf",
         "existfile",
         "extsz",
+        "fmtpath",
         "fprintfr",
         "gcfg",
         "IDXE",
@@ -30,6 +31,8 @@
         "QERROR",
         "reinit",
         "removen",
+        "repobuf",
+        "repodir",
         "rmrf",
         "setqerrno"
     ]
