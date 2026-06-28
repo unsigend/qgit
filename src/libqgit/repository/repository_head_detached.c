@@ -15,28 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPOSITORY_H
-#define REPOSITORY_H
+#include "repository.h"
 
-#include <libqgit/common.h>
-#include <libqgit/types.h>
-#include <stddef.h>
-#include <sys/stat.h>
+#include <assert.h>
+#include <string.h>
 
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+#define BUFLEN 64
 
-struct qgit_repository {
-    qgit_odb *odb;
-    qgit_index *index;
-    qgit_config *config;
+int qgit_repository_head_detached(qgit_repository *repo)
+{
+    assert(repo);
 
-    char *workdir;
-    char *repodir;
-};
+    char buf[BUFLEN] = {0};
 
-/* Read the content of HEAD file in a repository to a buffer. */
-int qgit_repository_head_content(const qgit_repository *repo, char *buf,
-                                 size_t buflen);
+    if (qgit_repository_head_content(repo, buf, BUFLEN) == -1)
+        return 0;
 
-#endif
+    return strncmp(buf, "ref: ", 5) == 0 ? 0 : 1;
+}

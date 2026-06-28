@@ -15,28 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPOSITORY_H
-#define REPOSITORY_H
+#include "repository.h"
 
-#include <libqgit/common.h>
-#include <libqgit/types.h>
-#include <stddef.h>
-#include <sys/stat.h>
+#include <assert.h>
+#include <errno.h>
+#include <fs.h>
+#include <limits.h>
+#include <stdio.h>
 
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+int qgit_repository_head_unborn(qgit_repository *repo)
+{
+    assert(repo);
 
-struct qgit_repository {
-    qgit_odb *odb;
-    qgit_index *index;
-    qgit_config *config;
+    char buf[PATH_MAX];
+    char path[PATH_MAX];
+    char ref[PATH_MAX];
 
-    char *workdir;
-    char *repodir;
-};
-
-/* Read the content of HEAD file in a repository to a buffer. */
-int qgit_repository_head_content(const qgit_repository *repo, char *buf,
-                                 size_t buflen);
-
-#endif
+    if (qgit_repository_head_content(repo, buf, PATH_MAX) == -1)
+        return 0;
+    if (sscanf(buf, "ref: %s", ref) != 1)
+        return 0;
+    if (snprintf(path, PATH_MAX, "%s/%s", repo->repodir, ref) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return 0;
+    }
+    return file_exists(path) ? 0 : 1;
+}

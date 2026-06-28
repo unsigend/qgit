@@ -26,13 +26,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int str_endwith(const char *str, const char *suffix)
+{
+    size_t str_len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    return str_len >= suffix_len &&
+           strcmp(str + str_len - suffix_len, suffix) == 0;
+}
+
 int qgit_repository_open(qgit_repository **repo, const char *path)
 {
     char repodir[PATH_MAX];
     struct qgit_repository *r = NULL;
+    char *slash;
     *repo = NULL;
 
-    if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
+    if (str_endwith(path, "/.qgit")) {
+        strcpy(repodir, path);
+    } else if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;
     }
@@ -52,7 +63,14 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
         return -1;
     }
 
-    r->workdir = strdup(path);
+    slash = strrchr(repodir, '/');
+    if (slash == repodir)
+        r->workdir = strdup("/");
+    else {
+        *slash = '\0';
+        r->workdir = strdup(repodir);
+    }
+
     if (!r->workdir) {
         qgit_repository_free(r);
         return -1;

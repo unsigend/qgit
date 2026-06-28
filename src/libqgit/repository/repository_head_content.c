@@ -15,28 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPOSITORY_H
-#define REPOSITORY_H
+#include "repository.h"
 
-#include <libqgit/common.h>
-#include <libqgit/types.h>
-#include <stddef.h>
-#include <sys/stat.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <fs.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
-
-struct qgit_repository {
-    qgit_odb *odb;
-    qgit_index *index;
-    qgit_config *config;
-
-    char *workdir;
-    char *repodir;
-};
-
-/* Read the content of HEAD file in a repository to a buffer. */
 int qgit_repository_head_content(const qgit_repository *repo, char *buf,
-                                 size_t buflen);
+                                 size_t buflen)
+{
+    assert(repo && buf && buflen);
 
-#endif
+    char path[PATH_MAX];
+    int fd = -1;
+
+    if (snprintf(path, PATH_MAX, "%s/HEAD", repo->repodir) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if ((fd = open(path, O_RDONLY)) == -1)
+        return -1;
+
+    if (read_all(fd, buf, buflen) < 0) {
+        close(fd);
+        return -1;
+    }
+    close(fd);
+
+    return 0;
+}

@@ -15,28 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REPOSITORY_H
-#define REPOSITORY_H
+#include <libqgit/repository.h>
 
-#include <libqgit/common.h>
-#include <libqgit/types.h>
-#include <stddef.h>
-#include <sys/stat.h>
-
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
-
-struct qgit_repository {
-    qgit_odb *odb;
-    qgit_index *index;
-    qgit_config *config;
-
-    char *workdir;
-    char *repodir;
-};
-
-/* Read the content of HEAD file in a repository to a buffer. */
-int qgit_repository_head_content(const qgit_repository *repo, char *buf,
-                                 size_t buflen);
-
-#endif
+int qgit_repository_is_empty(qgit_repository *repo)
+{
+    return qgit_repository_head_unborn(repo);
+}
