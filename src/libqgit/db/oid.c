@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/oid.h>
+#include <libqgit/db/oid.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

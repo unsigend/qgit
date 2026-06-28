@@ -15,30 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "repository.h"
+#include "odb.h"
 
-#include <libqgit/config.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/index.h>
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
-void qgit_repository_free(qgit_repository *repo)
+const void *qgit_odb_object_data(const qgit_odb_object *object)
 {
-    if (!repo)
-        return;
-
-    if (repo->repodir)
-        free(repo->repodir);
-    if (repo->workdir)
-        free(repo->workdir);
-    if (repo->odb)
-        qgit_odb_free(repo->odb);
-    if (repo->index)
-        qgit_index_free(repo->index);
-    if (repo->config)
-        qgit_config_free(repo->config);
-
-    memset(repo, 0, sizeof(struct qgit_repository));
-    free(repo);
+    assert(object);
+    return object->data;
 }

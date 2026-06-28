@@ -14,31 +14,3 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#include "repository.h"
-
-#include <libqgit/config.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/index.h>
-#include <stdlib.h>
-#include <string.h>
-
-void qgit_repository_free(qgit_repository *repo)
-{
-    if (!repo)
-        return;
-
-    if (repo->repodir)
-        free(repo->repodir);
-    if (repo->workdir)
-        free(repo->workdir);
-    if (repo->odb)
-        qgit_odb_free(repo->odb);
-    if (repo->index)
-        qgit_index_free(repo->index);
-    if (repo->config)
-        qgit_config_free(repo->config);
-
-    memset(repo, 0, sizeof(struct qgit_repository));
-    free(repo);
-}

@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_OBJECT_OID_H
-#define LIBQGIT_OBJECT_OID_H
+#ifndef LIBQGIT_DB_OID_H
+#define LIBQGIT_DB_OID_H
 
 #include <libqgit/common.h>
 #include <libqgit/types.h>

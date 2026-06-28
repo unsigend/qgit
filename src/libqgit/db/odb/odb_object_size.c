@@ -15,17 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_OBJECT_ODB_H
-#define LIBQGIT_OBJECT_ODB_H
+#include "odb.h"
 
-#include <libqgit/common.h>
-#include <libqgit/types.h>
+#include <assert.h>
 
-BEGIN_DECLS
-
-/* Free a previously allocated object database. */
-QGIT_EXTERN(void) qgit_odb_free(qgit_odb *odb);
-
-END_DECLS
-
-#endif
+size_t qgit_odb_object_size(const qgit_odb_object *object)
+{
+    assert(object);
+    return object->len;
+}

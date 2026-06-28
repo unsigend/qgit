@@ -15,30 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "repository.h"
+#ifndef ODB_H
+#define ODB_H
 
-#include <libqgit/config.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/index.h>
-#include <stdlib.h>
-#include <string.h>
+#include <libqgit/db/oid.h>
+#include <libqgit/types.h>
+#include <stddef.h>
 
-void qgit_repository_free(qgit_repository *repo)
-{
-    if (!repo)
-        return;
+struct qgit_odb_object {
+    qgit_oid oid;
+    void *data; /* raw decompressed object data */
+    size_t len; /* length of the raw object data */
+    qgit_obj_type type;
+};
 
-    if (repo->repodir)
-        free(repo->repodir);
-    if (repo->workdir)
-        free(repo->workdir);
-    if (repo->odb)
-        qgit_odb_free(repo->odb);
-    if (repo->index)
-        qgit_index_free(repo->index);
-    if (repo->config)
-        qgit_config_free(repo->config);
-
-    memset(repo, 0, sizeof(struct qgit_repository));
-    free(repo);
-}
+#endif

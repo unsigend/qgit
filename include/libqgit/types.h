@@ -20,6 +20,8 @@
 
 typedef struct qgit_oid qgit_oid;
 typedef struct qgit_odb qgit_odb;
+typedef struct qgit_odb_object qgit_odb_object;
+typedef struct qgit_odb_backend qgit_odb_backend;
 
 typedef struct qgit_index qgit_index;
 typedef struct qgit_config qgit_config;
@@ -31,5 +33,14 @@ typedef struct qgit_blob qgit_blob;
 typedef struct qgit_tree qgit_tree;
 typedef struct qgit_tag qgit_tag;
 typedef struct qgit_commit qgit_commit;
+
+typedef enum {
+    QGIT_OBJ_ANY = -2,   /* Any object type */
+    QGIT_OBJ_BAD = -1,   /* Bad object */
+    QGIT_OBJ_COMMIT = 1, /* Commit object */
+    QGIT_OBJ_BLOB = 2,   /* Blob object */
+    QGIT_OBJ_TREE = 3,   /* Tree object */
+    QGIT_OBJ_TAG = 4,    /* Tag object */
+} qgit_obj_type;
 
 #endif
