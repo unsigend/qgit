@@ -15,37 +15,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
+#include "rawobj.h"
 
 #include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
 #include <libqgit/error.h>
+#include <libqgit/object/object.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-static void backend_entry_free(void *p)
+int qgit_rawobj_format(qgit_rawobj *rawobj, void **buf, size_t *buflen)
 {
-    if (!p)
-        return;
-    struct backend_entry *entry = (struct backend_entry *)p;
-    entry->backend->free(entry->backend); /* delegate to the backend */
-}
+    assert(rawobj && buf && buflen);
 
-int qgit_odb_new(qgit_odb **out)
-{
-    assert(out);
+    const char *type_str = qgit_object_type2string(rawobj->type);
+    int n = 0;
+    size_t len = 0;
 
-    *out = NULL;
+    if (!type_str)
+        return -1;
 
-    struct qgit_odb *odb = malloc(sizeof(struct qgit_odb));
-    QGITERR_CHECK_ALLOC(odb);
+    if ((n = snprintf(NULL, 0, "%s %zu", type_str, rawobj->len)) < 0)
+        return -1;
 
-    if (vec_init(&odb->backends, sizeof(struct backend_entry),
-                 backend_entry_free) == -1) {
-        qgit_odb_free(odb);
+    len = n + rawobj->len + 1;
+    if (!(*buf = malloc(len)))
+        return -1;
+
+    char *cur = *buf;
+    if ((n = snprintf(cur, len, "%s %zu", type_str, rawobj->len)) < 0) {
+        free(*buf);
+        *buf = NULL;
         return -1;
     }
 
-    *out = odb;
+    cur += n;
+    *cur++ = '\0';
+
+    if (rawobj->data && rawobj->len)
+        memcpy(cur, rawobj->data, rawobj->len);
+
+    *buflen = len;
     return 0;
 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "../../odb/odb.h"
 #include "loose_backend.h"
 
 #include <assert.h>
@@ -21,6 +22,7 @@
 #include <errno.h>
 #include <fs.h>
 #include <libqgit/common.h>
+#include <libqgit/db/oid.h>
 #include <libqgit/object/object.h>
 #include <limits.h>
 #include <sha1.h>
@@ -30,51 +32,20 @@
 #include <string.h>
 #include <unistd.h>
 
-static int fmt_raw(void **buf, size_t *buflen, const void *data, size_t len,
-                   qgit_obj_type type)
-{
-    int n = 0;
-    const char *type_str = NULL;
-    char *cur = NULL;
-
-    if ((type_str = qgit_object_type2string(type)) == NULL)
-        return -1;
-
-    if ((n = snprintf(NULL, 0, "%s %zu", type_str, len)) < 0)
-        return -1;
-
-    *buflen = n + len + 1;
-    if (!(*buf = malloc(*buflen)))
-        return -1;
-
-    cur = *buf;
-
-    if ((n = snprintf(cur, *buflen, "%s %zu", type_str, len)) < 0) {
-        free(*buf);
-        *buf = NULL;
-        return -1;
-    }
-    cur += n;
-
-    *cur++ = '\0';
-    if (data && len)
-        memcpy(cur, data, len);
-
-    return 0;
-}
-
 int loose_backend_write(qgit_oid *out, qgit_odb_backend *backend,
                         const void *data, size_t len, qgit_obj_type type)
 {
-    assert(out && backend && data && len && type);
+    assert(out && backend && type);
 
     struct loose_backend *loose_backend = (struct loose_backend *)backend;
-    void *buf = NULL;
-    size_t buflen = 0;
     unsigned char sha[QGIT_OID_RAWSZ];
+    void *buf;
+    size_t buflen;
     char hex[QGIT_OID_HEXSZ], path1[PATH_MAX], path2[PATH_MAX];
 
-    if (fmt_raw(&buf, &buflen, data, len, type) == -1)
+    qgit_rawobj rawobj = {.data = (void *)data, .len = len, .type = type};
+
+    if (qgit_rawobj_format(&rawobj, &buf, &buflen) == -1)
         return -1;
 
     if (sha1(buf, buflen, sha) == -1) {
@@ -107,7 +78,8 @@ int loose_backend_write(qgit_oid *out, qgit_odb_backend *backend,
         return -1;
     }
 
-    if (!file_exists(path2)) /* idempotent skip write  */
+    if (!file_exists(
+            path2)) /* idempotent, skip write if the object already exists */
     {
         if (snprintf(path1, PATH_MAX, "%s.tmp", path2) >= PATH_MAX) {
             errno = ENAMETOOLONG;

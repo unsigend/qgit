@@ -14,3 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+void qgit_odb_object_free(qgit_odb_object *object)
+{
+    if (!object)
+        return;
+    if (object->rawobj.data)
+        free(object->rawobj.data);
+    memset(object, 0, sizeof(struct qgit_odb_object));
+    free(object);
+}

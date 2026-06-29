@@ -28,8 +28,12 @@
 #define QGITERR_REPO_NOT_FOUND 1 /* repository not found */
 #define QGITERR_BADOBJFILE 2     /* bad object file */
 #define QGITERR_INVALIDOBJTYPE 3 /* invalid object type */
+#define QGITERR_OBJ_NOT_FOUND 4  /* object not found */
 
 BEGIN_DECLS
+
+/* Clear the error code */
+QGIT_EXTERN(void) qgit_clearerrno(void);
 
 /* Set the error code */
 QGIT_EXTERN(void) qgit_seterrno(int err);

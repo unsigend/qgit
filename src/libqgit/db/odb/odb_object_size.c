@@ -22,5 +22,5 @@
 size_t qgit_odb_object_size(const qgit_odb_object *object)
 {
     assert(object);
-    return object->len;
+    return object->rawobj.len;
 }

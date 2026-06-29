@@ -14,3 +14,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <libqgit/db/odb_backend.h>
+#include <stddef.h>
+
+int qgit_odb_add_backend(qgit_odb *odb, qgit_odb_backend *backend, int priority)
+{
+    assert(odb && backend);
+
+    if (backend->odb)
+        return -1;
+
+    struct backend_entry entry = {
+        .backend = backend,
+        .priority = priority,
+    };
+
+    int push = 0;
+
+    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+        if (priority >
+            ((struct backend_entry *)vec_at(&odb->backends, i))->priority) {
+            push = 1;
+            if (vec_insert(&odb->backends, i, &entry) == -1)
+                return -1;
+            break;
+        }
+    }
+
+    if (!push) {
+        if (vec_pushback(&odb->backends, &entry) == -1)
+            return -1;
+    }
+    entry.backend->odb = odb;
+
+    return 0;
+}

@@ -22,5 +22,5 @@
 const void *qgit_odb_object_data(const qgit_odb_object *object)
 {
     assert(object);
-    return object->data;
+    return object->rawobj.data;
 }

@@ -23,8 +23,9 @@ static const char *errstr[] = {
     [QGITERR_REPO_NOT_FOUND] = "not inside a qgit repository",
     [QGITERR_BADOBJFILE] = "bad object file",
     [QGITERR_INVALIDOBJTYPE] = "invalid object type",
+    [QGITERR_OBJ_NOT_FOUND] = "object not found",
 };
-
+void qgit_clearerrno(void) { qgit_errno = 0; }
 void qgit_seterrno(int err) { qgit_errno = err; }
 
 int qgit_geterrno(void) { return qgit_errno; }

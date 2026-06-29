@@ -54,7 +54,8 @@ QGIT_EXTERN(int)
 qgit_odb_write(qgit_oid *out, qgit_odb *odb, const void *data, size_t len,
                qgit_obj_type type);
 
-/* Return 1 if the object exists in the database, 0 otherwise. */
+/* Return 1 if the object exists in the database, 0 otherwise. Return -1 on
+   error. */
 QGIT_EXTERN(int) qgit_odb_exists(qgit_odb *odb, const qgit_oid *id);
 
 /* Compute the OID of a data buffer without writing it to the database. */

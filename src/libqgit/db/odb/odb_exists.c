@@ -14,3 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <libqgit/db/odb_backend.h>
+
+int qgit_odb_exists(qgit_odb *odb, const qgit_oid *id)
+{
+    assert(odb && id);
+
+    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+        struct backend_entry *backend =
+            (struct backend_entry *)vec_at(&odb->backends, i);
+        if (!backend->backend->exists)
+            continue;
+        int result = backend->backend->exists(backend->backend, id);
+        if (result == -1)
+            return -1;
+        if (result == 1)
+            return 1;
+    }
+    return 0;
+}

@@ -15,16 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "../../odb/odb.h"
 #include "loose_backend.h"
 
 #include <assert.h>
 #include <compress.h>
 #include <errno.h>
 #include <fs.h>
-#include <libqgit/db/oid.h>
 #include <libqgit/error.h>
-#include <libqgit/object/object.h>
-#include <libqgit/types.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -39,42 +37,31 @@ int loose_backend_read(void **data_p, size_t *len_p, qgit_obj_type *type_p,
     *len_p = 0;
 
     struct loose_backend *loose_backend = (struct loose_backend *)backend;
-    char oidpath[QGIT_OID_HEXSZ + 2];
     char path[PATH_MAX];
 
-    void *decmpbuf, *payload;
-    size_t decmpbuflen = 0, payloadlen = 0;
+    void *decmpbuf;
+    size_t decmpbuflen;
+    qgit_rawobj rawobj = {.data = NULL, .len = 0, .type = QGIT_OBJ_BAD};
 
-    if (qgit_oid_fmtpath(oidpath, oid) < 0)
+    if (loose_oid_path(loose_backend->objects_dir, oid, path, PATH_MAX) == -1)
         return -1;
 
-    if (snprintf(path, PATH_MAX, "%s/%s", loose_backend->objects_dir,
-                 oidpath) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
+    if (zlib_decompressf(path, &decmpbuf, &decmpbuflen) == -1) {
+        if (errno == ENOENT)
+            qgit_seterrno(QGITERR_OBJ_NOT_FOUND);
+        else
+            qgit_clearerrno();
         return -1;
     }
 
-    if (zlib_decompressf(path, &decmpbuf, &decmpbuflen) == -1)
-        return -1;
-
-    if (loose_parse_raw(decmpbuf, decmpbuflen, type_p, &payload, &payloadlen) ==
-        -1) {
+    if (qgit_rawobj_parse(decmpbuf, decmpbuflen, &rawobj) == -1) {
         free(decmpbuf);
         return -1;
     }
 
-    if (payloadlen > 0) {
-        *data_p = malloc(payloadlen);
-        if (!*data_p) {
-            free(decmpbuf);
-            return -1;
-        }
-
-        memcpy(*data_p, payload, payloadlen);
-    } else
-        *data_p = NULL;
-
-    *len_p = payloadlen;
+    *data_p = rawobj.data; /* transfer ownership to caller */
+    *len_p = rawobj.len;
+    *type_p = rawobj.type;
 
     free(decmpbuf);
     return 0;

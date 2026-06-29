@@ -14,3 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <stdlib.h>
+
+void qgit_odb_free(qgit_odb *odb)
+{
+    if (!odb)
+        return;
+
+    vec_fini(&odb->backends);
+    free(odb);
+}

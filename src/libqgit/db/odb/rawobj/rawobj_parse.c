@@ -15,20 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "loose_backend.h"
+#include "rawobj.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <libqgit/error.h>
 #include <libqgit/object/object.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-int loose_parse_raw(void *decmpbuf, size_t decmpbuflen, qgit_obj_type *type_p,
-                    void **payload_p, size_t *payload_len_p)
+int qgit_rawobj_parse(void *decmpbuf, size_t decmpbuflen, qgit_rawobj *rawobj)
 {
-    assert(decmpbuf && decmpbuflen); /* the type_p, payload_p and payload_len_p
-                                        will be skipped if NULL */
+    assert(decmpbuf && decmpbuflen && rawobj);
 
     char *cur = decmpbuf;
     char *end = cur + decmpbuflen;
@@ -48,8 +48,6 @@ int loose_parse_raw(void *decmpbuf, size_t decmpbuflen, qgit_obj_type *type_p,
     type = qgit_object_string2type((char *)decmpbuf);
     if (type == QGIT_OBJ_BAD)
         return -1;
-    if (type_p)
-        *type_p = type;
 
     cur++;
 
@@ -61,15 +59,21 @@ int loose_parse_raw(void *decmpbuf, size_t decmpbuflen, qgit_obj_type *type_p,
         return -1;
     }
     cur = endstr + 1;
-    if (cur + size > end) {
+    if (size > (size_t)(end - cur)) {
         qgit_seterrno(QGITERR_BADOBJFILE);
         return -1;
     }
 
-    if (payload_p)
-        *payload_p = cur;
-    if (payload_len_p)
-        *payload_len_p = size;
+    if (size) {
+        rawobj->data = malloc(size);
+        if (!rawobj->data)
+            return -1;
+        memcpy(rawobj->data, cur, size);
+    } else
+        rawobj->data = NULL;
+
+    rawobj->type = type;
+    rawobj->len = size;
 
     return 0;
 }

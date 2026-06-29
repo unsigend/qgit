@@ -15,49 +15,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "loose_backend.h"
+#include "rawobj.h"
 
 #include <assert.h>
-#include <compress.h>
 #include <errno.h>
-#include <libqgit/db/oid.h>
 #include <libqgit/error.h>
 #include <libqgit/object/object.h>
-#include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-int loose_backend_read_header(size_t *len_p, qgit_obj_type *type_p,
-                              struct qgit_odb_backend *backend,
-                              const qgit_oid *oid)
+int qgit_rawobj_parse_header(void *decmpbuf, size_t decmpbuflen,
+                             qgit_rawobj *rawobj)
 {
-    assert(len_p && type_p && backend && oid);
-    *len_p = 0;
-    *type_p = QGIT_OBJ_BAD;
+    assert(decmpbuf && decmpbuflen && rawobj);
 
-    struct loose_backend *loose_backend = (struct loose_backend *)backend;
-    char oidpath[QGIT_OID_HEXSZ + 2];
-    char path[PATH_MAX];
-    void *decmpbuf = NULL;
-    size_t decmpbuflen = 0;
+    char *cur = decmpbuf;
+    char *end = cur + decmpbuflen;
+    char *endstr = NULL;
+    qgit_obj_type type = QGIT_OBJ_BAD;
 
-    if (qgit_oid_fmtpath(oidpath, oid) < 0)
-        return -1;
+    while (cur < end && *cur != ' ')
+        cur++;
 
-    if (snprintf(path, PATH_MAX, "%s/%s", loose_backend->objects_dir,
-                 oidpath) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
+    if (cur == end) {
+        qgit_seterrno(QGITERR_BADOBJFILE);
         return -1;
     }
 
-    if (zlib_decompressf(path, &decmpbuf, &decmpbuflen) == -1)
+    *cur = '\0';
+
+    type = qgit_object_string2type((char *)decmpbuf);
+    if (type == QGIT_OBJ_BAD)
         return -1;
 
-    if (loose_parse_raw(decmpbuf, decmpbuflen, type_p, NULL, len_p) == -1) {
-        free(decmpbuf);
+    cur++;
+
+    errno = 0;
+    size_t size = strtoul((char *)cur, &endstr, 10);
+    if (errno || endstr == cur || *endstr) {
+        if (!errno)
+            qgit_seterrno(QGITERR_BADOBJFILE);
+        return -1;
+    }
+    cur = endstr + 1;
+    if (size > (size_t)(end - cur)) {
+        qgit_seterrno(QGITERR_BADOBJFILE);
         return -1;
     }
 
-    free(decmpbuf);
+    rawobj->type = type;
+    rawobj->len = size;
+    rawobj->data = NULL;
+
     return 0;
 }

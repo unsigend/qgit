@@ -43,7 +43,7 @@ struct qgit_odb_backend {
     int (*write)(qgit_oid *, struct qgit_odb_backend *, const void *, size_t,
                  qgit_obj_type);
 
-    /* Return 1 if the object exists, 0 otherwise. */
+    /* Return 1 if the object exists, 0 otherwise. Return -1 on error. */
     int (*exists)(struct qgit_odb_backend *, const qgit_oid *);
 
     /* Free all resources held by this backend. */

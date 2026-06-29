@@ -14,3 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <assert.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+
+int qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,
+                         const qgit_oid *id)
+{
+    assert(len_p && type_p && odb && id);
+
+    *len_p = 0;
+    *type_p = QGIT_OBJ_BAD;
+    int found = 0;
+
+    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+        struct backend_entry *backend =
+            (struct backend_entry *)vec_at(&odb->backends, i);
+        if (!backend->backend->read_header)
+            continue;
+        int result =
+            backend->backend->read_header(len_p, type_p, backend->backend, id);
+        if (result == -1) {
+            if (qgit_geterrno() == QGITERR_OBJ_NOT_FOUND)
+                continue;
+            return -1;
+        }
+        if (result == 0) {
+            found = 1;
+            break;
+        }
+    }
+
+    if (found)
+        return 0;
+    qgit_seterrno(QGITERR_OBJ_NOT_FOUND);
+    return -1;
+}

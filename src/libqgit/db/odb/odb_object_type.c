@@ -22,5 +22,5 @@
 qgit_obj_type qgit_odb_object_type(const qgit_odb_object *object)
 {
     assert(object);
-    return object->type;
+    return object->rawobj.type;
 }

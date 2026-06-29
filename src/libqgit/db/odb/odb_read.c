@@ -14,3 +14,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "odb.h"
+
+#include <assert.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id)
+{
+    assert(out && odb && id);
+    *out = NULL;
+
+    int found = 0;
+    qgit_odb_object *object = calloc(1, sizeof(qgit_odb_object));
+    QGITERR_CHECK_ALLOC(object);
+
+    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+        struct backend_entry *backend =
+            (struct backend_entry *)vec_at(&odb->backends, i);
+        if (!backend->backend->read)
+            continue;
+        int result =
+            backend->backend->read(&object->rawobj.data, &object->rawobj.len,
+                                   &object->rawobj.type, backend->backend, id);
+        if (result == -1) {
+            if (qgit_geterrno() == QGITERR_OBJ_NOT_FOUND) {
+                memset(object, 0, sizeof(qgit_odb_object));
+                continue;
+            }
+            qgit_odb_object_free(object);
+            return -1;
+        }
+        if (result == 0) {
+            found = 1;
+            break;
+        }
+    }
+
+    if (found) {
+        *out = object;
+        qgit_oid_copy(&object->oid, id);
+        return 0;
+    }
+    qgit_seterrno(QGITERR_OBJ_NOT_FOUND);
+    qgit_odb_object_free(object);
+    return -1;
+}

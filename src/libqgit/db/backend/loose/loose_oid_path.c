@@ -17,15 +17,27 @@
 
 #include "loose_backend.h"
 
-#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include <libqgit/db/oid.h>
+#include <limits.h>
+#include <stdio.h>
 
-void loose_backend_free(struct qgit_odb_backend *backend)
+int loose_oid_path(const char *objects_dir, const qgit_oid *oid, char *path,
+                   size_t pathlen)
 {
-    if (!backend)
-        return;
+    assert(objects_dir && oid && path && pathlen);
 
-    struct loose_backend *loose_backend = (struct loose_backend *)backend;
-    if (loose_backend->objects_dir)
-        free(loose_backend->objects_dir);
-    free(loose_backend);
+    char oidpath[QGIT_OID_HEXSZ + 2];
+
+    if (qgit_oid_fmtpath(oidpath, oid) == -1)
+        return -1;
+
+    if (snprintf(path, pathlen, "%s/%s", objects_dir, oidpath) >=
+        (int)pathlen) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return 0;
 }

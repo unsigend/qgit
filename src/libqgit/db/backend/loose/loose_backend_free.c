@@ -15,28 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
+#include "loose_backend.h"
 
-#include <assert.h>
-#include <libqgit/db/odb.h>
+#include <stdlib.h>
 
-int qgit_odb_write(qgit_oid *out, qgit_odb *odb, const void *data, size_t len,
-                   qgit_obj_type type)
+void loose_backend_free(struct qgit_odb_backend *backend)
 {
-    assert(out && odb);
+    if (!backend)
+        return;
+    struct loose_backend *loose_backend = (struct loose_backend *)backend;
 
-    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
-        struct backend_entry *backend =
-            (struct backend_entry *)vec_at(&odb->backends, i);
-        if (!backend->backend->write)
-            continue;
-        int result =
-            backend->backend->write(out, backend->backend, data, len, type);
-        /* If result is -1, try the next writable backend */
-        if (result == 0)
-            return 0;
-    }
-
-    /* No writable backend found */
-    return -1;
+    if (loose_backend->objects_dir)
+        free(loose_backend->objects_dir);
+    free(loose_backend);
 }

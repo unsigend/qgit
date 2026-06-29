@@ -20,6 +20,7 @@
 
 #include <libqgit/common.h>
 #include <libqgit/db/odb_backend.h>
+#include <libqgit/db/oid.h>
 #include <stddef.h>
 
 struct loose_backend {
@@ -41,10 +42,10 @@ loose_backend_exists(qgit_odb_backend *backend, const qgit_oid *oid);
 
 QGIT_INTERNAL(void) loose_backend_free(qgit_odb_backend *backend);
 
-/* Parse the raw decompressed object buf, fill the type_p, payload_p and
-   payload_len_p. Return 0 on success, -1 on error. */
+/* Get the path to the object file in the objects directory. Return 0 on
+   success, -1 on error. */
 QGIT_INTERNAL(int)
-loose_parse_raw(void *decmpbuf, size_t decmpbuflen, qgit_obj_type *type_p,
-                void **payload_p, size_t *payload_len_p);
+loose_oid_path(const char *objects_dir, const qgit_oid *oid, char *path,
+               size_t pathlen);
 
 #endif

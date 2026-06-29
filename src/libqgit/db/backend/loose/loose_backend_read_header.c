@@ -15,31 +15,51 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "../../odb/odb.h"
 #include "loose_backend.h"
 
 #include <assert.h>
+#include <compress.h>
 #include <errno.h>
-#include <fs.h>
-#include <libqgit/db/oid.h>
+#include <libqgit/error.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-int loose_backend_exists(struct qgit_odb_backend *backend, const qgit_oid *oid)
+int loose_backend_read_header(size_t *len_p, qgit_obj_type *type_p,
+                              struct qgit_odb_backend *backend,
+                              const qgit_oid *oid)
 {
-    assert(backend && oid);
+    assert(len_p && type_p && backend && oid);
+    *len_p = 0;
+    *type_p = QGIT_OBJ_BAD;
 
     struct loose_backend *loose_backend = (struct loose_backend *)backend;
-    char oidpath[QGIT_OID_HEXSZ + 2];
     char path[PATH_MAX];
+    void *decmpbuf;
+    size_t decmpbuflen;
 
-    if (qgit_oid_fmtpath(oidpath, oid) < 0)
+    qgit_rawobj rawobj = {.data = NULL, .len = 0, .type = QGIT_OBJ_BAD};
+
+    if (loose_oid_path(loose_backend->objects_dir, oid, path, PATH_MAX) == -1)
         return -1;
 
-    if (snprintf(path, PATH_MAX, "%s/%s", loose_backend->objects_dir,
-                 oidpath) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
+    if (zlib_decompressf(path, &decmpbuf, &decmpbuflen) == -1) {
+        if (errno == ENOENT)
+            qgit_seterrno(QGITERR_OBJ_NOT_FOUND);
+        else
+            qgit_clearerrno();
         return -1;
     }
 
-    return file_exists(path);
+    if (qgit_rawobj_parse_header(decmpbuf, decmpbuflen, &rawobj) == -1) {
+        free(decmpbuf);
+        return -1;
+    }
+
+    *len_p = rawobj.len;
+    *type_p = rawobj.type;
+
+    free(decmpbuf);
+    return 0;
 }
