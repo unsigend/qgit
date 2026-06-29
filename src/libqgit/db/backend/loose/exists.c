@@ -14,3 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "loose_backend.h"
+
+#include <assert.h>
+#include <errno.h>
+#include <fs.h>
+#include <libqgit/db/oid.h>
+#include <limits.h>
+#include <stdio.h>
+
+int loose_backend_exists(struct qgit_odb_backend *backend, const qgit_oid *oid)
+{
+    assert(backend && oid);
+
+    struct loose_backend *loose_backend = (struct loose_backend *)backend;
+    char oidpath[QGIT_OID_HEXSZ + 2];
+    char path[PATH_MAX];
+
+    if (qgit_oid_fmtpath(oidpath, oid) < 0)
+        return -1;
+
+    if (snprintf(path, PATH_MAX, "%s/%s", loose_backend->objects_dir,
+                 oidpath) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return file_exists(path);
+}

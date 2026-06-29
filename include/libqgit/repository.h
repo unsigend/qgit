@@ -25,11 +25,11 @@
 BEGIN_DECLS
 
 /* Open a repository at the exact given path. The 'path' argument must point to
-   either a qgit repository folder, or an existing work dir.*/
+   either a qgit repository folder, or an existing work dir. */
 QGIT_EXTERN(int) qgit_repository_open(qgit_repository **repo, const char *path);
 
 /* Walk parent directories from start_path to find a repository.
- * Writes the found .qgit directory path into repo_path (size bytes). */
+   Writes the found .qgit directory path into repo_path (size bytes). */
 QGIT_EXTERN(int)
 qgit_repository_discover(char *repo_path, size_t size, const char *start_path);
 
@@ -58,7 +58,7 @@ qgit_repository_head(qgit_reference **head, qgit_repository *repo);
 QGIT_EXTERN(int) qgit_repository_head_detached(qgit_repository *repo);
 
 /* Return 1 if HEAD points to a branch that has no commits (unborn), 0
- * otherwise. */
+   otherwise. */
 QGIT_EXTERN(int) qgit_repository_head_unborn(qgit_repository *repo);
 
 /* Get the object database for this repository. */

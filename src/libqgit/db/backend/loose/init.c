@@ -15,21 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "repository.h"
+#include "loose_backend.h"
 
 #include <assert.h>
+#include <libqgit/error.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define BUFLEN 64
-
-int qgit_repository_head_detached(qgit_repository *repo)
+int qgit_odb_backend_loose(qgit_odb_backend **out, const char *objects_dir)
 {
-    assert(repo);
+    assert(out && objects_dir);
 
-    char buf[BUFLEN] = {0};
+    *out = NULL;
 
-    if (qgit_repository_head_content(repo, buf, BUFLEN) == -1)
+    struct loose_backend *backend = malloc(sizeof(struct loose_backend));
+    QGITERR_CHECK_ALLOC(backend);
+    memset(backend, 0, sizeof(struct loose_backend));
+
+    backend->objects_dir = strdup(objects_dir);
+    if (!backend->objects_dir) {
+        loose_backend_free(&backend->base);
         return -1;
+    }
 
-    return strncmp(buf, "ref: ", 5) == 0 ? 0 : 1;
+    backend->base.read = loose_backend_read;
+    backend->base.read_header = loose_backend_read_header;
+    backend->base.write = loose_backend_write;
+    backend->base.exists = loose_backend_exists;
+    backend->base.free = loose_backend_free;
+
+    *out = &backend->base;
+    return 0;
 }

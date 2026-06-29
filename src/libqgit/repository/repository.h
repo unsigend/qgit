@@ -21,10 +21,6 @@
 #include <libqgit/common.h>
 #include <libqgit/types.h>
 #include <stddef.h>
-#include <sys/stat.h>
-
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
 struct qgit_repository {
     qgit_odb *odb;

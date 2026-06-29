@@ -14,3 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "loose_backend.h"
+
+#include <stdlib.h>
+
+void loose_backend_free(struct qgit_odb_backend *backend)
+{
+    if (!backend)
+        return;
+
+    struct loose_backend *loose_backend = (struct loose_backend *)backend;
+    if (loose_backend->objects_dir)
+        free(loose_backend->objects_dir);
+    free(loose_backend);
+}

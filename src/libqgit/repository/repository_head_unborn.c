@@ -32,12 +32,12 @@ int qgit_repository_head_unborn(qgit_repository *repo)
     char ref[PATH_MAX];
 
     if (qgit_repository_head_content(repo, buf, PATH_MAX) == -1)
-        return 0;
+        return -1;
     if (sscanf(buf, "ref: %s", ref) != 1)
         return 0;
     if (snprintf(path, PATH_MAX, "%s/%s", repo->repodir, ref) >= PATH_MAX) {
         errno = ENAMETOOLONG;
-        return 0;
+        return -1;
     }
     return file_exists(path) ? 0 : 1;
 }

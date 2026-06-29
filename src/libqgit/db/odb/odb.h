@@ -18,6 +18,7 @@
 #ifndef ODB_H
 #define ODB_H
 
+#include <collection/vector.h>
 #include <libqgit/db/oid.h>
 #include <libqgit/types.h>
 #include <stddef.h>
@@ -27,6 +28,10 @@ struct qgit_odb_object {
     void *data; /* raw decompressed object data */
     size_t len; /* length of the raw object data */
     qgit_obj_type type;
+};
+
+struct qgit_odb {
+    struct vector backends;
 };
 
 #endif

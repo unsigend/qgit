@@ -26,6 +26,8 @@
     }
 
 #define QGITERR_REPO_NOT_FOUND 1 /* repository not found */
+#define QGITERR_BADOBJFILE 2     /* bad object file */
+#define QGITERR_INVALIDOBJTYPE 3 /* invalid object type */
 
 BEGIN_DECLS
 

@@ -14,3 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef LIBQGIT_OBJECT_OBJECT_H
+#define LIBQGIT_OBJECT_OBJECT_H
+
+#include <libqgit/common.h>
+#include <libqgit/types.h>
+
+BEGIN_DECLS
+
+/* Convert a qgit_obj_type to a string object type representation */
+QGIT_EXTERN(const char *) qgit_object_type2string(qgit_obj_type type);
+
+/* Convert a string object type representation to a qgit_obj_type */
+QGIT_EXTERN(qgit_obj_type) qgit_object_string2type(const char *str);
+
+END_DECLS
+
+#endif

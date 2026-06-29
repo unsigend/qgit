@@ -14,3 +14,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "loose_backend.h"
+
+#include <assert.h>
+#include <compress.h>
+#include <errno.h>
+#include <libqgit/db/oid.h>
+#include <libqgit/error.h>
+#include <libqgit/object/object.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int loose_backend_read_header(size_t *len_p, qgit_obj_type *type_p,
+                              struct qgit_odb_backend *backend,
+                              const qgit_oid *oid)
+{
+    assert(len_p && type_p && backend && oid);
+    *len_p = 0;
+    *type_p = QGIT_OBJ_BAD;
+
+    struct loose_backend *loose_backend = (struct loose_backend *)backend;
+    char oidpath[QGIT_OID_HEXSZ + 2];
+    char path[PATH_MAX];
+    void *decmpbuf = NULL;
+    size_t decmpbuflen = 0;
+
+    if (qgit_oid_fmtpath(oidpath, oid) < 0)
+        return -1;
+
+    if (snprintf(path, PATH_MAX, "%s/%s", loose_backend->objects_dir,
+                 oidpath) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (zlib_decompressf(path, &decmpbuf, &decmpbuflen) == -1)
+        return -1;
+
+    if (loose_parse_raw(decmpbuf, decmpbuflen, type_p, NULL, len_p) == -1) {
+        free(decmpbuf);
+        return -1;
+    }
+
+    free(decmpbuf);
+    return 0;
+}

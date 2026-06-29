@@ -15,21 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "repository.h"
+#include <libqgit/object/object.h>
+#include <stddef.h>
 
-#include <assert.h>
-#include <string.h>
-
-#define BUFLEN 64
-
-int qgit_repository_head_detached(qgit_repository *repo)
+const char *qgit_object_type2string(qgit_obj_type type)
 {
-    assert(repo);
-
-    char buf[BUFLEN] = {0};
-
-    if (qgit_repository_head_content(repo, buf, BUFLEN) == -1)
-        return -1;
-
-    return strncmp(buf, "ref: ", 5) == 0 ? 0 : 1;
+    switch (type) {
+    case QGIT_OBJ_COMMIT:
+        return "commit";
+    case QGIT_OBJ_BLOB:
+        return "blob";
+    case QGIT_OBJ_TREE:
+        return "tree";
+    case QGIT_OBJ_TAG:
+        return "tag";
+    default:
+        return NULL;
+    }
 }
