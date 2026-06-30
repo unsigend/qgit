@@ -35,6 +35,13 @@ struct qgit_odb_backend {
     int (*read)(void **data_p, size_t *len_p, qgit_obj_type *type_p,
                 struct qgit_odb_backend *, const qgit_oid *);
 
+    /* Find a unique object matching a short OID prefix of `len` hex chars.
+       Writes the full OID into `full_oid_out` and the object data into the
+       remaining out-params. Returns error if ambiguous or not found. */
+    int (*read_prefix)(qgit_oid *full_oid_out, void **data_p, size_t *len_p,
+                       qgit_obj_type *type_p, struct qgit_odb_backend *,
+                       const qgit_oid *short_id, unsigned int len);
+
     /* Read only the type and size of an object, without reading its data. */
     int (*read_header)(size_t *len_p, qgit_obj_type *type_p,
                        struct qgit_odb_backend *, const qgit_oid *);

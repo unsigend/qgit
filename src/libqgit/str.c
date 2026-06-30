@@ -15,38 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
+#include <libqgit/str.h>
+#include <stddef.h>
+#include <string.h>
 
-#include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/error.h>
-#include <stdlib.h>
-
-static void backend_entry_free(void *p)
+int qgit_str_endwith(const char *str, const char *suffix)
 {
-    if (!p)
-        return;
-    struct backend_entry *entry = (struct backend_entry *)p;
-    entry->backend->free(entry->backend); /* delegate to the backend */
+    size_t str_len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    return str_len >= suffix_len &&
+           strcmp(str + str_len - suffix_len, suffix) == 0;
 }
 
-int qgit_odb_new(qgit_odb **out)
+int qgit_str_startswith(const char *str, const char *prefix)
 {
-    assert(out);
-
-    *out = NULL;
-
-    struct qgit_odb *odb = malloc(sizeof(struct qgit_odb));
-    if (!odb)
-        return -1;
-
-    if (vec_init(&odb->backends, sizeof(struct backend_entry),
-                 backend_entry_free) == -1) {
-        qgit_odb_free(odb);
-        return -1;
-    }
-
-    *out = odb;
-    return 0;
+    size_t str_len = strlen(str);
+    size_t prefix_len = strlen(prefix);
+    return str_len >= prefix_len && strncmp(str, prefix, prefix_len) == 0;
 }

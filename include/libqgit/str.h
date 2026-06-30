@@ -15,31 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_ERROR_H
-#define LIBQGIT_ERROR_H
+#ifndef LIBQGIT_STR_H
+#define LIBQGIT_STR_H
 
 #include <libqgit/common.h>
 
-#define QGITERR_REPO_NOT_FOUND 1    /* repository not found */
-#define QGITERR_BADOBJFILE 2        /* bad object file */
-#define QGITERR_INVALIDOBJTYPE 3    /* invalid object type */
-#define QGITERR_OBJ_NOT_FOUND 4     /* object not found */
-#define QGITERR_OBJ_TYPE_MISMATCH 5 /* object type mismatch */
-#define QGITERR_AMBIGUOUS 6         /* ambiguous object */
-
 BEGIN_DECLS
 
-/* Clear the error code */
-QGIT_EXTERN(void) qgit_clearerrno(void);
+/* Retrun 1 if the string ends with the suffix, 0 otherwise. */
+QGIT_EXTERN(int) qgit_str_endwith(const char *str, const char *suffix);
 
-/* Set the error code */
-QGIT_EXTERN(void) qgit_seterrno(int err);
-
-/* Get the error code */
-QGIT_EXTERN(int) qgit_geterrno(void);
-
-/* Get the error string */
-QGIT_EXTERN(const char *) qgit_error_str(int err);
+/* Retrun 1 if the string starts with the prefix, 0 otherwise. */
+QGIT_EXTERN(int) qgit_str_startswith(const char *str, const char *prefix);
 
 END_DECLS
 

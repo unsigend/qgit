@@ -23,8 +23,46 @@
 
 BEGIN_DECLS
 
+/* Open and parse an existing config file at path. */
+QGIT_EXTERN(int) qgit_config_open(qgit_config **out, const char *path);
+
+/* Create a new empty in-memory config associated with path (not written until
+   qgit_config_write is called). */
+QGIT_EXTERN(int) qgit_config_create(qgit_config **out, const char *path);
+
+/* Write all pending changes back to disk. */
+QGIT_EXTERN(int) qgit_config_write(qgit_config *config);
+
 /* Free a previously allocated config. */
 QGIT_EXTERN(void) qgit_config_free(qgit_config *config);
+
+/* Get a string value for key "section.key". The returned pointer is owned by
+   the config and valid until the config is modified or freed. */
+QGIT_EXTERN(int) qgit_config_get_string(const char **out, qgit_config *config,
+                                        const char *name);
+
+/* Get a boolean value. Recognises "true"/"false", "yes"/"no", "1"/"0". */
+QGIT_EXTERN(int) qgit_config_get_bool(int *out, qgit_config *config,
+                                      const char *name);
+
+/* Get an integer value. */
+QGIT_EXTERN(int) qgit_config_get_int(int *out, qgit_config *config,
+                                     const char *name);
+
+/* Set a string value for key "section.key". An internal copy is made. */
+QGIT_EXTERN(int) qgit_config_set_string(qgit_config *config, const char *name,
+                                        const char *value);
+
+/* Set a boolean value. Stored as "true" or "false". */
+QGIT_EXTERN(int) qgit_config_set_bool(qgit_config *config, const char *name,
+                                      int value);
+
+/* Set an integer value. */
+QGIT_EXTERN(int) qgit_config_set_int(qgit_config *config, const char *name,
+                                     int value);
+
+/* Delete a config entry. name is "section.key". */
+QGIT_EXTERN(int) qgit_config_delete(qgit_config *config, const char *name);
 
 END_DECLS
 

@@ -24,9 +24,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-int qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id)
+int qgit_odb_read_prefix(qgit_odb_object **out, qgit_odb *odb,
+                         const qgit_oid *short_id, unsigned int len)
 {
-    assert(out && odb && id);
+    assert(out && odb && short_id && len >= QGIT_OID_MINPREFIXLEN &&
+           len <= QGIT_OID_RAWSZ * 2);
+
     *out = NULL;
 
     int found = 0;
@@ -37,11 +40,11 @@ int qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id)
     for (size_t i = 0; i < vec_size(&odb->backends); i++) {
         struct backend_entry *backend =
             (struct backend_entry *)vec_at(&odb->backends, i);
-        if (!backend->backend->read)
+        if (!backend->backend->read_prefix)
             continue;
-        int result =
-            backend->backend->read(&object->rawobj.data, &object->rawobj.len,
-                                   &object->rawobj.type, backend->backend, id);
+        int result = backend->backend->read_prefix(
+            &object->oid, &object->rawobj.data, &object->rawobj.len,
+            &object->rawobj.type, backend->backend, short_id, len);
         if (result == -1) {
             if (qgit_geterrno() == QGITERR_OBJ_NOT_FOUND) {
                 memset(object, 0, sizeof(qgit_odb_object));
@@ -58,7 +61,6 @@ int qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id)
 
     if (found) {
         *out = object;
-        qgit_oid_copy(&object->oid, id);
         return 0;
     }
     qgit_seterrno(QGITERR_OBJ_NOT_FOUND);

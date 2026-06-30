@@ -21,18 +21,11 @@
 #include <fs.h>
 #include <libqgit/error.h>
 #include <libqgit/repository.h>
+#include <libqgit/str.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-static int str_endwith(const char *str, const char *suffix)
-{
-    size_t str_len = strlen(str);
-    size_t suffix_len = strlen(suffix);
-    return str_len >= suffix_len &&
-           strcmp(str + str_len - suffix_len, suffix) == 0;
-}
 
 int qgit_repository_open(qgit_repository **repo, const char *path)
 {
@@ -41,7 +34,7 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
     char *slash;
     *repo = NULL;
 
-    if (str_endwith(path, "/.qgit")) {
+    if (qgit_str_endwith(path, "/.qgit")) {
         strcpy(repodir, path);
     } else if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
@@ -54,7 +47,8 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
     }
 
     r = malloc(sizeof(struct qgit_repository));
-    QGITERR_CHECK_ALLOC(r);
+    if (!r)
+        return -1;
     memset(r, 0, sizeof(struct qgit_repository));
 
     r->repodir = strdup(repodir);

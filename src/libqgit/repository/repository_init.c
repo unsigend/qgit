@@ -163,7 +163,8 @@ int qgit_repository_init(qgit_repository **repo, const char *path,
     char repodir[PATH_MAX];
 
     r = malloc(sizeof(struct qgit_repository));
-    QGITERR_CHECK_ALLOC(r);
+    if (!r)
+        return -1;
     memset(r, 0, sizeof(struct qgit_repository));
 
     if (path_exists(path)) {

@@ -24,7 +24,10 @@ static const char *errstr[] = {
     [QGITERR_BADOBJFILE] = "bad object file",
     [QGITERR_INVALIDOBJTYPE] = "invalid object type",
     [QGITERR_OBJ_NOT_FOUND] = "object not found",
+    [QGITERR_OBJ_TYPE_MISMATCH] = "object type mismatch",
+    [QGITERR_AMBIGUOUS] = "ambiguous object",
 };
+
 void qgit_clearerrno(void) { qgit_errno = 0; }
 void qgit_seterrno(int err) { qgit_errno = err; }
 

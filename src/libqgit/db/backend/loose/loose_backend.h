@@ -32,6 +32,10 @@ QGIT_INTERNAL(int)
 loose_backend_read(void **data_p, size_t *len_p, qgit_obj_type *type_p,
                    qgit_odb_backend *backend, const qgit_oid *oid);
 QGIT_INTERNAL(int)
+loose_backend_read_prefix(qgit_oid *full_oid_out, void **data_p, size_t *len_p,
+                          qgit_obj_type *type_p, qgit_odb_backend *backend,
+                          const qgit_oid *short_id, unsigned int len);
+QGIT_INTERNAL(int)
 loose_backend_read_header(size_t *len_p, qgit_obj_type *type_p,
                           qgit_odb_backend *backend, const qgit_oid *oid);
 QGIT_INTERNAL(int)

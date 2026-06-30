@@ -44,6 +44,12 @@ QGIT_EXTERN(void) qgit_odb_free(qgit_odb *odb);
 QGIT_EXTERN(int)
 qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id);
 
+/* Read an object matching a short OID prefix of `len` hex chars.
+   Fails if the prefix is ambiguous or not found. */
+QGIT_EXTERN(int)
+qgit_odb_read_prefix(qgit_odb_object **out, qgit_odb *odb,
+                     const qgit_oid *short_id, unsigned int len);
+
 /* Read only the type and size of an object without loading its data. */
 QGIT_EXTERN(int)
 qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,

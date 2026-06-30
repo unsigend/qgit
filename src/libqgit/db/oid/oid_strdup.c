@@ -15,38 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
-
-#include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/error.h>
+#include <libqgit/db/oid.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-static void backend_entry_free(void *p)
+char *qgit_oid_strdup(const qgit_oid *oid)
 {
-    if (!p)
-        return;
-    struct backend_entry *entry = (struct backend_entry *)p;
-    entry->backend->free(entry->backend); /* delegate to the backend */
-}
-
-int qgit_odb_new(qgit_odb **out)
-{
-    assert(out);
-
-    *out = NULL;
-
-    struct qgit_odb *odb = malloc(sizeof(struct qgit_odb));
-    if (!odb)
-        return -1;
-
-    if (vec_init(&odb->backends, sizeof(struct backend_entry),
-                 backend_entry_free) == -1) {
-        qgit_odb_free(odb);
-        return -1;
+    char *str = malloc(QGIT_OID_HEXSZ);
+    if (!str)
+        return NULL;
+    if (qgit_oid_fmt(str, oid) < 0) {
+        free(str);
+        return NULL;
     }
-
-    *out = odb;
-    return 0;
+    return str;
 }

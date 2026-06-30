@@ -29,7 +29,8 @@ int qgit_odb_backend_loose(qgit_odb_backend **out, const char *objects_dir)
     *out = NULL;
 
     struct loose_backend *backend = malloc(sizeof(struct loose_backend));
-    QGITERR_CHECK_ALLOC(backend);
+    if (!backend)
+        return -1;
     memset(backend, 0, sizeof(struct loose_backend));
 
     backend->objects_dir = strdup(objects_dir);
@@ -39,6 +40,7 @@ int qgit_odb_backend_loose(qgit_odb_backend **out, const char *objects_dir)
     }
 
     backend->base.read = loose_backend_read;
+    backend->base.read_prefix = loose_backend_read_prefix;
     backend->base.read_header = loose_backend_read_header;
     backend->base.write = loose_backend_write;
     backend->base.exists = loose_backend_exists;

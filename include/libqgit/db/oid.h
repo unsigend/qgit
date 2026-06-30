@@ -20,6 +20,7 @@
 
 #include <libqgit/common.h>
 #include <libqgit/types.h>
+#include <stddef.h>
 
 #define QGIT_OID_RAWSZ 20 /* Size of the raw OID in bytes */
 #define QGIT_OID_HEXSZ                                                         \
@@ -34,6 +35,10 @@ BEGIN_DECLS
 
 /* Parse a hex formatted object id into a qgit_oid */
 QGIT_EXTERN(int) qgit_oid_fromstr(qgit_oid *oid, const char *str);
+
+/* Parse the first `len` hex characters into a qgit_oid remaining bytes are
+   zeroed. Used to build a prefix OID for short-SHA lookup. */
+QGIT_EXTERN(int) qgit_oid_fromstrn(qgit_oid *oid, const char *str, size_t len);
 
 /* Parse a raw object id into a qgit_oid */
 QGIT_EXTERN(void) qgit_oid_fromraw(qgit_oid *oid, const unsigned char *raw);
@@ -52,6 +57,11 @@ QGIT_EXTERN(void) qgit_oid_copy(qgit_oid *dest, const qgit_oid *src);
 
 /* Compare two qgit_oids. */
 QGIT_EXTERN(int) qgit_oid_cmp(const qgit_oid *a, const qgit_oid *b);
+
+/* Compare only the first `len` hex characters of two qgit_oids.
+   Returns 0 if they match. Used for prefix matching. */
+QGIT_EXTERN(int)
+qgit_oid_ncmp(const qgit_oid *a, const qgit_oid *b, size_t len);
 
 /* Check if a qgit_oid is zero. Return 1 if zero, 0 otherwise. */
 QGIT_EXTERN(int) qgit_oid_iszero(const qgit_oid *oid);

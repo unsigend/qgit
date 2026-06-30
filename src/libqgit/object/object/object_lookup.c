@@ -15,38 +15,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
+#include "object.h"
 
 #include <assert.h>
-#include <collection/vector.h>
 #include <libqgit/db/odb.h>
 #include <libqgit/error.h>
+#include <libqgit/repository.h>
 #include <stdlib.h>
 
-static void backend_entry_free(void *p)
+int qgit_object_lookup(qgit_object **object, qgit_repository *repo,
+                       const qgit_oid *id, qgit_obj_type type)
 {
-    if (!p)
-        return;
-    struct backend_entry *entry = (struct backend_entry *)p;
-    entry->backend->free(entry->backend); /* delegate to the backend */
-}
+    assert(object && repo && id);
 
-int qgit_odb_new(qgit_odb **out)
-{
-    assert(out);
+    *object = NULL;
+    struct qgit_odb_object *odb_object;
+    struct qgit_odb *odb;
 
-    *out = NULL;
-
-    struct qgit_odb *odb = malloc(sizeof(struct qgit_odb));
-    if (!odb)
+    if (qgit_repository_odb(&odb, repo) == -1 ||
+        qgit_odb_read(&odb_object, odb, id) == -1)
         return -1;
 
-    if (vec_init(&odb->backends, sizeof(struct backend_entry),
-                 backend_entry_free) == -1) {
-        qgit_odb_free(odb);
+    if (type != QGIT_OBJ_ANY && type != qgit_odb_object_type(odb_object)) {
+        qgit_seterrno(QGITERR_OBJ_TYPE_MISMATCH);
+        qgit_odb_object_free(odb_object);
         return -1;
     }
 
-    *out = odb;
+    *object = calloc(1, sizeof(qgit_object));
+    if (!*object) {
+        qgit_odb_object_free(odb_object);
+        return -1;
+    }
+
+    (*object)->owner = repo;
+    (*object)->type = qgit_odb_object_type(odb_object);
+    qgit_oid_copy(&(*object)->oid, qgit_odb_object_id(odb_object));
+
+    qgit_odb_object_free(odb_object);
+
     return 0;
 }
