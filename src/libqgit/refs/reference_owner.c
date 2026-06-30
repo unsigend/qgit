@@ -14,3 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+
+qgit_repository *qgit_reference_owner(const qgit_reference *ref)
+{
+    assert(ref);
+    return ref->owner;
+}

@@ -1,4 +1,4 @@
-/* qgit - A simplified git like version control system
+/* miniutils - A minimal GNU coreutils implementation
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,33 +15,51 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
-
-#include <assert.h>
 #include <errno.h>
-#include <fs.h>
-#include <libqgit/refs.h>
-#include <libqgit/repository.h>
-#include <limits.h>
-#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
-int qgit_reference_delete(qgit_reference *ref)
+#include "fs.h"
+
+int read_file(const char *path, void **buf, size_t *len)
 {
-    assert(ref);
+    int fd = -1;
+    struct stat st;
+    void *tmpbuf = NULL;
 
-    if (!ref->name)
+    if (stat(path, &st) == -1)
         return -1;
-
-    char path[PATH_MAX];
-    if (snprintf(path, PATH_MAX, "%s/%s", qgit_repository_path(ref->owner),
-                 ref->name) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
+    if (!S_ISREG(st.st_mode)) {
+        errno = EINVAL;
         return -1;
     }
 
-    if (unlink(path) == -1)
+    if (st.st_size == 0) {
+        *buf = NULL;
+        *len = 0;
+        return 0;
+    }
+
+    if ((fd = open(path, O_RDONLY)) == -1)
         return -1;
 
+    tmpbuf = malloc(st.st_size + 1);
+    if (!tmpbuf) {
+        close(fd);
+        return -1;
+    }
+    ((char *)tmpbuf)[st.st_size] = '\0';
+
+    if (read_all(fd, tmpbuf, st.st_size) != (ssize_t)st.st_size) {
+        free(tmpbuf);
+        close(fd);
+        return -1;
+    }
+
+    *buf = tmpbuf;
+    *len = st.st_size;
+    close(fd);
     return 0;
 }

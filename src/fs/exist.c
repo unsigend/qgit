@@ -19,22 +19,22 @@
 
 int path_exists(const char *path)
 {
-  struct stat st;
-  return stat(path, &st) == 0;
+    struct stat st;
+    return stat(path, &st) == 0;
 }
 
 int file_exists(const char *path)
 {
-  struct stat st;
-  if (stat(path, &st) == -1)
-    return 0;
-  return S_ISREG(st.st_mode);
+    struct stat st;
+    if (stat(path, &st) == -1)
+        return 0;
+    return S_ISREG(st.st_mode);
 }
 
 int dir_exists(const char *path)
 {
-  struct stat st;
-  if (stat(path, &st) == -1)
-    return 0;
-  return S_ISDIR(st.st_mode);
+    struct stat st;
+    if (stat(path, &st) == -1)
+        return 0;
+    return S_ISDIR(st.st_mode);
 }

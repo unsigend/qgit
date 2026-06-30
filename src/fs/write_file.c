@@ -1,4 +1,4 @@
-/* qgit - A simplified git like version control system
+/* miniutils - A minimal GNU coreutils implementation
  * Copyright (C) 2025 - 2026 Qiu Yixiang
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,33 +15,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
-
-#include <assert.h>
 #include <errno.h>
-#include <fs.h>
-#include <libqgit/refs.h>
-#include <libqgit/repository.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 
-int qgit_reference_delete(qgit_reference *ref)
+#include "fs.h"
+
+int write_file(const char *path, const void *buf, size_t buflen)
 {
-    assert(ref);
-
-    if (!ref->name)
+    if (buflen == 0 || !buf) {
+        errno = EINVAL;
         return -1;
+    }
 
-    char path[PATH_MAX];
-    if (snprintf(path, PATH_MAX, "%s/%s", qgit_repository_path(ref->owner),
-                 ref->name) >= PATH_MAX) {
+    int fd;
+    char tmppath[PATH_MAX];
+
+    if (snprintf(tmppath, PATH_MAX, "%s.tmp", path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;
     }
 
-    if (unlink(path) == -1)
+    if ((fd = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
         return -1;
+
+    if (write_all(fd, buf, buflen) != (ssize_t)buflen) {
+        close(fd);
+        unlink(tmppath);
+        return -1;
+    }
+
+    if (close(fd) == -1) {
+        unlink(tmppath);
+        return -1;
+    }
+
+    if (rename(tmppath, path) == -1) {
+        unlink(tmppath);
+        return -1;
+    }
 
     return 0;
 }

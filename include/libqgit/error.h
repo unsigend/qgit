@@ -27,6 +27,8 @@
 #define QGITERR_OBJ_TYPE_MISMATCH 5 /* object type mismatch */
 #define QGITERR_AMBIGUOUS 6         /* ambiguous object */
 #define QGITERR_INVKEY 7            /* invalid key */
+#define QGITERR_BADREF 8            /* bad reference */
+#define QGITERR_REFEXISTS 9         /* reference already exists */
 
 BEGIN_DECLS
 

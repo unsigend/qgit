@@ -14,3 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+
+const char *qgit_reference_target(const qgit_reference *ref)
+{
+    assert(ref);
+    if (ref->type != QGIT_REF_SYMBOLIC)
+        return NULL;
+    return ref->target.symbolic;
+}

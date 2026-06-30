@@ -20,15 +20,15 @@
 
 ssize_t write_all(int fd, const void *buf, size_t n)
 {
-  size_t nbytes = 0;
-  while (nbytes < n) {
-    ssize_t w = write(fd, (const char *)buf + nbytes, n - nbytes);
-    if (w < 0) {
-      if (errno == EINTR || errno == EAGAIN)
-        continue;
-      return -1;
+    size_t nbytes = 0;
+    while (nbytes < n) {
+        ssize_t w = write(fd, (const char *)buf + nbytes, n - nbytes);
+        if (w < 0) {
+            if (errno == EINTR || errno == EAGAIN)
+                continue;
+            return -1;
+        }
+        nbytes += w;
     }
-    nbytes += w;
-  }
-  return nbytes;
+    return nbytes;
 }

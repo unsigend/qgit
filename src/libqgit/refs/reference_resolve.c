@@ -14,3 +14,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+#include <libqgit/db/oid.h>
+#include <libqgit/refs.h>
+#include <libqgit/types.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_reference_resolve(qgit_reference **out, const qgit_reference *ref)
+{
+    assert(out && ref);
+
+    *out = NULL;
+
+    if (ref->type == QGIT_REF_OID) /* direct reference */
+    {
+        *out = calloc(1, sizeof(qgit_reference));
+        if (!*out)
+            return -1;
+        (*out)->type = QGIT_REF_OID;
+        (*out)->owner = ref->owner;
+        (*out)->name = strdup(ref->name);
+        if (!(*out)->name) {
+            qgit_reference_free(*out);
+            return -1;
+        }
+        qgit_oid_copy(&(*out)->target.oid, &ref->target.oid);
+
+        return 0;
+    } else /* symbolic reference */
+    {
+        qgit_reference *cur;
+        if (qgit_reference_lookup(&cur, ref->owner, ref->target.symbolic) == -1)
+            return -1;
+        while (cur->type == QGIT_REF_SYMBOLIC) {
+            qgit_reference *next;
+            if (qgit_reference_lookup(&next, ref->owner,
+                                      cur->target.symbolic) == -1) {
+                qgit_reference_free(cur);
+                return -1;
+            }
+            qgit_reference_free(cur);
+            cur = next;
+        }
+        *out = cur;
+        return 0;
+    }
+}

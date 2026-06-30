@@ -14,3 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fs.h>
+#include <libqgit/repository.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+
+int qgit_reference_foreach(qgit_repository *repo,
+                           int (*callback)(const char *name, void *payload),
+                           void *payload)
+{
+    assert(repo && callback);
+}

@@ -14,3 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+
+void qgit_reference_free(qgit_reference *ref)
+{
+    if (!ref)
+        return;
+    if (ref->name)
+        free(ref->name);
+    if (ref->type == QGIT_REF_SYMBOLIC && ref->target.symbolic)
+        free(ref->target.symbolic);
+    memset(ref, 0, sizeof(struct qgit_reference));
+    free(ref);
+}

@@ -27,6 +27,8 @@ static const char *errstr[] = {
     [QGITERR_OBJ_TYPE_MISMATCH] = "object type mismatch",
     [QGITERR_AMBIGUOUS] = "ambiguous object",
     [QGITERR_INVKEY] = "invalid key",
+    [QGITERR_BADREF] = "bad reference",
+    [QGITERR_REFEXISTS] = "reference already exists",
 };
 
 void qgit_clearerrno(void) { qgit_errno = 0; }

@@ -24,8 +24,8 @@ char *fbasename(const char *path, char *buf) { return basename_r(path, buf); }
 #include <string.h>
 char *fbasename(const char *path, char *buf)
 {
-  strncpy(buf, path, PATH_MAX - 1);
-  buf[PATH_MAX - 1] = '\0';
-  return basename(buf);
+    strncpy(buf, path, PATH_MAX - 1);
+    buf[PATH_MAX - 1] = '\0';
+    return basename(buf);
 }
 #endif

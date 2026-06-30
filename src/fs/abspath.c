@@ -23,26 +23,26 @@
 
 int fabspath(const char *path, char *buf)
 {
-  if (realpath(path, buf))
-    return 0;
-  if (errno != ENOENT)
-    return -1;
+    if (realpath(path, buf))
+        return 0;
+    if (errno != ENOENT)
+        return -1;
 
-  if (*path == '/') {
-    if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
-      errno = ENAMETOOLONG;
-      return -1;
+    if (*path == '/') {
+        if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            return -1;
+        }
+        return 0;
+    }
+
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, PATH_MAX) == NULL)
+        return -1;
+
+    if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
     }
     return 0;
-  }
-
-  char cwd[PATH_MAX];
-  if (getcwd(cwd, PATH_MAX) == NULL)
-    return -1;
-
-  if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
-    errno = ENAMETOOLONG;
-    return -1;
-  }
-  return 0;
 }

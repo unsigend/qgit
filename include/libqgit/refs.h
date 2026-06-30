@@ -59,7 +59,7 @@ QGIT_EXTERN(const qgit_oid *) qgit_reference_oid(const qgit_reference *ref);
 QGIT_EXTERN(const char *) qgit_reference_target(const qgit_reference *ref);
 
 /* Return the type of a reference (QGIT_REF_OID or QGIT_REF_SYMBOLIC). */
-QGIT_EXTERN(qgit_ref_t) qgit_reference_type(const qgit_reference *ref);
+QGIT_EXTERN(qgit_ref_type) qgit_reference_type(const qgit_reference *ref);
 
 /* Return the full name of a reference (e.g. "refs/heads/main"). */
 QGIT_EXTERN(const char *) qgit_reference_name(const qgit_reference *ref);
@@ -81,7 +81,7 @@ qgit_reference_set_oid(qgit_reference *ref, const qgit_oid *id);
 QGIT_EXTERN(int)
 qgit_reference_set_target(qgit_reference *ref, const char *target);
 
-/* Delete a reference from disk and invalidate the pointer. */
+/* Delete a reference from disk */
 QGIT_EXTERN(int) qgit_reference_delete(qgit_reference *ref);
 
 /* Free a reference obtained from a lookup or create call. */

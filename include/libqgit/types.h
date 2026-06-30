@@ -49,6 +49,6 @@ typedef enum {
     QGIT_REF_INVALID = 0,  /* Invalid reference */
     QGIT_REF_OID = 1,      /* Direct reference (points to an OID) */
     QGIT_REF_SYMBOLIC = 2, /* Symbolic reference (points to another ref) */
-} qgit_ref_t;
+} qgit_ref_type;
 
 #endif

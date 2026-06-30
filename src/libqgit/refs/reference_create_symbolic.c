@@ -14,3 +14,78 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "reference.h"
+
+#include <assert.h>
+#include <errno.h>
+#include <fs.h>
+#include <libqgit/error.h>
+#include <libqgit/refs.h>
+#include <libqgit/repository.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_reference_create_symbolic(qgit_reference **out, qgit_repository *repo,
+                                   const char *name, const char *target,
+                                   int force)
+{
+    assert(out && repo && name && target);
+
+    qgit_reference *ref;
+    char path[PATH_MAX];
+    void *buf;
+    int n = 0;
+
+    if (snprintf(path, PATH_MAX, "%s/%s", qgit_repository_path(repo), name) >=
+        PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (file_exists(path) && !force) {
+        qgit_seterrno(QGITERR_REFEXISTS);
+        return -1;
+    }
+
+    n = snprintf(NULL, 0, "ref: %s\n", target);
+    if (n < 0)
+        return -1;
+
+    buf = malloc(n + 1);
+    if (!buf)
+        return -1;
+
+    if (snprintf(buf, n + 1, "ref: %s\n", target) < 0) {
+        free(buf);
+        return -1;
+    }
+
+    if (write_file(path, buf, n) == -1) {
+        free(buf);
+        return -1;
+    }
+
+    free(buf);
+
+    ref = calloc(1, sizeof(qgit_reference));
+    if (!ref)
+        return -1;
+    ref->owner = repo;
+    ref->name = strdup(name);
+    if (!ref->name) {
+        qgit_reference_free(ref);
+        return -1;
+    }
+    ref->type = QGIT_REF_SYMBOLIC;
+    ref->target.symbolic = strdup(target);
+    if (!ref->target.symbolic) {
+        qgit_reference_free(ref);
+        return -1;
+    }
+
+    *out = ref;
+    return 0;
+}

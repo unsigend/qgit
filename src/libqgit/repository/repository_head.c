@@ -15,33 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#include "repository.h"
 
 #include <assert.h>
-#include <libqgit/db/oid.h>
 #include <libqgit/refs.h>
-#include <libqgit/types.h>
 
-int qgit_reference_name_to_oid(qgit_oid *out, qgit_repository *repo,
-                               const char *name)
+int qgit_repository_head(qgit_reference **head, qgit_repository *repo)
 {
-    assert(out && repo && name);
-
-    qgit_reference *ref;
-    if (qgit_reference_lookup(&ref, repo, name) == -1)
-        return -1;
-    if (ref->type != QGIT_REF_OID) {
-        qgit_reference *newref;
-        if (qgit_reference_resolve(&newref, ref) == -1) {
-            qgit_reference_free(ref);
-            return -1;
-        }
-
-        qgit_reference_free(ref);
-        ref = newref;
-    }
-
-    qgit_oid_copy(out, &ref->target.oid);
-    qgit_reference_free(ref);
-    return 0;
+    return qgit_reference_lookup(head, repo, "HEAD");
 }

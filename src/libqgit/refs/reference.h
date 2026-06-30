@@ -18,7 +18,18 @@
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
+#include <libqgit/db/oid.h>
+#include <libqgit/types.h>
+
 struct qgit_reference {
+    qgit_ref_type type;
+    qgit_repository *owner;
+    char *name; /* full reference name */
+
+    union {
+        qgit_oid oid;   /* QGIT_REF_OID */
+        char *symbolic; /* QGIT_REF_SYMBOLIC */
+    } target;
 };
 
 #endif
