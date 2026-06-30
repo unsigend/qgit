@@ -43,4 +43,12 @@ typedef enum {
     QGIT_OBJ_TAG = 4,    /* Tag object */
 } qgit_obj_type;
 
+/* Reference type: direct (points to an OID) or symbolic (points to another
+   reference name). */
+typedef enum {
+    QGIT_REF_INVALID = 0,  /* Invalid reference */
+    QGIT_REF_OID = 1,      /* Direct reference (points to an OID) */
+    QGIT_REF_SYMBOLIC = 2, /* Symbolic reference (points to another ref) */
+} qgit_ref_t;
+
 #endif

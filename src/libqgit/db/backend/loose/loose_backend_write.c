@@ -18,19 +18,19 @@
 #include "loose_backend.h"
 
 #include <assert.h>
-#include <compress.h>
 #include <errno.h>
 #include <fs.h>
 #include <libqgit/common.h>
 #include <libqgit/db/oid.h>
 #include <libqgit/object/object.h>
 #include <limits.h>
-#include <sha1.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <util/compress.h>
+#include <util/sha1.h>
 
 int loose_backend_write(qgit_oid *out, qgit_odb_backend *backend,
                         const void *data, size_t len, qgit_obj_type type)

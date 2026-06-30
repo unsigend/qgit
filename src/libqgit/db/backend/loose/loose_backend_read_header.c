@@ -19,12 +19,12 @@
 #include "loose_backend.h"
 
 #include <assert.h>
-#include <compress.h>
 #include <errno.h>
 #include <libqgit/error.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <util/compress.h>
 
 int loose_backend_read_header(size_t *len_p, qgit_obj_type *type_p,
                               struct qgit_odb_backend *backend,

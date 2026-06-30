@@ -15,37 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
-#include "rawobj/rawobj.h"
+#include <string.h>
 
-#include <assert.h>
-#include <libqgit/db/oid.h>
-#include <stdlib.h>
-#include <util/sha1.h>
-
-int qgit_odb_hash(qgit_oid *out, const void *data, size_t len,
-                  qgit_obj_type type)
+int str_endwith(const char *str, const char *suffix)
 {
-    assert(out && type);
+    size_t str_len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    return str_len >= suffix_len &&
+           strcmp(str + str_len - suffix_len, suffix) == 0;
+}
 
-    unsigned char sha[QGIT_OID_RAWSZ];
-    qgit_rawobj rawobj = {
-        .data = (void *)data,
-        .len = len,
-        .type = type,
-    };
-
-    void *buf = NULL;
-    size_t buflen = 0;
-
-    if (qgit_rawobj_format(&rawobj, &buf, &buflen) == -1)
-        return -1;
-    if (sha1(buf, buflen, sha) == -1) {
-        free(buf);
-        return -1;
-    }
-
-    qgit_oid_fromraw(out, sha);
-    free(buf);
-    return 0;
+int str_startswith(const char *str, const char *prefix)
+{
+    size_t str_len = strlen(str);
+    size_t prefix_len = strlen(prefix);
+    return str_len >= prefix_len && strncmp(str, prefix, prefix_len) == 0;
 }

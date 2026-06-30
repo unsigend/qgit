@@ -15,37 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
-#include "rawobj/rawobj.h"
+#ifndef REFERENCE_H
+#define REFERENCE_H
 
-#include <assert.h>
-#include <libqgit/db/oid.h>
-#include <stdlib.h>
-#include <util/sha1.h>
+struct qgit_reference {
+};
 
-int qgit_odb_hash(qgit_oid *out, const void *data, size_t len,
-                  qgit_obj_type type)
-{
-    assert(out && type);
-
-    unsigned char sha[QGIT_OID_RAWSZ];
-    qgit_rawobj rawobj = {
-        .data = (void *)data,
-        .len = len,
-        .type = type,
-    };
-
-    void *buf = NULL;
-    size_t buflen = 0;
-
-    if (qgit_rawobj_format(&rawobj, &buf, &buflen) == -1)
-        return -1;
-    if (sha1(buf, buflen, sha) == -1) {
-        free(buf);
-        return -1;
-    }
-
-    qgit_oid_fromraw(out, sha);
-    free(buf);
-    return 0;
-}
+#endif

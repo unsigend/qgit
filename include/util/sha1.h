@@ -15,37 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "odb.h"
-#include "rawobj/rawobj.h"
+#ifndef SHA1_H
+#define SHA1_H
 
-#include <assert.h>
-#include <libqgit/db/oid.h>
-#include <stdlib.h>
-#include <util/sha1.h>
+#include <stddef.h>
 
-int qgit_odb_hash(qgit_oid *out, const void *data, size_t len,
-                  qgit_obj_type type)
-{
-    assert(out && type);
+#define SHA1_DIGLEN 20
+#define SHA1_HEXLEN (SHA1_DIGLEN * 2 + 1)
 
-    unsigned char sha[QGIT_OID_RAWSZ];
-    qgit_rawobj rawobj = {
-        .data = (void *)data,
-        .len = len,
-        .type = type,
-    };
+/* Compute the SHA1 digest of the given data. */
+extern int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGLEN]);
 
-    void *buf = NULL;
-    size_t buflen = 0;
-
-    if (qgit_rawobj_format(&rawobj, &buf, &buflen) == -1)
-        return -1;
-    if (sha1(buf, buflen, sha) == -1) {
-        free(buf);
-        return -1;
-    }
-
-    qgit_oid_fromraw(out, sha);
-    free(buf);
-    return 0;
-}
+#endif

@@ -21,11 +21,11 @@
 #include <fs.h>
 #include <libqgit/error.h>
 #include <libqgit/repository.h>
-#include <libqgit/str.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <util/str.h>
 
 int qgit_repository_open(qgit_repository **repo, const char *path)
 {
@@ -34,7 +34,7 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
     char *slash;
     *repo = NULL;
 
-    if (qgit_str_endwith(path, "/.qgit")) {
+    if (str_endwith(path, "/.qgit")) {
         strcpy(repodir, path);
     } else if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
