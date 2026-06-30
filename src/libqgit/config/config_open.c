@@ -15,29 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/error.h>
+#include "config.h"
 
-static int qgit_errno = 0;
+#include <assert.h>
+#include <libqgit/config.h>
+#include <stdlib.h>
+#include <string.h>
 
-static const char *errstr[] = {
-    [QGITERR_REPO_NOT_FOUND] = "not inside a qgit repository",
-    [QGITERR_BADOBJFILE] = "bad object file",
-    [QGITERR_INVALIDOBJTYPE] = "invalid object type",
-    [QGITERR_OBJ_NOT_FOUND] = "object not found",
-    [QGITERR_OBJ_TYPE_MISMATCH] = "object type mismatch",
-    [QGITERR_AMBIGUOUS] = "ambiguous object",
-    [QGITERR_INVKEY] = "invalid key",
-};
-
-void qgit_clearerrno(void) { qgit_errno = 0; }
-void qgit_seterrno(int err) { qgit_errno = err; }
-
-int qgit_geterrno(void) { return qgit_errno; }
-
-const char *qgit_error_str(int err)
+int qgit_config_open(qgit_config **out, const char *path)
 {
-    if (err < 1 || err >= (int)(sizeof(errstr) / sizeof(errstr[0])))
-        return "internal error";
+    assert(out && path);
+    *out = NULL;
 
-    return errstr[err];
+    struct qgit_config *config = calloc(1, sizeof(struct qgit_config));
+    if (!config)
+        return -1;
+
+    config->fp = iniparse_open(path);
+    if (!config->fp) {
+        qgit_config_free(config);
+        return -1;
+    }
+
+    if (iniparse_parse(config->fp) == -1) {
+        qgit_config_free(config);
+        return -1;
+    }
+
+    *out = config;
+    return 0;
 }

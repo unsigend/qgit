@@ -15,29 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
 #include <libqgit/error.h>
+#include <string.h>
 
-static int qgit_errno = 0;
-
-static const char *errstr[] = {
-    [QGITERR_REPO_NOT_FOUND] = "not inside a qgit repository",
-    [QGITERR_BADOBJFILE] = "bad object file",
-    [QGITERR_INVALIDOBJTYPE] = "invalid object type",
-    [QGITERR_OBJ_NOT_FOUND] = "object not found",
-    [QGITERR_OBJ_TYPE_MISMATCH] = "object type mismatch",
-    [QGITERR_AMBIGUOUS] = "ambiguous object",
-    [QGITERR_INVKEY] = "invalid key",
-};
-
-void qgit_clearerrno(void) { qgit_errno = 0; }
-void qgit_seterrno(int err) { qgit_errno = err; }
-
-int qgit_geterrno(void) { return qgit_errno; }
-
-const char *qgit_error_str(int err)
+int parse_seckey(char *name, char **sec, char **key)
 {
-    if (err < 1 || err >= (int)(sizeof(errstr) / sizeof(errstr[0])))
-        return "internal error";
-
-    return errstr[err];
+    *sec = NULL;
+    *key = NULL;
+    char *dot = strchr(name, '.');
+    if (!dot || dot == name || *(dot + 1) == '\0') {
+        qgit_seterrno(QGITERR_INVKEY);
+        return -1;
+    }
+    *dot++ = '\0';
+    *sec = name;
+    *key = dot;
+    return 0;
 }

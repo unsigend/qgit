@@ -21,11 +21,9 @@
 #include <errno.h>
 #include <fs.h>
 #include <iniparse.h>
-#include <libqgit/error.h>
 #include <libqgit/repository.h>
 #include <libqgit/types.h>
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -212,13 +210,15 @@ int qgit_repository_init(qgit_repository **repo, const char *path,
 
     if (create_structure(r->repodir) < 0 || create_config(r->repodir) < 0 ||
         create_head(r->repodir, branch) < 0 ||
-        create_description(r->repodir) < 0) {
+        create_description(r->repodir) < 0 ||
+        qgit_repository_load_config(r->repodir, &r->config) < 0 ||
+        qgit_repository_load_odb(r->repodir, &r->odb) < 0) {
         rollback(path, repodir, created);
         qgit_repository_free(r);
         return -1;
     }
 
-    /* TODO: create the object database, index, and config */
+    /* TODO: create the index */
 
     *repo = r;
     return 0;

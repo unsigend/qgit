@@ -18,9 +18,14 @@
 #ifndef REPOSITORY_H
 #define REPOSITORY_H
 
+#include <errno.h>
 #include <libqgit/common.h>
+#include <libqgit/config.h>
+#include <libqgit/db/odb.h>
 #include <libqgit/types.h>
+#include <limits.h>
 #include <stddef.h>
+#include <stdio.h>
 
 struct qgit_repository {
     qgit_odb *odb;
@@ -32,7 +37,33 @@ struct qgit_repository {
 };
 
 /* Read the content of HEAD file in a repository to a buffer. */
-int qgit_repository_head_content(const qgit_repository *repo, char *buf,
-                                 size_t buflen);
+QGIT_INTERNAL(int)
+qgit_repository_head_content(const qgit_repository *repo, char *buf,
+                             size_t buflen);
 
+/* Load the config file of a repository. Returns -1 on error. */
+QGIT_INLINE(int)
+qgit_repository_load_config(const char *path, qgit_config **out)
+{
+    char buf[PATH_MAX];
+    if (snprintf(buf, PATH_MAX, "%s/config", path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return qgit_config_open(out, buf);
+}
+
+/* Load the object database of a repository. Returns -1 on error. */
+QGIT_INLINE(int)
+qgit_repository_load_odb(const char *path, qgit_odb **out)
+{
+    char buf[PATH_MAX];
+    if (snprintf(buf, PATH_MAX, "%s/objects", path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return qgit_odb_open(out, buf);
+}
 #endif

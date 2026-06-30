@@ -70,7 +70,13 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
         return -1;
     }
 
-    /* TODO: load the configure file, object database, index, etc. */
+    if (qgit_repository_load_config(r->repodir, &r->config) < 0 ||
+        qgit_repository_load_odb(r->repodir, &r->odb) < 0) {
+        qgit_repository_free(r);
+        return -1;
+    }
+
+    /* TODO: load the index */
 
     *repo = r;
     return 0;
