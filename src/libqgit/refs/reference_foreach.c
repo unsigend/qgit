@@ -27,9 +27,66 @@
 #include <string.h>
 #include <sys/stat.h>
 
+static int foreach (const char *base, const char *dirname,
+                    int (*callback)(const char *name, void *payload),
+                    void *payload)
+{
+    char path[PATH_MAX], refname[PATH_MAX];
+    DIR *dir;
+    struct dirent *entry;
+
+    if (snprintf(path, PATH_MAX, "%s/%s", base, dirname) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    dir = opendir(path);
+    if (dir == NULL)
+        return -1;
+
+    while ((entry = readdir(dir))) {
+        if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0)
+            continue;
+        if (snprintf(path, PATH_MAX, "%s/%s/%s", base, dirname,
+                     entry->d_name) >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            closedir(dir);
+            return -1;
+        }
+        if (snprintf(refname, PATH_MAX, "%s/%s", dirname, entry->d_name) >=
+            PATH_MAX) {
+            errno = ENAMETOOLONG;
+            closedir(dir);
+            return -1;
+        }
+
+        if (dir_exists(path)) /* subdirectory */
+        {
+            if (foreach (base, refname, callback, payload) == -1) {
+                closedir(dir);
+                return -1;
+            }
+        } else /* reference file */
+        {
+            if (callback(refname, payload)) {
+                closedir(dir);
+                return -1;
+            }
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
 int qgit_reference_foreach(qgit_repository *repo,
                            int (*callback)(const char *name, void *payload),
                            void *payload)
 {
     assert(repo && callback);
+
+    if (foreach (qgit_repository_path(repo), "refs", callback, payload) == -1)
+        return -1;
+
+    return 0;
 }

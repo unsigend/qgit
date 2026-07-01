@@ -15,39 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#ifndef LIBQGIT_H
+#define LIBQGIT_H
 
-#include <assert.h>
-#include <errno.h>
-#include <fs.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/db/odb_backend.h>
 #include <libqgit/db/oid.h>
+
+#include <libqgit/object/blob.h>
+#include <libqgit/object/commit.h>
+#include <libqgit/object/object.h>
+#include <libqgit/object/tag.h>
+#include <libqgit/object/tree.h>
+
+#include <libqgit/config.h>
+#include <libqgit/error.h>
+#include <libqgit/index.h>
 #include <libqgit/refs.h>
 #include <libqgit/repository.h>
-#include <limits.h>
-#include <stdio.h>
+#include <libqgit/types.h>
 
-int qgit_reference_set_oid(qgit_reference *ref, const qgit_oid *id)
-{
-    assert(ref && id);
-
-    if (ref->type != QGIT_REF_OID)
-        return -1;
-
-    char path[PATH_MAX];
-    char hex[QGIT_OID_HEXSZ];
-
-    if (snprintf(path, PATH_MAX, "%s/%s", qgit_repository_path(ref->owner),
-                 ref->name) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-
-    qgit_oid_fmt(hex, id);
-    hex[QGIT_OID_HEXSZ - 1] = '\n';
-    if (write_file(path, hex, QGIT_OID_HEXSZ) == -1)
-        return -1;
-
-    qgit_oid_copy(&ref->target.oid, id);
-
-    return 0;
-}
+#endif
