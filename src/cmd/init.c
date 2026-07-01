@@ -32,7 +32,7 @@ int cmd_init(int argc, char **argv)
     const char *branch = DEFAULT_BRANCH;
     const char *path = DEFAULT_PATH;
 
-    struct argparse ctx;
+    struct argparse parser;
     struct argparse_opt opts[] = {
         OPT_HELP(),
         OPT_BOOL('q', "quiet", "Only print error and warning messages", &q),
@@ -57,19 +57,19 @@ int cmd_init(int argc, char **argv)
         .epilog = "The default initial branch is 'main'.",
     };
 
-    if (argparse_init(&ctx, opts, &desc) == -1)
-        die("%s", argparse_strerror(&ctx));
-    if (argparse_parse(&ctx, argc, argv) == -1)
-        die("%s", argparse_strerror(&ctx));
+    if (argparse_init(&parser, opts, &desc) == -1)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) == -1)
+        die("%s", argparse_strerror(&parser));
 
     struct qgit_repository *repository;
     int reinit = 0;
     char abspath[PATH_MAX];
     char qgitdir[PATH_MAX];
 
-    if (argparse_getremargc(&ctx) > 0)
-        path = argparse_getremargv(&ctx)[0];
-    if (argparse_getremargc(&ctx) > 1)
+    if (argparse_getremargc(&parser) > 0)
+        path = argparse_getremargv(&parser)[0];
+    if (argparse_getremargc(&parser) > 1)
         die("too many arguments");
     if (!branch[0] || branch[0] == '.')
         die("invalid initial branch name '%s'", branch);
@@ -96,6 +96,6 @@ int cmd_init(int argc, char **argv)
     }
 
     qgit_repository_free(repository);
-    argparse_fini(&ctx);
+    argparse_fini(&parser);
     return 0;
 }

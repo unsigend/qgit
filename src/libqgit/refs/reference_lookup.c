@@ -84,7 +84,11 @@ int qgit_reference_lookup(qgit_reference **out, qgit_repository *repo,
         }
     } else /* direct reference */
     {
-        qgit_oid_fromstr(&ref->target.oid, (char *)buf);
+        if (qgit_oid_fromstr(&ref->target.oid, (char *)buf) == -1) {
+            qgit_reference_free(ref);
+            free(buf);
+            return -1;
+        }
         ref->type = QGIT_REF_OID;
         free(buf);
     }
