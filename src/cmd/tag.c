@@ -232,3 +232,11 @@
 //   argparse_fini(&ctx);
 //   return 0;
 // }
+
+int cmd_tag(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}

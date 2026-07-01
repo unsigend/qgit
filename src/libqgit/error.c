@@ -26,9 +26,10 @@ static const char *errstr[] = {
     [QGITERR_OBJ_NOT_FOUND] = "object not found",
     [QGITERR_OBJ_TYPE_MISMATCH] = "object type mismatch",
     [QGITERR_AMBIGUOUS] = "ambiguous object",
-    [QGITERR_INVKEY] = "invalid key",
+    [QGITERR_INVKEY] = "invalid key format",
     [QGITERR_BADREF] = "bad reference",
     [QGITERR_REFEXISTS] = "reference already exists",
+    [QGITERR_REF_NOT_FOUND] = "reference not found",
 };
 
 void qgit_clearerrno(void) { qgit_errno = 0; }

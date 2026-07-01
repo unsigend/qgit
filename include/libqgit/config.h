@@ -20,11 +20,18 @@
 
 #include <libqgit/common.h>
 #include <libqgit/types.h>
+#include <stdio.h>
 
 BEGIN_DECLS
 
 /* Open and parse an existing config file at path. */
 QGIT_EXTERN(int) qgit_config_open(qgit_config **out, const char *path);
+
+/* Open and parse the global config file. */
+QGIT_EXTERN(int) qgit_config_open_global(qgit_config **out);
+
+/* Write the path to the global config file into path (size bytes). */
+QGIT_EXTERN(int) qgit_config_global_path(char *path, size_t size);
 
 /* Create a new empty in-memory config associated with path not written until
    qgit_config_write is called. */
@@ -64,6 +71,10 @@ qgit_config_set_int(qgit_config *config, const char *name, int value);
 
 /* Delete a config entry. name is "section.key". */
 QGIT_EXTERN(int) qgit_config_delete(qgit_config *config, const char *name);
+
+/* Print the config with the format of [section].[key]=[value] to the output
+   stream. */
+QGIT_EXTERN(int) qgit_config_fprint(const qgit_config *config, FILE *stream);
 
 END_DECLS
 

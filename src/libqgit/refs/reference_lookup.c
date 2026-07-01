@@ -29,8 +29,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int reference_lookup(qgit_reference **out, qgit_repository *repo,
-                     const char *name)
+int qgit_reference_lookup(qgit_reference **out, qgit_repository *repo,
+                          const char *name)
 {
     assert(out && repo && name);
 

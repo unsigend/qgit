@@ -102,3 +102,11 @@
 //   repo_close(repo);
 //   return 0;
 // }
+
+int cmd_ls_files(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}

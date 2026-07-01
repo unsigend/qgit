@@ -28,10 +28,12 @@
 #include <libqgit/object/tag.h>
 #include <libqgit/object/tree.h>
 
+#include <libqgit/branch.h>
+#include <libqgit/refs.h>
+
 #include <libqgit/config.h>
 #include <libqgit/error.h>
 #include <libqgit/index.h>
-#include <libqgit/refs.h>
 #include <libqgit/repository.h>
 #include <libqgit/types.h>
 

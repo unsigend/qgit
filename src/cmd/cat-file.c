@@ -120,3 +120,11 @@
 //   argparse_fini(&ctx);
 //   return 0;
 // }
+
+int cmd_cat_file(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}

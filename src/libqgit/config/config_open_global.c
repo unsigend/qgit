@@ -15,20 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <feature.h>
-#include <stdio.h>
+#include "config.h"
 
-int cmd_help(int argc, char **argv)
+#include <assert.h>
+#include <errno.h>
+#include <libqgit/config.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_config_open_global(qgit_config **out)
 {
-    (void)argc;
-    (void)argv;
+    assert(out);
+    *out = NULL;
 
-    printf("Usage: %s <command> [options]\n", PROG_NAME);
-    printf("Subcommands:\n");
-    for (size_t i = 0; i < subcmds_cnt; i++) {
-        printf("  %-15s %s\n", subcmds[i].name, subcmds[i].desc);
-    }
-    fputc('\n', stdout);
-    return 0;
+    char path[PATH_MAX];
+
+    if (qgit_config_global_path(path, PATH_MAX) == -1)
+        return -1;
+
+    return qgit_config_open(out, path);
 }

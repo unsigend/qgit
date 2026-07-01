@@ -23,9 +23,9 @@
 typedef int (*cmd_func)(int argc, char **argv);
 
 struct subcmd {
-  const char *name;
-  const char *desc;
-  cmd_func func;
+    const char *name;
+    const char *desc;
+    cmd_func func;
 };
 
 extern const struct subcmd subcmds[];

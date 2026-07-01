@@ -29,6 +29,7 @@
 #define QGITERR_INVKEY 7            /* invalid key */
 #define QGITERR_BADREF 8            /* bad reference */
 #define QGITERR_REFEXISTS 9         /* reference already exists */
+#define QGITERR_REF_NOT_FOUND 10    /* reference not found */
 
 BEGIN_DECLS
 

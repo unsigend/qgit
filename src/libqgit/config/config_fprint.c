@@ -15,20 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <feature.h>
+#include "config.h"
+
+#include <libqgit/config.h>
 #include <stdio.h>
 
-int cmd_help(int argc, char **argv)
+int qgit_config_fprint(const qgit_config *config, FILE *stream)
 {
-    (void)argc;
-    (void)argv;
-
-    printf("Usage: %s <command> [options]\n", PROG_NAME);
-    printf("Subcommands:\n");
-    for (size_t i = 0; i < subcmds_cnt; i++) {
-        printf("  %-15s %s\n", subcmds[i].name, subcmds[i].desc);
-    }
-    fputc('\n', stdout);
-    return 0;
+    return iniparse_fprint(config->fp, stream);
 }

@@ -63,3 +63,11 @@
 //   repo_close(repo);
 //   return 0;
 // }
+
+int cmd_commit(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}

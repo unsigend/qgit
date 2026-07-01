@@ -73,3 +73,11 @@
 //   repo_close(repo);
 //   return 0;
 // }
+
+int cmd_add(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}

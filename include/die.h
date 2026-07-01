@@ -15,20 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
-#include <feature.h>
-#include <stdio.h>
+#ifndef DIE_H
+#define DIE_H
 
-int cmd_help(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
+#include <libqgit/common.h>
+#include <stdnoreturn.h>
 
-    printf("Usage: %s <command> [options]\n", PROG_NAME);
-    printf("Subcommands:\n");
-    for (size_t i = 0; i < subcmds_cnt; i++) {
-        printf("  %-15s %s\n", subcmds[i].name, subcmds[i].desc);
-    }
-    fputc('\n', stdout);
-    return 0;
-}
+extern noreturn void die(const char *fmt, ...) QGIT_FORMAT(1, 2);
+extern noreturn void die_errno(void);
+
+#endif

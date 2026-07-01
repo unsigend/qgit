@@ -15,20 +15,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmd.h>
+#include <die.h>
+#include <errno.h>
 #include <feature.h>
+#include <libqgit/error.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int cmd_help(int argc, char **argv)
+void die(const char *fmt, ...)
 {
-    (void)argc;
-    (void)argv;
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "%s: ", PROG_NAME);
+    vfprintf(stderr, fmt, args);
+    fputc('\n', stderr);
+    va_end(args);
+    exit(EXIT_FAILURE);
+}
 
-    printf("Usage: %s <command> [options]\n", PROG_NAME);
-    printf("Subcommands:\n");
-    for (size_t i = 0; i < subcmds_cnt; i++) {
-        printf("  %-15s %s\n", subcmds[i].name, subcmds[i].desc);
+void die_errno(void)
+{
+    fprintf(stderr, "%s: ", PROG_NAME);
+    if (qgit_geterrno()) {
+        fprintf(stderr, "%s", qgit_error_str(qgit_geterrno()));
+    } else if (errno) {
+        fprintf(stderr, "%s", strerror(errno));
+    } else {
+        fprintf(stderr, "unknown error");
     }
-    fputc('\n', stdout);
-    return 0;
+    fputc('\n', stderr);
+    exit(EXIT_FAILURE);
 }

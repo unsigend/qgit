@@ -33,7 +33,8 @@ QGIT_EXTERN(int) qgit_repository_open(qgit_repository **repo, const char *path);
 QGIT_EXTERN(int)
 qgit_repository_discover(char *repo_path, size_t size, const char *start_path);
 
-/* Initialize a new repository at path with the given initial branch name. */
+/* Initialize a new repository at path with the given initial branch name. The
+   path must be an absolute path.*/
 QGIT_EXTERN(int)
 qgit_repository_init(qgit_repository **repo, const char *path,
                      const char *branch);

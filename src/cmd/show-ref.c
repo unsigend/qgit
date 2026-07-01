@@ -111,3 +111,11 @@
 //   argparse_fini(&ctx);
 //   return 0;
 // }
+
+int cmd_show_ref(int argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    return 0;
+}
