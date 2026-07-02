@@ -1,5 +1,5 @@
-/* qgit - A simplified git like version control system
- * Copyright (C) 2025 - 2026 Qiu Yixiang
+/* collection - A generic data structure and algorithms library
+ * Copyright (C) 2025 Yixiang Qiu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <openssl/evp.h>
-#include <util/sha1.h>
+#ifndef COLLECTION_H
+#define COLLECTION_H
 
-int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGLEN])
-{
-    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    if (!ctx)
-        return -1;
+#include <collection/util.h>
 
-    int ok = EVP_DigestInit_ex(ctx, EVP_sha1(), NULL) &&
-             EVP_DigestUpdate(ctx, data, len) &&
-             EVP_DigestFinal_ex(ctx, sha1, NULL);
+#include <collection/hashtbl.h>
+#include <collection/heap.h>
+#include <collection/set.h>
+#include <collection/slist.h>
+#include <collection/string.h>
+#include <collection/vector.h>
 
-    EVP_MD_CTX_free(ctx);
-    return ok ? 0 : -1;
-}
+#endif

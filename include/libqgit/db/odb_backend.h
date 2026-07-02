@@ -57,7 +57,13 @@ struct qgit_odb_backend {
     void (*free)(struct qgit_odb_backend *);
 };
 
-/* Create the built-in loose object backend for the given objects directory. */
+/**
+ * Create the built-in loose object backend for the given objects directory.
+ *
+ * @param out pointer where to store the backend
+ * @param objects_dir path of the backend's "objects" directory
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_odb_backend_loose(qgit_odb_backend **out, const char *objects_dir);
 

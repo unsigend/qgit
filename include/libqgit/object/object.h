@@ -24,39 +24,121 @@
 
 BEGIN_DECLS
 
-/* Lookup an object in the repository by OID. Pass QGIT_OBJ_ANY to infer the
-   type automatically. */
+/**
+ * Lookup a reference to one of the objects in a repository.
+ *
+ * The generated reference should be closed with the `qgit_object_free`
+ * method instead of free'd manually.
+ *
+ * The `type` parameter must match the type of the object
+ * in the odb, the method will fail otherwise.
+ * The special value `QGIT_OBJ_ANY` may be passed to let
+ * the method guess the object's type.
+ *
+ * @param object pointer to the looked-up object
+ * @param repo the repository to look up the object
+ * @param id the unique identifier for the object
+ * @param type the type of the object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_object_lookup(qgit_object **object, qgit_repository *repo,
                    const qgit_oid *id, qgit_obj_type type);
 
-/* Lookup an object by a short OID prefix (at least QGIT_OID_MINPREFIXLEN hex
-   chars). The prefix must uniquely identify one object, fails if ambiguous. */
+/**
+ * Lookup a reference to one of the objects in a repository,
+ * given a prefix of its identifier (short id).
+ *
+ * The object obtained will be so that its identifier
+ * matches the first `len` hexadecimal characters
+ * (packets of 4 bits) of the given `id`.
+ * `len` must be at least QGIT_OID_MINPREFIXLEN, and
+ * long enough to identify a unique object matching
+ * the prefix, otherwise the method will fail.
+ *
+ * The generated reference should be closed with the `qgit_object_free`
+ * method instead of free'd manually.
+ *
+ * The `type` parameter must match the type of the object
+ * in the odb, the method will fail otherwise.
+ * The special value `QGIT_OBJ_ANY` may be passed to let
+ * the method guess the object's type.
+ *
+ * @param object pointer where to store the looked-up object
+ * @param repo the repository to look up the object
+ * @param id a short identifier for the object
+ * @param len the length of the short identifier
+ * @param type the type of the object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_object_lookup_prefix(qgit_object **object, qgit_repository *repo,
                           const qgit_oid *id, unsigned int len,
                           qgit_obj_type type);
 
-/* Return the OID of the object. The pointer is valid for the object's lifetime.
+/**
+ * Get the id of a repository object.
+ *
+ * The pointer is valid for the object's lifetime.
+ *
+ * @param obj the repository object
+ * @return a pointer to the object id
  */
 QGIT_EXTERN(const qgit_oid *) qgit_object_id(const qgit_object *obj);
 
-/* Return the type of the object. */
+/**
+ * Get the object type of an object.
+ *
+ * @param obj the repository object
+ * @return the object's type
+ */
 QGIT_EXTERN(qgit_obj_type) qgit_object_type(const qgit_object *obj);
 
-/* Return the repository that owns this object. */
+/**
+ * Get the repository that owns this object.
+ *
+ * @param obj the object
+ * @return the repository that owns this object
+ */
 QGIT_EXTERN(qgit_repository *) qgit_object_owner(const qgit_object *obj);
 
-/* Release an object obtained from a lookup. */
+/**
+ * Close an open object.
+ *
+ * This method instructs the library to close an existing
+ * object. It must be called when the object is no longer needed,
+ * otherwise memory will leak.
+ *
+ * @param object the object to close
+ */
 QGIT_EXTERN(void) qgit_object_free(qgit_object *object);
 
-/* Convert a qgit_obj_type to its string representation. */
+/**
+ * Convert an object type to its string representation.
+ *
+ * The result is a pointer to a string in static memory and
+ * should not be free'd.
+ *
+ * @param type object type to convert
+ * @return the corresponding string representation
+ */
 QGIT_EXTERN(const char *) qgit_object_type2string(qgit_obj_type type);
 
-/* Convert a string object type representation to a qgit_obj_type. */
+/**
+ * Convert a string object type representation to a qgit_obj_type.
+ *
+ * @param str the string to convert
+ * @return the corresponding qgit_obj_type
+ */
 QGIT_EXTERN(qgit_obj_type) qgit_object_string2type(const char *str);
 
-/* Return 1 if the type is a valid loose object type, 0 otherwise. */
+/**
+ * Determine if the given qgit_obj_type is a valid loose object type.
+ *
+ * @param type object type to test
+ * @return 1 if the type represents a valid loose object type,
+ * 0 otherwise
+ */
 QGIT_EXTERN(int) qgit_object_typeisloose(qgit_obj_type type);
 
 END_DECLS

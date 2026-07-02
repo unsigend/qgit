@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     gdb \
     git \
     bats \
+    cloc \
     build-essential \
     libssl-dev \
     zlib1g-dev \

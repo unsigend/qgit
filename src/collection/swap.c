@@ -18,21 +18,19 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "collection/util.h"
-
 void swap(void *l, void *r, size_t sz)
 {
-  uint64_t u64;
-  size_t i = 0;
-  for (; i + 8 <= sz; i += 8) {
-    memcpy(&u64, l + i, 8);
-    memcpy(l + i, r + i, 8);
-    memcpy(r + i, &u64, 8);
-  }
-  uint8_t u8;
-  for (; i < sz; i++) {
-    memcpy(&u8, l + i, 1);
-    memcpy(l + i, r + i, 1);
-    memcpy(r + i, &u8, 1);
-  }
+    uint64_t u64;
+    size_t i = 0;
+    for (; i + 8 <= sz; i += 8) {
+        memcpy(&u64, l + i, 8);
+        memcpy(l + i, r + i, 8);
+        memcpy(r + i, &u64, 8);
+    }
+    uint8_t u8;
+    for (; i < sz; i++) {
+        memcpy(&u8, l + i, 1);
+        memcpy(l + i, r + i, 1);
+        memcpy(r + i, &u8, 1);
+    }
 }

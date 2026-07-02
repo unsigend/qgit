@@ -24,51 +24,150 @@
 
 BEGIN_DECLS
 
-/* Open a repository at the exact given path. The 'path' argument must point to
-   either a qgit repository folder, or an existing work dir. */
+/**
+ * Open a qgit repository.
+ *
+ * The `path` argument must point to either a qgit repository
+ * folder, or an existing work dir.
+ *
+ * @param repo pointer to the repo which will be opened
+ * @param path the path to the repository
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_open(qgit_repository **repo, const char *path);
 
-/* Walk parent directories from start_path to find a repository.
-   Writes the found .qgit directory path into repo_path (size bytes). */
+/**
+ * Look for a qgit repository and copy its path in the given buffer.
+ *
+ * The lookup starts from `start_path` and walks across parent directories
+ * if nothing has been found. The lookup ends when the first repository
+ * is found.
+ *
+ * @param repo_path the user allocated buffer which will contain the found path
+ * @param size size of the `repo_path` buffer
+ * @param start_path the base path where the lookup starts
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_repository_discover(char *repo_path, size_t size, const char *start_path);
 
-/* Initialize a new repository at path with the given initial branch name. The
-   path must be an absolute path.*/
+/**
+ * Initialize a new repository at the given path.
+ *
+ * The path must be an absolute path. The repository is created with
+ * the given initial branch name.
+ *
+ * @param repo pointer to the repo which will be created
+ * @param path the path to the repository
+ * @param branch the name of the initial branch
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_repository_init(qgit_repository **repo, const char *path,
                      const char *branch);
 
-/* Free a previously allocated repository. */
+/**
+ * Free a previously allocated repository.
+ *
+ * @param repo repository handle to close. If NULL nothing occurs
+ */
 QGIT_EXTERN(void) qgit_repository_free(qgit_repository *repo);
 
-/* Get the path to the .qgit directory. */
+/**
+ * Get the path of this repository.
+ *
+ * This is the path of the `.qgit` directory.
+ *
+ * @param repo a repository object
+ * @return the path to the repository
+ */
 QGIT_EXTERN(const char *) qgit_repository_path(const qgit_repository *repo);
 
-/* Get the path to the working directory. */
+/**
+ * Get the path of the working directory for this repository.
+ *
+ * @param repo a repository object
+ * @return the path to the working dir, if it exists
+ */
 QGIT_EXTERN(const char *) qgit_repository_workdir(const qgit_repository *repo);
 
-/* Return 1 if the repository has no commits, 0 otherwise. */
+/**
+ * Check if a repository is empty.
+ *
+ * An empty repository has just been initialized and contains
+ * no commits.
+ *
+ * @param repo repo to test
+ * @return 1 if the repository is empty, 0 if it is not, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_is_empty(qgit_repository *repo);
 
-/* Retrieve and resolve the reference pointed at by HEAD. */
+/**
+ * Retrieve and resolve the reference pointed at by HEAD.
+ *
+ * @param head pointer to the reference which will be retrieved
+ * @param repo a repository object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_repository_head(qgit_reference **head, qgit_repository *repo);
 
-/* Return 1 if HEAD points directly to a commit (detached), 0 otherwise. */
+/**
+ * Check if a repository's HEAD is detached.
+ *
+ * A repository's HEAD is detached when it points directly to a commit
+ * instead of a branch.
+ *
+ * @param repo repo to test
+ * @return 1 if HEAD is detached, 0 if it is not, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_head_detached(qgit_repository *repo);
 
-/* Return 1 if HEAD points to a branch that has no commits (unborn), 0
-   otherwise. */
+/**
+ * Check if the current branch is unborn.
+ *
+ * An unborn branch is one named from HEAD but which does not have any
+ * commit to point to.
+ *
+ * @param repo repo to test
+ * @return 1 if the current branch is unborn, 0 if it is not, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_head_unborn(qgit_repository *repo);
 
-/* Get the object database for this repository. */
+/**
+ * Get the Object Database for this repository.
+ *
+ * The ODB must be freed once it is no longer being used by
+ * the user.
+ *
+ * @param out pointer to store the loaded ODB
+ * @param repo a repository object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_odb(qgit_odb **out, qgit_repository *repo);
 
-/* Get the index for this repository. */
+/**
+ * Get the Index file for this repository.
+ *
+ * The index must be freed once it is no longer being used by
+ * the user.
+ *
+ * @param out pointer to store the loaded index
+ * @param repo a repository object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_repository_index(qgit_index **out, qgit_repository *repo);
 
-/* Get the config for this repository. */
+/**
+ * Get the configuration file for this repository.
+ *
+ * The configuration file must be freed once it is no longer
+ * being used by the user.
+ *
+ * @param out pointer to store the loaded config file
+ * @param repo a repository object
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int)
 qgit_repository_config(qgit_config **out, qgit_repository *repo);
 

@@ -15,13 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STR_H
-#define STR_H
+#include <openssl/evp.h>
+#include <sha1.h>
 
-/* Retrun 1 if the string ends with the suffix, 0 otherwise. */
-extern int str_endwith(const char *str, const char *suffix);
+int sha1(const void *data, size_t len, unsigned char sha1[SHA1_DIGLEN])
+{
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return -1;
 
-/* Retrun 1 if the string starts with the prefix, 0 otherwise. */
-extern int str_startswith(const char *str, const char *prefix);
+    int ok = EVP_DigestInit_ex(ctx, EVP_sha1(), NULL) &&
+             EVP_DigestUpdate(ctx, data, len) &&
+             EVP_DigestFinal_ex(ctx, sha1, NULL);
 
-#endif
+    EVP_MD_CTX_free(ctx);
+    return ok ? 0 : -1;
+}

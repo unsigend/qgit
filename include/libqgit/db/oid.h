@@ -22,48 +22,123 @@
 #include <libqgit/types.h>
 #include <stddef.h>
 
-#define QGIT_OID_RAWSZ 20 /* Size of the raw OID in bytes */
-#define QGIT_OID_HEXSZ                                                         \
-    (QGIT_OID_RAWSZ * 2 + 1)    /* Size of the hex OID in bytes */
-#define QGIT_OID_MINPREFIXLEN 4 /* Minimum prefix length for OID */
+#define QGIT_OID_RAWSZ 20                       /* Raw binary oid length */
+#define QGIT_OID_HEXSZ (QGIT_OID_RAWSZ * 2 + 1) /* Hex formatted oid length */
+#define QGIT_OID_MINPREFIXLEN 4 /* Minimum length of an oid prefix */
 
+/* Unique identity of any object (commit, tree, blob, tag). */
 struct qgit_oid {
-    unsigned char id[QGIT_OID_RAWSZ];
+    unsigned char id[QGIT_OID_RAWSZ]; /* Raw binary oid */
 };
 
 BEGIN_DECLS
 
-/* Parse a hex formatted object id into a qgit_oid */
+/**
+ * Parse a hex formatted object id into a qgit_oid.
+ *
+ * @param oid oid structure the result is written into
+ * @param str input hex string, must be pointing at the start of
+ *		the hex sequence and have at least the number of bytes
+ *		needed for an oid encoded in hex (40 bytes)
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_oid_fromstr(qgit_oid *oid, const char *str);
 
-/* Parse the first `len` hex characters into a qgit_oid remaining bytes are
-   zeroed. Used to build a prefix OID for short-SHA lookup. */
+/**
+ * Parse N characters of a hex formatted object id into a qgit_oid.
+ *
+ * If N is odd, N-1 characters will be parsed instead.
+ * The remaining space in the qgit_oid will be set to zero.
+ * Used to build a prefix OID for short SHA lookup.
+ *
+ * @param oid oid structure the result is written into
+ * @param str input hex string of at least size `len`
+ * @param len length of the input string
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_oid_fromstrn(qgit_oid *oid, const char *str, size_t len);
 
-/* Parse a raw object id into a qgit_oid */
+/**
+ * Copy an already raw oid into a qgit_oid structure.
+ *
+ * @param oid oid structure the result is written into
+ * @param raw the raw input bytes to be copied
+ */
 QGIT_EXTERN(void) qgit_oid_fromraw(qgit_oid *oid, const unsigned char *raw);
 
-/* Format a qgit_oid into a hex formatted string */
+/**
+ * Format a qgit_oid into a hex string.
+ *
+ * @param str output hex string, must be pointing at the start of
+ *		the hex sequence and have at least the number of bytes
+ *		needed for an oid encoded in hex (41 bytes). Only the
+ *		oid digits are written, a '\\0' terminator must be added
+ *		by the caller if it is required
+ * @param oid oid structure to format
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_oid_fmt(char *str, const qgit_oid *oid);
 
-/* Format a qgit_oid into a path formatted string with "xx/..." format. */
+/**
+ * Format a qgit_oid into a loose object path string.
+ *
+ * The resulting string is "aa/...", where "aa" is the first two
+ * hex digits of the oid and "..." is the remaining 38 digits.
+ *
+ * @param str output hex string, must be pointing at the start of
+ *		the hex sequence and have at least the number of bytes
+ *		needed for an oid encoded in hex (42 bytes). Only the
+ *		oid digits are written, a '\\0' terminator must be added
+ *		by the caller if it is required
+ * @param oid oid structure to format
+ * @return 0 on success, -1 on error and set errno
+ */
 QGIT_EXTERN(int) qgit_oid_fmtpath(char *str, const qgit_oid *oid);
 
-/* Duplicate a qgit_oid into a heap allocated hex string. */
+/**
+ * Format a qgit_oid into a newly allocated c-string.
+ *
+ * @param oid the oid structure to format
+ * @return the c-string on success, NULL on error and set errno. Caller must
+ *			deallocate the string with free()
+ */
 QGIT_EXTERN(char *) qgit_oid_strdup(const qgit_oid *oid);
 
-/* Copy a qgit_oid to another qgit_oid. */
+/**
+ * Copy an oid from one structure to another.
+ *
+ * @param dest oid structure the result is written into
+ * @param src oid structure to copy from
+ */
 QGIT_EXTERN(void) qgit_oid_copy(qgit_oid *dest, const qgit_oid *src);
 
-/* Compare two qgit_oids. */
+/**
+ * Compare two oid structures.
+ *
+ * @param a first oid structure
+ * @param b second oid structure
+ * @return <0, 0, >0 if a < b, a == b, a > b
+ */
 QGIT_EXTERN(int) qgit_oid_cmp(const qgit_oid *a, const qgit_oid *b);
 
-/* Compare only the first `len` hex characters of two qgit_oids.
-   Returns 0 if they match. Used for prefix matching. */
+/**
+ * Compare the first `len` hexadecimal characters (packets of 4 bits)
+ * of two oid structures.
+ *
+ * @param a first oid structure
+ * @param b second oid structure
+ * @param len the number of hex chars to compare
+ * @return 0 in case of a match
+ */
 QGIT_EXTERN(int)
 qgit_oid_ncmp(const qgit_oid *a, const qgit_oid *b, size_t len);
 
-/* Check if a qgit_oid is zero. Return 1 if zero, 0 otherwise. */
+/**
+ * Check if an oid is all zeros.
+ *
+ * @param oid oid structure to test
+ * @return 1 if the oid is zero, 0 otherwise
+ */
 QGIT_EXTERN(int) qgit_oid_iszero(const qgit_oid *oid);
 
 END_DECLS

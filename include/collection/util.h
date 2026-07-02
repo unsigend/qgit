@@ -15,11 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef COL_UTIL_H
-#define COL_UTIL_H
+#ifndef COLLECTION_UTIL_H
+#define COLLECTION_UTIL_H
 
 #include <stddef.h>
 
-void swap(void *l, void *r, size_t sz);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * Exchange the contents of two memory regions of sz bytes each.
+ *
+ * When sz is zero, neither region is read or written. l and r must each point
+ * to at least sz bytes and must not overlap.
+ *
+ * @param l  pointer to the first object
+ * @param r  pointer to the second object
+ * @param sz number of bytes to exchange, usually sizeof the value type
+ */
+extern void swap(void *l, void *r, size_t sz);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <compress.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <fs.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <util/compress.h>
 #include <zlib.h>
 
 int zlib_compress(const void *src, size_t srclen, void **dest, size_t *destlen)

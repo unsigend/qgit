@@ -18,37 +18,48 @@
 #ifndef LIBQGIT_TYPES_H
 #define LIBQGIT_TYPES_H
 
-typedef struct qgit_oid qgit_oid;
-typedef struct qgit_odb qgit_odb;
-typedef struct qgit_odb_object qgit_odb_object;
-typedef struct qgit_odb_backend qgit_odb_backend;
+typedef struct qgit_oid qgit_oid; /* Unique identity of any object*/
+typedef struct qgit_odb qgit_odb; /* An open object database handle. */
 
-typedef struct qgit_index qgit_index;
-typedef struct qgit_config qgit_config;
-typedef struct qgit_reference qgit_reference;
-typedef struct qgit_repository qgit_repository;
+typedef struct qgit_odb_object
+    qgit_odb_object; /* An object read from the ODB. */
+typedef struct qgit_odb_backend
+    qgit_odb_backend; /* A custom backend in an ODB. */
 
-typedef struct qgit_object qgit_object;
-typedef struct qgit_blob qgit_blob;
-typedef struct qgit_tree qgit_tree;
-typedef struct qgit_tag qgit_tag;
-typedef struct qgit_commit qgit_commit;
+typedef struct qgit_index
+    qgit_index; /* Memory representation of an index file. */
+
+typedef struct qgit_config
+    qgit_config; /* Memory representation of a set of config files. */
+
+typedef struct qgit_reference
+    qgit_reference; /* In-memory representation of a reference. */
+
+typedef struct qgit_repository
+    qgit_repository; /* Representation of an existing qgit repository. */
+
+typedef struct qgit_object
+    qgit_object; /* Representation of a generic object in a repository. */
+typedef struct qgit_blob
+    qgit_blob; /* In-memory representation of a blob object. */
+typedef struct qgit_tree qgit_tree; /* Representation of a tree object. */
+typedef struct qgit_tag qgit_tag;   /* Parsed representation of a tag object. */
+typedef struct qgit_commit
+    qgit_commit; /* Parsed representation of a commit object. */
 
 typedef enum {
-    QGIT_OBJ_ANY = -2,   /* Any object type */
-    QGIT_OBJ_BAD = -1,   /* Bad object */
+    QGIT_OBJ_ANY = -2,   /* Any Object */
+    QGIT_OBJ_BAD = -1,   /* Invalid Object */
     QGIT_OBJ_COMMIT = 1, /* Commit object */
     QGIT_OBJ_BLOB = 2,   /* Blob object */
     QGIT_OBJ_TREE = 3,   /* Tree object */
-    QGIT_OBJ_TAG = 4,    /* Tag object */
+    QGIT_OBJ_TAG = 4,    /* Annotated tag object */
 } qgit_obj_type;
 
-/* Reference type: direct (points to an OID) or symbolic (points to another
-   reference name). */
 typedef enum {
     QGIT_REF_INVALID = 0,  /* Invalid reference */
-    QGIT_REF_OID = 1,      /* Direct reference (points to an OID) */
-    QGIT_REF_SYMBOLIC = 2, /* Symbolic reference (points to another ref) */
+    QGIT_REF_OID = 1,      /* Direct reference */
+    QGIT_REF_SYMBOLIC = 2, /* Symbolic reference */
 } qgit_ref_type;
 
 #endif

@@ -53,7 +53,10 @@
 #define QGIT_UNUSED(x) (void)(x)
 #define QGIT_FORMAT(fmt, args) __attribute__((format(printf, fmt, args)))
 
-#define QGIT_DIR_MODE (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-#define QGIT_FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+#define QGIT_DIR_MODE                                                          \
+    (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH |                                   \
+     S_IXOTH) /* Default directory mode */
+#define QGIT_FILE_MODE                                                         \
+    (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) /* Default file mode */
 
 #endif

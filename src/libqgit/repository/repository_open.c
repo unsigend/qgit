@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <util/str.h>
 
 int qgit_repository_open(qgit_repository **repo, const char *path)
 {

@@ -23,7 +23,11 @@
 
 BEGIN_DECLS
 
-/* Free a previously allocated index. */
+/**
+ * Free an existing index object.
+ *
+ * @param index an existing index object
+ */
 QGIT_EXTERN(void) qgit_index_free(qgit_index *index);
 
 END_DECLS

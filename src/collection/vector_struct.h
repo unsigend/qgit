@@ -1,5 +1,5 @@
-/* qgit - A simplified git like version control system
- * Copyright (C) 2025 - 2026 Qiu Yixiang
+/* collection - A generic data structure and algorithms library
+ * Copyright (C) 2025 Yixiang Qiu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
+#ifndef COL_VECTOR_STRUCT_H
+#define COL_VECTOR_STRUCT_H
 
-int str_endwith(const char *str, const char *suffix)
-{
-    size_t str_len = strlen(str);
-    size_t suffix_len = strlen(suffix);
-    return str_len >= suffix_len &&
-           strcmp(str + str_len - suffix_len, suffix) == 0;
-}
+#include <stddef.h>
 
-int str_startswith(const char *str, const char *prefix)
-{
-    size_t str_len = strlen(str);
-    size_t prefix_len = strlen(prefix);
-    return str_len >= prefix_len && strncmp(str, prefix, prefix_len) == 0;
-}
+struct vector {
+    char *buf;
+    size_t elesz;
+    size_t sz;
+    size_t cap;
+    void (*free)(void *);
+};
+
+#endif /* COL_VECTOR_STRUCT_H */
