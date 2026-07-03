@@ -26,6 +26,6 @@ void qgit_odb_free(qgit_odb *odb)
     if (!odb)
         return;
 
-    vec_fini(&odb->backends);
+    vec_free(odb->backends);
     free(odb);
 }

@@ -25,9 +25,9 @@ int qgit_odb_write(qgit_oid *out, qgit_odb *odb, const void *data, size_t len,
 {
     assert(out && odb);
 
-    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
         struct backend_entry *backend =
-            (struct backend_entry *)vec_at(&odb->backends, i);
+            (struct backend_entry *)vec_at(odb->backends, i);
         if (!backend->backend->write)
             continue;
         int result =

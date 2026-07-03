@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <collection/vector.h>
 #include <libqgit/branch.h>
+#include <libqgit/refs.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -65,7 +66,7 @@ static int callback(const char *name, void *payload)
     return 0;
 }
 
-int qgit_branch_list(struct vector *out, qgit_repository *repo,
+int qgit_branch_list(struct vector **out, qgit_repository *repo,
                      qgit_branch_t branch_type, qgit_branch_sort_t sort)
 {
     assert(out && repo);
@@ -74,19 +75,20 @@ int qgit_branch_list(struct vector *out, qgit_repository *repo,
         return -1;
 
     struct ctx ctx = {
-        .vec = out,
+        .vec = *out,
         .type = branch_type,
     };
 
     if (qgit_reference_foreach(repo, callback, &ctx) == -1) {
-        vec_fini(out);
+        vec_free(*out);
+        *out = NULL;
         return -1;
     }
 
     if (sort == QGIT_BRANCH_SORT_NAME) {
-        vec_sort(out, cmp_branch_asc);
+        vec_sort(*out, cmp_branch_asc);
     } else if (sort == QGIT_BRANCH_SORT_NAME_DESC) {
-        vec_sort(out, cmp_branch_desc);
+        vec_sort(*out, cmp_branch_desc);
     }
 
     return 0;

@@ -31,7 +31,7 @@ struct qgit_odb_object {
 };
 
 struct qgit_odb {
-    struct vector backends;
+    struct vector *backends;
 };
 
 struct backend_entry {

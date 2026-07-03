@@ -98,7 +98,8 @@ QGIT_EXTERN(const char *) qgit_repository_workdir(const qgit_repository *repo);
  * no commits.
  *
  * @param repo repo to test
- * @return 1 if the repository is empty, 0 if it is not, -1 on error and set errno
+ * @return 1 if the repository is empty, 0 if it is not, -1 on error and set
+ * errno
  */
 QGIT_EXTERN(int) qgit_repository_is_empty(qgit_repository *repo);
 
@@ -130,7 +131,8 @@ QGIT_EXTERN(int) qgit_repository_head_detached(qgit_repository *repo);
  * commit to point to.
  *
  * @param repo repo to test
- * @return 1 if the current branch is unborn, 0 if it is not, -1 on error and set errno
+ * @return 1 if the current branch is unborn, 0 if it is not, -1 on error and
+ * set errno
  */
 QGIT_EXTERN(int) qgit_repository_head_unborn(qgit_repository *repo);
 

@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <libqgit/branch.h>
+#include <libqgit/refs.h>
 #include <limits.h>
 #include <stdio.h>
 

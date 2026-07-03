@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <libqgit/branch.h>
+#include <libqgit/refs.h>
 #include <libqgit/repository.h>
 #include <libqgit/types.h>
 #include <string.h>

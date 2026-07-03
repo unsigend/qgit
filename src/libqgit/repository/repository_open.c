@@ -17,6 +17,7 @@
 
 #include "repository.h"
 
+#include <collection/string.h>
 #include <errno.h>
 #include <fs.h>
 #include <libqgit/error.h>
@@ -33,7 +34,7 @@ int qgit_repository_open(qgit_repository **repo, const char *path)
     char *slash;
     *repo = NULL;
 
-    if (str_endwith(path, "/.qgit")) {
+    if (str_endswith(path, "/.qgit")) {
         strcpy(repodir, path);
     } else if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
         errno = ENAMETOOLONG;

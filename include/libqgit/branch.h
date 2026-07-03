@@ -100,16 +100,16 @@ qgit_branch_lookup(qgit_reference **out, qgit_repository *repo,
  *
  * The vector is initialised by this function. Each element is a
  * heap allocated char pointer owned by the vector. The caller must
- * call vec_fini() when done.
+ * call vec_free() when done.
  *
- * @param out vector where branch names will be stored
+ * @param out pointer to the vector where branch names will be stored
  * @param repo repository where to find the branches
  * @param branch_type filtering flags for the branch listing
  * @param sort sort order for the branch names
  * @return 0 on success, -1 on error and set errno
  */
 QGIT_EXTERN(int)
-qgit_branch_list(struct vector *out, qgit_repository *repo,
+qgit_branch_list(struct vector **out, qgit_repository *repo,
                  qgit_branch_t branch_type, qgit_branch_sort_t sort);
 
 /**

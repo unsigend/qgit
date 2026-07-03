@@ -25,9 +25,9 @@ int qgit_odb_exists(qgit_odb *odb, const qgit_oid *id)
 {
     assert(odb && id);
 
-    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
         struct backend_entry *backend =
-            (struct backend_entry *)vec_at(&odb->backends, i);
+            (struct backend_entry *)vec_at(odb->backends, i);
         if (!backend->backend->exists)
             continue;
         int result = backend->backend->exists(backend->backend, id);

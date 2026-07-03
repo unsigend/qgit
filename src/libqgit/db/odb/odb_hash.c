@@ -20,8 +20,8 @@
 
 #include <assert.h>
 #include <libqgit/db/oid.h>
+#include <sha1.h>
 #include <stdlib.h>
-#include <util/sha1.h>
 
 int qgit_odb_hash(qgit_oid *out, const void *data, size_t len,
                   qgit_obj_type type)

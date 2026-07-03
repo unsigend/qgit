@@ -30,9 +30,9 @@ int qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,
     *type_p = QGIT_OBJ_BAD;
     int found = 0;
 
-    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
         struct backend_entry *backend =
-            (struct backend_entry *)vec_at(&odb->backends, i);
+            (struct backend_entry *)vec_at(odb->backends, i);
         if (!backend->backend->read_header)
             continue;
         int result =

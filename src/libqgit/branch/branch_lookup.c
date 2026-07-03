@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <libqgit/branch.h>
 #include <libqgit/error.h>
+#include <libqgit/refs.h>
 #include <limits.h>
 #include <stdio.h>
 

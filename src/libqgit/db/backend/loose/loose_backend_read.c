@@ -19,6 +19,7 @@
 #include "loose_backend.h"
 
 #include <assert.h>
+#include <compress.h>
 #include <errno.h>
 #include <fs.h>
 #include <libqgit/error.h>
@@ -27,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <util/compress.h>
 
 int loose_backend_read(void **data_p, size_t *len_p, qgit_obj_type *type_p,
                        struct qgit_odb_backend *backend, const qgit_oid *oid)

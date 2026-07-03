@@ -11,6 +11,7 @@
 
 extern UTEST_SUITE(hash);
 extern UTEST_SUITE(compress);
+extern UTEST_SUITE(oid);
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
   /* add test suites */
   UTEST_ADDSUITE(hash);
   UTEST_ADDSUITE(compress);
+  UTEST_ADDSUITE(oid);
 
   for (int i = 1; i < argc; i++) {
     if (strncmp(argv[i], "-j", 2) == 0) {

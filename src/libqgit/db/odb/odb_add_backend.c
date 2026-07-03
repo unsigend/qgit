@@ -36,18 +36,18 @@ int qgit_odb_add_backend(qgit_odb *odb, qgit_odb_backend *backend, int priority)
 
     int push = 0;
 
-    for (size_t i = 0; i < vec_size(&odb->backends); i++) {
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
         if (priority >
-            ((struct backend_entry *)vec_at(&odb->backends, i))->priority) {
+            ((struct backend_entry *)vec_at(odb->backends, i))->priority) {
             push = 1;
-            if (vec_insert(&odb->backends, i, &entry) == -1)
+            if (vec_insert(odb->backends, i, &entry) == -1)
                 return -1;
             break;
         }
     }
 
     if (!push) {
-        if (vec_pushback(&odb->backends, &entry) == -1)
+        if (vec_pushback(odb->backends, &entry) == -1)
             return -1;
     }
     entry.backend->odb = odb;
