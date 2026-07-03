@@ -43,14 +43,20 @@ int string_init(struct string **str) { return string_init_bufn(str, NULL, 0); }
 
 int string_init_buf(struct string **str, const char *src)
 {
-    if (!str || !src)
+    if (!str)
+        return -1;
+    *str = NULL;
+    if (!src)
         return -1;
     return string_init_bufn(str, src, strlen(src));
 }
 
 int string_init_bufn(struct string **str, const char *src, size_t n)
 {
-    if (!str || (n && !src))
+    if (!str)
+        return -1;
+    *str = NULL;
+    if (n && !src)
         return -1;
     struct string *s = calloc(1, sizeof(struct string));
     if (!s)
@@ -71,7 +77,10 @@ int string_init_bufn(struct string **str, const char *src, size_t n)
 
 int string_dup(struct string **dest, const struct string *src)
 {
-    if (!dest || !src)
+    if (!dest)
+        return -1;
+    *dest = NULL;
+    if (!src)
         return -1;
     return string_init_bufn(dest, src->buf, src->len);
 }
@@ -727,7 +736,4 @@ char string_iter_get(struct string_iter *iter)
     return iter->str->buf[iter->idx];
 }
 
-void string_iter_free(struct string_iter *iter)
-{
-    free(iter);
-}
+void string_iter_free(struct string_iter *iter) { free(iter); }

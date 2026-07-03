@@ -18,10 +18,10 @@
 #ifndef LIBQGIT_REPO_REPOSITORY_H
 #define LIBQGIT_REPO_REPOSITORY_H
 
-#include <stddef.h>
 #include <libqgit/common.h>
-#include <libqgit/types.h>
 #include <libqgit/oid.h>
+#include <libqgit/types.h>
+#include <stddef.h>
 
 QGIT_BEGIN_DECLS
 
@@ -46,8 +46,8 @@ QGIT_EXTERN(int) qgit_repository_open(qgit_repository **out, const char *path);
  * @param start_path directory from which to begin the search
  * @return 0 on success, -1 if no repository is found or on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_discover(char *out, size_t out_size,
-                                           const char *start_path);
+QGIT_EXTERN(int)
+qgit_repository_discover(char *out, size_t out_size, const char *start_path);
 
 /**
  * Initialize a new qgit repository at the given path.
@@ -55,13 +55,15 @@ QGIT_EXTERN(int) qgit_repository_discover(char *out, size_t out_size,
  * If a repository already exists at path the call succeeds without
  * overwriting existing data.
  *
- * @param out        output pointer to receive the repository handle, must not be NULL
+ * @param out        output pointer to receive the repository handle, must not
+ *                   be NULL
  * @param path       path to the working directory to initialize
  * @param branch     name for the initial branch, or NULL to use "main"
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_init(qgit_repository **out, const char *path,
-                                       const char *branch);
+QGIT_EXTERN(int)
+qgit_repository_init(qgit_repository **out, const char *path,
+                     const char *branch);
 
 /**
  * Free a repository handle.
@@ -80,8 +82,8 @@ QGIT_EXTERN(void) qgit_repository_free(qgit_repository *repo);
  * @param repo repository to query, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_head(qgit_reference **out,
-                                       qgit_repository *repo);
+QGIT_EXTERN(int)
+qgit_repository_head(qgit_reference **out, qgit_repository *repo);
 
 /**
  * Test whether HEAD is detached.
@@ -139,17 +141,15 @@ QGIT_EXTERN(const char *) qgit_repository_path(qgit_repository *repo);
 QGIT_EXTERN(const char *) qgit_repository_workdir(qgit_repository *repo);
 
 /**
- * Retrieve the config associated with this repository.
- *
- * The returned config covers both the local (.qgit/config) and global
- * (~/.qgitconfig) files. The caller must free it with qgit_config_free.
+ * Retrieve the config associated with this repository. The caller must free it
+ * with qgit_config_free
  *
  * @param out  output pointer to receive the config handle, must not be NULL
  * @param repo repository to query, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_config(qgit_config **out,
-                                         qgit_repository *repo);
+QGIT_EXTERN(int)
+qgit_repository_config(qgit_config **out, qgit_repository *repo);
 
 /**
  * Retrieve the ODB associated with this repository.
@@ -171,8 +171,7 @@ QGIT_EXTERN(int) qgit_repository_odb(qgit_odb **out, qgit_repository *repo);
  * @param repo repository to query, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_index(qgit_index **out,
-                                        qgit_repository *repo);
+QGIT_EXTERN(int) qgit_repository_index(qgit_index **out, qgit_repository *repo);
 
 QGIT_END_DECLS
 
