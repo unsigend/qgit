@@ -34,6 +34,12 @@
 #define QGIT_EXTERN(type) extern type
 #endif
 
+#ifdef __GNUC__
+#define QGIT_INTERNAL(type) extern __attribute__((visibility("hidden"))) type
+#else
+#define QGIT_INTERNAL(type) extern type
+#endif
+
 #if defined(_MSC_VER)
 #define QGIT_INLINE(type) static __inline type
 #elif defined(__GNUC__)
