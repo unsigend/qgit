@@ -18,13 +18,12 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-#include <collection/util.h>
-
 #include <collection/hashtbl.h>
 #include <collection/heap.h>
 #include <collection/set.h>
 #include <collection/slist.h>
 #include <collection/string.h>
+#include <collection/util.h>
 #include <collection/vector.h>
 
 #endif

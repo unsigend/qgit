@@ -19,54 +19,114 @@
 #define LIBQGIT_DB_ODB_BACKEND_H
 
 #include <libqgit/common.h>
-#include <libqgit/db/oid.h>
+#include <libqgit/oid.h>
 #include <libqgit/types.h>
 #include <stddef.h>
 
-BEGIN_DECLS
+QGIT_BEGIN_DECLS
 
-/* A backend is a vtable that defines how objects are physically stored.
-   The odb field is set automatically by qgit_odb_add_backend.
- */
+/* ODB backend vtable, one instance per backend implementation. */
 struct qgit_odb_backend {
-    qgit_odb *odb; /* owning odb, set by qgit_odb_add_backend */
+    qgit_odb
+        *odb; /* back-pointer to the owning ODB, set by qgit_odb_add_backend */
 
-    /* Read a full object. Caller must free *data_p. */
+    /**
+     * Read a full object by its OID.
+     *
+     * On success the implementation allocates *data_p and writes the
+     * uncompressed payload into it, sets *len_p to the payload size in
+     * bytes, and sets *type_p to the object type. The caller is
+     * responsible for freeing *data_p.
+     *
+     * @param data_p  output pointer to the allocated payload buffer
+     * @param len_p   output pointer to the payload length in bytes
+     * @param type_p  output pointer to the object type
+     * @param backend this backend instance
+     * @param oid     OID of the object to read, must not be NULL
+     * @return 0 on success, -1 on error and sets errno
+     */
     int (*read)(void **data_p, size_t *len_p, qgit_obj_type *type_p,
-                struct qgit_odb_backend *, const qgit_oid *);
+                struct qgit_odb_backend *backend, const qgit_oid *oid);
 
-    /* Find a unique object matching a short OID prefix of `len` hex chars.
-       Writes the full OID into `full_oid_out` and the object data into the
-       remaining out-params. Returns error if ambiguous or not found. */
-    int (*read_prefix)(qgit_oid *full_oid_out, void **data_p, size_t *len_p,
-                       qgit_obj_type *type_p, struct qgit_odb_backend *,
+    /**
+     * Read a full object matching an abbreviated OID prefix.
+     *
+     * Behaves like read but accepts a prefix of len hex characters.
+     * The remaining bytes of short_id beyond the prefix must be zero.
+     * Fails if the prefix matches more than one object.
+     *
+     * @param full_oid output pointer to receive the resolved full OID
+     * @param data_p   output pointer to the allocated payload buffer
+     * @param len_p    output pointer to the payload length in bytes
+     * @param type_p   output pointer to the object type
+     * @param backend  this backend instance
+     * @param short_id partial OID with the unused suffix zeroed
+     * @param len      number of hex characters in the prefix
+     * @return 0 on success, -1 on error and sets errno
+     */
+    int (*read_prefix)(qgit_oid *full_oid, void **data_p, size_t *len_p,
+                       qgit_obj_type *type_p, struct qgit_odb_backend *backend,
                        const qgit_oid *short_id, unsigned int len);
 
-    /* Read only the type and size of an object, without reading its data. */
+    /**
+     * Read only the type and size of an object without loading the full
+     * payload.
+     *
+     * @param len_p   output pointer to the payload length in bytes
+     * @param type_p  output pointer to the object type
+     * @param backend this backend instance
+     * @param oid     OID of the object to inspect, must not be NULL
+     * @return 0 on success, -1 on error and sets errno
+     */
     int (*read_header)(size_t *len_p, qgit_obj_type *type_p,
-                       struct qgit_odb_backend *, const qgit_oid *);
+                       struct qgit_odb_backend *backend, const qgit_oid *oid);
 
-    /* Write an object. Stores the resulting OID in the first argument. */
-    int (*write)(qgit_oid *, struct qgit_odb_backend *, const void *, size_t,
-                 qgit_obj_type);
+    /**
+     * Write a raw object payload into the backend.
+     *
+     * The implementation computes the OID from the data and type, stores
+     * the object, and writes the resulting OID into *oid.
+     *
+     * @param oid     output pointer to receive the written object OID
+     * @param backend this backend instance
+     * @param data    uncompressed object payload
+     * @param len     payload length in bytes
+     * @param type    object type
+     * @return 0 on success, -1 on error and sets errno
+     */
+    int (*write)(qgit_oid *oid, struct qgit_odb_backend *backend,
+                 const void *data, size_t len, qgit_obj_type type);
 
-    /* Return 1 if the object exists, 0 otherwise. Return -1 on error. */
-    int (*exists)(struct qgit_odb_backend *, const qgit_oid *);
+    /**
+     * Test whether the backend contains an object with the given OID.
+     *
+     * @param backend this backend instance
+     * @param oid     OID to look up, must not be NULL
+     * @return 1 if the object exists, 0 if not, -1 on error and sets errno
+     */
+    int (*exists)(struct qgit_odb_backend *backend, const qgit_oid *oid);
 
-    /* Free all resources held by this backend. */
-    void (*free)(struct qgit_odb_backend *);
+    /**
+     * Release all resources held by this backend.
+     *
+     * @param backend this backend instance, must not be NULL
+     */
+    void (*free)(struct qgit_odb_backend *backend);
 };
 
 /**
- * Create the built-in loose object backend for the given objects directory.
+ * Allocate a loose-object backend that reads and writes zlib-compressed
+ * objects under the standard two-character fanout layout inside
+ * objects_dir.
  *
- * @param out pointer where to store the backend
- * @param objects_dir path of the backend's "objects" directory
- * @return 0 on success, -1 on error and set errno
+ * @param backend_out output pointer to receive the new backend, must not be
+ * NULL
+ * @param objects_dir path to the objects directory (e.g. ".qgit/objects")
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_odb_backend_loose(qgit_odb_backend **out, const char *objects_dir);
+qgit_odb_backend_loose(qgit_odb_backend **backend_out, const char *objects_dir);
 
-END_DECLS
+QGIT_END_DECLS
 
 #endif

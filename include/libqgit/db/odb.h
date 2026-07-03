@@ -20,204 +20,202 @@
 
 #include <libqgit/common.h>
 #include <libqgit/db/odb_backend.h>
-#include <libqgit/db/oid.h>
+#include <libqgit/oid.h>
 #include <libqgit/types.h>
 #include <stddef.h>
 
-BEGIN_DECLS
+QGIT_BEGIN_DECLS
 
 /**
- * Create a new object database with no backends.
+ * Allocate an empty object database with no backends attached.
  *
- * Before the ODB can be used for read/writing, a custom database
- * backend must be manually added using `qgit_odb_add_backend()`
+ * At least one backend must be added via qgit_odb_add_backend before
+ * the ODB can be used for reading or writing.
  *
- * @param out location to store the database pointer, if opened.
- *			Set to NULL if the open failed
- * @return 0 on success, -1 on error and set errno
+ * @param out output pointer to receive the new ODB handle, must not be NULL
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int) qgit_odb_new(qgit_odb **out);
 
 /**
- * Create a new object database and automatically add
- * the default loose backend.
+ * Open an object database backed by a loose-object store.
  *
- * @param out location to store the database pointer, if opened.
- *			Set to NULL if the open failed
- * @param objects_dir path of the backend's "objects" directory
- * @return 0 on success, -1 on error and set errno
+ * Equivalent to qgit_odb_new followed by qgit_odb_add_backend with a
+ * loose backend rooted at objects_dir.
+ *
+ * @param out         output pointer to receive the ODB handle, must not be NULL
+ * @param objects_dir path to the objects directory (e.g. ".qgit/objects")
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int) qgit_odb_open(qgit_odb **out, const char *objects_dir);
 
 /**
- * Add a custom backend to an existing Object DB.
+ * Attach a custom backend to an existing ODB.
  *
- * The backends are checked in relative ordering, based on the
- * value of the `priority` parameter. Higher priority backends
- * are checked first.
+ * Backends are queried in ascending priority order; higher priority values
+ * are checked first. The ODB takes ownership of the backend and will call
+ * backend->free when the ODB is freed.
  *
- * @param odb database to add the backend to
- * @param backend pointer to a qgit_odb_backend instance
- * @param priority value for ordering the backends queue
- * @return 0 on success, -1 on error and set errno
+ * @param odb      ODB to attach the backend to, must not be NULL
+ * @param backend  backend to attach, must not be NULL
+ * @param priority ordering value, higher means checked first
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
 qgit_odb_add_backend(qgit_odb *odb, qgit_odb_backend *backend, int priority);
 
 /**
- * Close an open object database.
+ * Free an ODB handle and all attached backends.
  *
- * @param odb database pointer to close. If NULL no action is taken
+ * @param odb ODB to free, no-op if NULL
  */
 QGIT_EXTERN(void) qgit_odb_free(qgit_odb *odb);
 
 /**
- * Read an object from the database.
+ * Read a full object from the ODB.
  *
- * This method queries all available ODB backends
- * trying to read the given OID.
+ * Queries each backend in priority order until the object is found.
+ * The returned qgit_odb_object must be released with qgit_odb_object_free.
  *
- * The returned object must be closed by the user once
- * it is no longer in use with `qgit_odb_object_free()`.
- *
- * @param out pointer where to store the read object
- * @param odb database to search for the object in
- * @param id identity of the object to read
- * @return 0 on success, -1 on error and set errno
+ * @param out output pointer to receive the object handle, must not be NULL
+ * @param odb ODB to search, must not be NULL
+ * @param oid OID of the object to read, must not be NULL
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *id);
+qgit_odb_read(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *oid);
 
 /**
- * Read an object from the database, given a prefix
- * of its identifier.
+ * Read a full object from the ODB using an abbreviated OID prefix.
  *
- * This method queries all available ODB backends
- * trying to match the `len` first hexadecimal
- * characters of the `short_id`.
- * The prefix must be long enough to identify
- * a unique object in all the backends, the
- * method will fail otherwise.
+ * len must be at least QGIT_OID_MINPREFIXLEN. Fails if the prefix
+ * matches more than one object.
  *
- * The returned object must be closed by the user once
- * it is no longer in use with `qgit_odb_object_free()`.
- *
- * @param out pointer where to store the read object
- * @param odb database to search for the object in
- * @param short_id a prefix of the id of the object to read
- * @param len the length of the prefix
- * @return 0 on success, -1 on error and set errno
+ * @param out      output pointer to receive the object handle, must not be NULL
+ * @param odb      ODB to search, must not be NULL
+ * @param short_id partial OID with the unused suffix zeroed
+ * @param len      number of hex characters in the prefix
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
 qgit_odb_read_prefix(qgit_odb_object **out, qgit_odb *odb,
                      const qgit_oid *short_id, unsigned int len);
 
 /**
- * Read the header of an object from the database, without
- * reading its full contents.
+ * Read only the type and uncompressed size of an object without loading
+ * the full payload.
  *
- * The header includes the length and the type of an object.
- *
- * @param len_p pointer where to store the length
- * @param type_p pointer where to store the type
- * @param odb database to search for the object in
- * @param id identity of the object to read
- * @return 0 on success, -1 on error and set errno
+ * @param len_p  output pointer to receive the payload size in bytes
+ * @param type_p output pointer to receive the object type
+ * @param odb    ODB to search, must not be NULL
+ * @param oid    OID of the object to inspect, must not be NULL
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
 qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,
-                     const qgit_oid *id);
+                     const qgit_oid *oid);
 
 /**
- * Write an object directly into the ODB.
+ * Test whether an object with the given OID exists in the ODB.
  *
- * @param out pointer to store the OID result of the write
- * @param odb object database where to store the object
- * @param data buffer with the data to store
- * @param len size of the buffer
- * @param type type of the data to store
- * @return 0 on success, -1 on error and set errno
+ * @param odb ODB to search, must not be NULL
+ * @param oid OID to look up, must not be NULL
+ * @return 1 if found, 0 if not found, -1 on error and sets errno
+ */
+QGIT_EXTERN(int) qgit_odb_exists(qgit_odb *odb, const qgit_oid *oid);
+
+/**
+ * Write a raw object payload into the ODB.
+ *
+ * Computes the SHA-1 OID from the header and data, then delegates to the
+ * first writable backend. The resulting OID is written into *oid.
+ *
+ * @param oid  output pointer to receive the written object OID, must not be
+ * NULL
+ * @param odb  ODB to write into, must not be NULL
+ * @param data uncompressed object payload
+ * @param len  payload length in bytes
+ * @param type object type
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_odb_write(qgit_oid *out, qgit_odb *odb, const void *data, size_t len,
+qgit_odb_write(qgit_oid *oid, qgit_odb *odb, const void *data, size_t len,
                qgit_obj_type type);
 
 /**
- * Determine if the given object can be found in the object database.
+ * Compute the OID that a data buffer would receive if written to the ODB.
  *
- * @param odb database to be searched for the given object
- * @param id the object to search for
- * @return 1 if the object was found, 0 if not, -1 on error and set errno
- */
-QGIT_EXTERN(int) qgit_odb_exists(qgit_odb *odb, const qgit_oid *id);
-
-/**
- * Determine the object ID of a data buffer.
+ * No object is stored, only the hash is computed. Used by hash-object.
  *
- * The resulting OID will be the identifier for the data
- * buffer as if the data buffer were to be written to the ODB.
- *
- * @param out the resulting object ID
- * @param data data to hash
- * @param len size of the data
- * @param type type of the data to hash
- * @return 0 on success, -1 on error and set errno
+ * @param oid  output pointer to receive the computed OID, must not be NULL
+ * @param data buffer to hash
+ * @param len  buffer length in bytes
+ * @param type object type to use when constructing the git header
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_odb_hash(qgit_oid *out, const void *data, size_t len, qgit_obj_type type);
+qgit_odb_hash(qgit_oid *oid, const void *data, size_t len, qgit_obj_type type);
 
 /**
- * Close an ODB object.
+ * Compute the OID that a file would receive if written to the ODB as the
+ * given object type.
  *
- * This method must always be called once a `qgit_odb_object` is no
- * longer needed, otherwise memory will leak.
+ * No object is stored. Equivalent to git hash-object without -w.
  *
- * @param object object to close
+ * @param oid  output pointer to receive the computed OID, must not be NULL
+ * @param path path to the file to hash
+ * @param type object type to use when constructing the git header
+ * @return 0 on success, -1 on error and sets errno
+ */
+QGIT_EXTERN(int)
+qgit_odb_hashfile(qgit_oid *oid, const char *path, qgit_obj_type type);
+
+/**
+ * Free a qgit_odb_object returned by qgit_odb_read or qgit_odb_read_prefix.
+ *
+ * @param object object to free, no-op if NULL
  */
 QGIT_EXTERN(void) qgit_odb_object_free(qgit_odb_object *object);
 
 /**
  * Return the OID of an ODB object.
  *
- * This is the OID from which the object was read.
+ * The returned pointer is owned by the object and is valid until
+ * qgit_odb_object_free is called.
  *
- * @param object the object
- * @return a pointer to the OID
+ * @param object object to query, must not be NULL
+ * @return pointer to the object OID
  */
-QGIT_EXTERN(const qgit_oid *) qgit_odb_object_id(const qgit_odb_object *object);
+QGIT_EXTERN(const qgit_oid *) qgit_odb_object_id(qgit_odb_object *object);
 
 /**
- * Return the data of an ODB object.
+ * Return the uncompressed payload of an ODB object.
  *
- * This is the uncompressed, raw data as read from the ODB,
- * without the leading header.
+ * The returned pointer is owned by the object and is valid until
+ * qgit_odb_object_free is called. The data does not include the git
+ * object header.
  *
- * This pointer is owned by the object and shall not be free'd.
- *
- * @param object the object
- * @return a pointer to the data
+ * @param object object to query, must not be NULL
+ * @return pointer to the raw payload
  */
-QGIT_EXTERN(const void *) qgit_odb_object_data(const qgit_odb_object *object);
+QGIT_EXTERN(const void *) qgit_odb_object_data(qgit_odb_object *object);
 
 /**
- * Return the size of an ODB object.
+ * Return the uncompressed payload size of an ODB object.
  *
- * This is the real size of the `data` buffer, not the
- * actual size of the object.
- *
- * @param object the object
- * @return the size
+ * @param object object to query, must not be NULL
+ * @return payload size in bytes
  */
-QGIT_EXTERN(size_t) qgit_odb_object_size(const qgit_odb_object *object);
+QGIT_EXTERN(size_t) qgit_odb_object_size(qgit_odb_object *object);
 
 /**
  * Return the type of an ODB object.
  *
- * @param object the object
- * @return the type
+ * @param object object to query, must not be NULL
+ * @return object type
  */
-QGIT_EXTERN(qgit_obj_type) qgit_odb_object_type(const qgit_odb_object *object);
+QGIT_EXTERN(qgit_obj_type) qgit_odb_object_type(qgit_odb_object *object);
 
-END_DECLS
+QGIT_END_DECLS
 
 #endif

@@ -67,14 +67,6 @@ extern int string_init_bufn(struct string **str, const char *src, size_t n);
 extern int string_dup(struct string **dest, const struct string *src);
 
 /**
- * Allocate a new string as a deep copy of the raw string in str.
- *
- * @param str the string to duplicate, must not be NULL
- * @return    the new string, or NULL on failure
- */
-extern char *string_dup_raw(const struct string *str);
-
-/**
  * Release the internal buffer and free the string. NULL-safe.
  *
  * @param str the string to free, or NULL
@@ -514,26 +506,6 @@ extern char string_iter_get(struct string_iter *iter);
  * @param iter the iterator to free, or NULL
  */
 extern void string_iter_free(struct string_iter *iter);
-
-/*
- * Test whether the string starts with the null-terminated prefix.
- *
- * @param str    the string to inspect, or NULL
- * @param prefix null-terminated prefix to match, must not be NULL
- * @return       non-zero if str starts with prefix, zero otherwise or if str
- *               is NULL
- */
-extern int str_startswith(const char *str, const char *prefix);
-
-/**
- * Test whether the string ends with the null-terminated suffix.
- *
- * @param str    the string to inspect, or NULL
- * @param suffix null-terminated suffix to match, must not be NULL
- * @return       non-zero if str ends with suffix, zero otherwise or if str is
- *               NULL
- */
-extern int str_endswith(const char *str, const char *suffix);
 
 #ifdef __cplusplus
 }

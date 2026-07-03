@@ -177,8 +177,6 @@ help:
 	@echo "  make install   - install executable globally"
 	@echo "  make test      - run all tests"
 	@echo "  make test-NAME - run one BATS file or directory"
-	@echo "  make unit      - build and run unit tests"
-	@echo "  make unit-NAME - run one unit test"
 	@echo "  make help      - this message\n"
 
 flags:
@@ -198,12 +196,6 @@ test: bin
 
 test-%: bin
 	@$(MAKE) -C $(TESTS_PATH) test-$*
-
-unit: lib
-	@$(MAKE) -C $(TESTS_PATH) unit
-
-unit-%: lib
-	@$(MAKE) -C $(TESTS_PATH) unit-$*
 
 format:
 	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \

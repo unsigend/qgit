@@ -19,128 +19,112 @@
 #define LIBQGIT_OBJECT_OBJECT_H
 
 #include <libqgit/common.h>
-#include <libqgit/db/oid.h>
+#include <libqgit/oid.h>
 #include <libqgit/types.h>
 
-BEGIN_DECLS
+QGIT_BEGIN_DECLS
 
 /**
- * Lookup a reference to one of the objects in a repository.
+ * Look up an object in the repository by OID.
  *
- * The generated reference should be closed with the `qgit_object_free`
- * method instead of free'd manually.
+ * Pass QGIT_OBJ_ANY as type to let the function determine the type
+ * automatically, otherwise the stored type must match or the call fails.
+ * The returned object must be released with qgit_object_free.
  *
- * The `type` parameter must match the type of the object
- * in the odb, the method will fail otherwise.
- * The special value `QGIT_OBJ_ANY` may be passed to let
- * the method guess the object's type.
- *
- * @param object pointer to the looked-up object
- * @param repo the repository to look up the object
- * @param id the unique identifier for the object
- * @param type the type of the object
- * @return 0 on success, -1 on error and set errno
+ * @param out  output pointer to receive the object handle, must not be NULL
+ * @param repo repository to search, must not be NULL
+ * @param id   OID of the object to look up, must not be NULL
+ * @param type expected object type, or QGIT_OBJ_ANY
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_object_lookup(qgit_object **object, qgit_repository *repo,
-                   const qgit_oid *id, qgit_obj_type type);
+qgit_object_lookup(qgit_object **out, qgit_repository *repo, const qgit_oid *id,
+                   qgit_obj_type type);
 
 /**
- * Lookup a reference to one of the objects in a repository,
- * given a prefix of its identifier (short id).
+ * Look up an object in the repository by abbreviated OID prefix.
  *
- * The object obtained will be so that its identifier
- * matches the first `len` hexadecimal characters
- * (packets of 4 bits) of the given `id`.
- * `len` must be at least QGIT_OID_MINPREFIXLEN, and
- * long enough to identify a unique object matching
- * the prefix, otherwise the method will fail.
+ * len must be at least QGIT_OID_MINPREFIXLEN and must identify a unique
+ * object. Pass QGIT_OBJ_ANY to skip type checking.
+ * The returned object must be released with qgit_object_free.
  *
- * The generated reference should be closed with the `qgit_object_free`
- * method instead of free'd manually.
- *
- * The `type` parameter must match the type of the object
- * in the odb, the method will fail otherwise.
- * The special value `QGIT_OBJ_ANY` may be passed to let
- * the method guess the object's type.
- *
- * @param object pointer where to store the looked-up object
- * @param repo the repository to look up the object
- * @param id a short identifier for the object
- * @param len the length of the short identifier
- * @param type the type of the object
- * @return 0 on success, -1 on error and set errno
+ * @param out  output pointer to receive the object handle, must not be NULL
+ * @param repo repository to search, must not be NULL
+ * @param id   partial OID with the unused suffix zeroed
+ * @param len  number of hex characters in the prefix
+ * @param type expected object type, or QGIT_OBJ_ANY
+ * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_object_lookup_prefix(qgit_object **object, qgit_repository *repo,
+qgit_object_lookup_prefix(qgit_object **out, qgit_repository *repo,
                           const qgit_oid *id, unsigned int len,
                           qgit_obj_type type);
 
 /**
- * Get the id of a repository object.
+ * Return the OID of an object.
  *
- * The pointer is valid for the object's lifetime.
+ * The returned pointer is owned by the object and is valid until
+ * qgit_object_free is called.
  *
- * @param obj the repository object
- * @return a pointer to the object id
+ * @param obj object to query, must not be NULL
+ * @return pointer to the object OID
  */
 QGIT_EXTERN(const qgit_oid *) qgit_object_id(const qgit_object *obj);
 
 /**
- * Get the object type of an object.
+ * Return the type of an object.
  *
- * @param obj the repository object
- * @return the object's type
+ * @param obj object to query, must not be NULL
+ * @return the object type
  */
 QGIT_EXTERN(qgit_obj_type) qgit_object_type(const qgit_object *obj);
 
 /**
- * Get the repository that owns this object.
+ * Return the repository that owns this object.
  *
- * @param obj the object
- * @return the repository that owns this object
+ * The returned pointer is valid as long as the repository is open.
+ * Freeing the repository invalidates the object.
+ *
+ * @param obj object to query, must not be NULL
+ * @return pointer to the owning repository
  */
 QGIT_EXTERN(qgit_repository *) qgit_object_owner(const qgit_object *obj);
 
 /**
- * Close an open object.
+ * Free an object handle.
  *
- * This method instructs the library to close an existing
- * object. It must be called when the object is no longer needed,
- * otherwise memory will leak.
- *
- * @param object the object to close
+ * @param obj object to free, no-op if NULL
  */
-QGIT_EXTERN(void) qgit_object_free(qgit_object *object);
+QGIT_EXTERN(void) qgit_object_free(qgit_object *obj);
 
 /**
- * Convert an object type to its string representation.
+ * Convert a qgit_otype to its canonical string representation.
  *
- * The result is a pointer to a string in static memory and
- * should not be free'd.
+ * The returned pointer refers to static storage and must not be freed.
+ * Returns NULL for QGIT_OBJ_BAD or unknown types.
  *
  * @param type object type to convert
- * @return the corresponding string representation
+ * @return "commit", "tree", "blob", "tag", or NULL
  */
 QGIT_EXTERN(const char *) qgit_object_type2string(qgit_obj_type type);
 
 /**
- * Convert a string object type representation to a qgit_obj_type.
+ * Parse a type string into a qgit_otype.
  *
- * @param str the string to convert
- * @return the corresponding qgit_obj_type
+ * @param str type string to parse (e.g. "commit", "tree", "blob", "tag")
+ * @return the corresponding qgit_otype, or QGIT_OBJ_BAD if unrecognized
  */
 QGIT_EXTERN(qgit_obj_type) qgit_object_string2type(const char *str);
 
 /**
- * Determine if the given qgit_obj_type is a valid loose object type.
+ * Test whether a type is a valid loose object type.
  *
- * @param type object type to test
- * @return 1 if the type represents a valid loose object type,
- * 0 otherwise
+ * @param type type to test
+ * @return 1 if type is QGIT_OBJ_COMMIT, QGIT_OBJ_TREE, QGIT_OBJ_BLOB,
+ *         or QGIT_OBJ_TAG, 0 otherwise
  */
 QGIT_EXTERN(int) qgit_object_typeisloose(qgit_obj_type type);
 
-END_DECLS
+QGIT_END_DECLS
 
 #endif

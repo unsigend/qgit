@@ -18,14 +18,12 @@
 #ifndef LIBQGIT_COMMON_H
 #define LIBQGIT_COMMON_H
 
-#include <sys/stat.h>
-
 #ifdef __cplusplus
-#define BEGIN_DECLS extern "C" {
-#define END_DECLS }
+#define QGIT_BEGIN_DECLS extern "C" {
+#define QGIT_END_DECLS }
 #else
-#define BEGIN_DECLS
-#define END_DECLS
+#define QGIT_BEGIN_DECLS
+#define QGIT_END_DECLS
 #endif
 
 #ifdef __GNUC__
@@ -36,27 +34,21 @@
 #define QGIT_EXTERN(type) extern type
 #endif
 
-#ifdef __GNUC__
-#define QGIT_INTERNAL(type) __attribute__((visibility("hidden"))) type
-#else
-#define QGIT_INTERNAL(type) type
-#endif
-
-#ifdef __GNUC__
-#define QGIT_INLINE(type) __attribute__((always_inline)) static inline type
-#elif defined(_MSC_VER)
-#define QGIT_INLINE(type) __inline static type
+#if defined(_MSC_VER)
+#define QGIT_INLINE(type) static __inline type
+#elif defined(__GNUC__)
+#define QGIT_INLINE(type) __attribute__((always_inline)) inline type
 #else
 #define QGIT_INLINE(type) static inline type
 #endif
 
-#define QGIT_UNUSED(x) (void)(x)
-#define QGIT_FORMAT(fmt, args) __attribute__((format(printf, fmt, args)))
+#ifdef __GNUC__
+#define QGIT_FORMAT_PRINTF(format, args)                                       \
+    __attribute__((format(printf, format, args)))
+#else
+#define QGIT_FORMAT_PRINTF(format, args) /* empty */
+#endif
 
-#define QGIT_DIR_MODE                                                          \
-    (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH |                                   \
-     S_IXOTH) /* Default directory mode */
-#define QGIT_FILE_MODE                                                         \
-    (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) /* Default file mode */
+#define QGIT_UNUSED(x) (void)(x)
 
 #endif

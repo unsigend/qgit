@@ -4,4 +4,3 @@ compile_commands.json
 TODO.md
 .qgit/
 .cursor/
-tests/cmd/
