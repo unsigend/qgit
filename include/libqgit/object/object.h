@@ -98,7 +98,7 @@ QGIT_EXTERN(qgit_repository *) qgit_object_owner(const qgit_object *obj);
 QGIT_EXTERN(void) qgit_object_free(qgit_object *obj);
 
 /**
- * Convert a qgit_otype to its canonical string representation.
+ * Convert a qgit_obj_type to its canonical string representation.
  *
  * The returned pointer refers to static storage and must not be freed.
  * Returns NULL for QGIT_OBJ_BAD or unknown types.
@@ -109,10 +109,10 @@ QGIT_EXTERN(void) qgit_object_free(qgit_object *obj);
 QGIT_EXTERN(const char *) qgit_object_type2string(qgit_obj_type type);
 
 /**
- * Parse a type string into a qgit_otype.
+ * Parse a type string into a qgit_obj_type.
  *
  * @param str type string to parse (e.g. "commit", "tree", "blob", "tag")
- * @return the corresponding qgit_otype, or QGIT_OBJ_BAD if unrecognized
+ * @return the corresponding qgit_obj_type, or QGIT_OBJ_BAD if unrecognized
  */
 QGIT_EXTERN(qgit_obj_type) qgit_object_string2type(const char *str);
 
