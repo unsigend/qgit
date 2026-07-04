@@ -18,10 +18,10 @@
 #ifndef LIBQGIT_REPO_CONFIG_H
 #define LIBQGIT_REPO_CONFIG_H
 
-#include <stddef.h>
-#include <stdio.h>
 #include <libqgit/common.h>
 #include <libqgit/types.h>
+#include <stddef.h>
+#include <stdio.h>
 
 QGIT_BEGIN_DECLS
 
@@ -41,6 +41,13 @@ QGIT_EXTERN(int) qgit_config_find_global(char *out, size_t out_size);
  * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int) qgit_config_open_global(qgit_config **out);
+
+/**
+ * Create the global config file (~/.qgitconfig).
+ *
+ * @return 0 on success, -1 on error and sets errno
+ */
+QGIT_EXTERN(int) qgit_config_create_global(qgit_config **out);
 
 /**
  * Open a single on-disk config file.
@@ -80,8 +87,8 @@ QGIT_EXTERN(int) qgit_config_save(qgit_config *cfg);
  * @param name variable name in "section.key" form (e.g. "user.name")
  * @return 0 on success, -1 if not found or on error and sets errno
  */
-QGIT_EXTERN(int) qgit_config_get_string(const char **out, qgit_config *cfg,
-                                         const char *name);
+QGIT_EXTERN(int)
+qgit_config_get_string(const char **out, qgit_config *cfg, const char *name);
 
 /**
  * Get the value of a boolean config variable.
@@ -94,8 +101,8 @@ QGIT_EXTERN(int) qgit_config_get_string(const char **out, qgit_config *cfg,
  * @param name variable name in "section.key" form (e.g. "core.bare")
  * @return 0 on success, -1 if not found or on error and sets errno
  */
-QGIT_EXTERN(int) qgit_config_get_bool(int *out, qgit_config *cfg,
-                                       const char *name);
+QGIT_EXTERN(int)
+qgit_config_get_bool(int *out, qgit_config *cfg, const char *name);
 
 /**
  * Set the value of a string config variable.
@@ -109,8 +116,8 @@ QGIT_EXTERN(int) qgit_config_get_bool(int *out, qgit_config *cfg,
  * @param value string value to store, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_config_set_string(qgit_config *cfg, const char *name,
-                                         const char *value);
+QGIT_EXTERN(int)
+qgit_config_set_string(qgit_config *cfg, const char *name, const char *value);
 
 /**
  * Delete a config variable.

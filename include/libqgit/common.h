@@ -60,4 +60,6 @@
 #define QGIT_DIRMODE 0755
 #define QGIT_FILEMODE 0644
 
+#define QGIT_GLOBAL_CONFIG_NAME ".qgitconfig"
+
 #endif

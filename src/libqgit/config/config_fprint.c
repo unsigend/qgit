@@ -15,39 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include "config.h"
 
-#include <libqgit/common.h>
+#include <assert.h>
+#include <iniparse.h>
+#include <libqgit/repo/config.h>
 
-#define QGITERR_BADOID 1       /* Bad OID */
-#define QGITERR_REPONOTFOUND 2 /* Repository not found */
-#define QGITERR_INVKEY 3       /* Invalid key */
-
-/**
- * Set the error code.
- *
- * @param err The error code to set.
- */
-QGIT_EXTERN(void) qgit_seterror(int err);
-
-/**
- * Get the error code.
- *
- * @return The error code.
- */
-QGIT_EXTERN(int) qgit_error(void);
-
-/**
- * Clear the error code.
- */
-QGIT_EXTERN(void) qgit_clear_error(void);
-
-/**
- * Get the error message.
- *
- * @return The error message.
- */
-QGIT_EXTERN(const char *) qgit_strerror(int err);
-
-#endif
+int qgit_config_fprint(qgit_config *cfg, FILE *stream)
+{
+    assert(cfg && stream);
+    return iniparse_fprint(cfg->inifp, stream) < 0 ? -1 : 0;
+}

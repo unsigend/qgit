@@ -23,6 +23,7 @@ static int qgit_error_code = 0; /* error code */
 static const char *qgit_error_messages[] = {
     [QGITERR_BADOID] = "Bad OID",
     [QGITERR_REPONOTFOUND] = "Repository not found",
+    [QGITERR_INVKEY] = "Invalid key format",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

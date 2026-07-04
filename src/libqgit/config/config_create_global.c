@@ -15,39 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include "config.h"
 
-#include <libqgit/common.h>
+#include <assert.h>
+#include <libqgit/repo/config.h>
+#include <limits.h>
+#include <stdlib.h>
 
-#define QGITERR_BADOID 1       /* Bad OID */
-#define QGITERR_REPONOTFOUND 2 /* Repository not found */
-#define QGITERR_INVKEY 3       /* Invalid key */
+int qgit_config_create_global(qgit_config **out)
+{
+    assert(out);
+    *out = NULL;
 
-/**
- * Set the error code.
- *
- * @param err The error code to set.
- */
-QGIT_EXTERN(void) qgit_seterror(int err);
+    char path[PATH_MAX];
+    if (qgit_config_find_global(path, PATH_MAX) == -1)
+        return -1;
 
-/**
- * Get the error code.
- *
- * @return The error code.
- */
-QGIT_EXTERN(int) qgit_error(void);
+    struct qgit_config *cfg = calloc(1, sizeof(struct qgit_config));
+    if (!cfg)
+        return -1;
 
-/**
- * Clear the error code.
- */
-QGIT_EXTERN(void) qgit_clear_error(void);
+    cfg->inifp = iniparse_create(path);
+    if (!cfg->inifp) {
+        free(cfg);
+        return -1;
+    }
+    *out = cfg;
 
-/**
- * Get the error message.
- *
- * @return The error message.
- */
-QGIT_EXTERN(const char *) qgit_strerror(int err);
-
-#endif
+    return 0;
+}

@@ -15,39 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#include <assert.h>
+#include <errno.h>
+#include <libqgit/repo/config.h>
+#include <stdlib.h>
 
-#include <libqgit/common.h>
+int qgit_config_find_global(char *out, size_t out_size)
+{
+    assert(out);
+    char *home = getenv("HOME");
+    if (!home) {
+        if (!errno)
+            errno = EINVAL;
+        return -1;
+    }
+    int ret = snprintf(out, out_size, "%s/%s", home, QGIT_GLOBAL_CONFIG_NAME);
 
-#define QGITERR_BADOID 1       /* Bad OID */
-#define QGITERR_REPONOTFOUND 2 /* Repository not found */
-#define QGITERR_INVKEY 3       /* Invalid key */
+    if (ret < 0)
+        return -1;
 
-/**
- * Set the error code.
- *
- * @param err The error code to set.
- */
-QGIT_EXTERN(void) qgit_seterror(int err);
+    if (ret >= (int)out_size) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
 
-/**
- * Get the error code.
- *
- * @return The error code.
- */
-QGIT_EXTERN(int) qgit_error(void);
-
-/**
- * Clear the error code.
- */
-QGIT_EXTERN(void) qgit_clear_error(void);
-
-/**
- * Get the error message.
- *
- * @return The error message.
- */
-QGIT_EXTERN(const char *) qgit_strerror(int err);
-
-#endif
+    return 0;
+}

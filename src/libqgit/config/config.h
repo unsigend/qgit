@@ -15,39 +15,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
+#include <errno.h>
+#include <iniparse.h>
 #include <libqgit/common.h>
+#include <libqgit/error.h>
+#include <string.h>
 
-#define QGITERR_BADOID 1       /* Bad OID */
-#define QGITERR_REPONOTFOUND 2 /* Repository not found */
-#define QGITERR_INVKEY 3       /* Invalid key */
+struct qgit_config {
+    struct iniFILE *inifp;
+};
 
 /**
- * Set the error code.
+ * Parse a section and key from a name.
  *
- * @param err The error code to set.
+ * @param name The name to parse in "section.key" form.
+ * @param sec Output pointer to receive the section, must not be NULL
+ * @param key Output pointer to receive the key, must not be NULL
+ * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(void) qgit_seterror(int err);
-
-/**
- * Get the error code.
- *
- * @return The error code.
- */
-QGIT_EXTERN(int) qgit_error(void);
-
-/**
- * Clear the error code.
- */
-QGIT_EXTERN(void) qgit_clear_error(void);
-
-/**
- * Get the error message.
- *
- * @return The error message.
- */
-QGIT_EXTERN(const char *) qgit_strerror(int err);
+QGIT_INLINE(int)
+parse_seckey(char *name, char **sec, char **key)
+{
+    *sec = NULL;
+    *key = NULL;
+    char *dot = strchr(name, '.');
+    if (!dot || dot == name || *(dot + 1) == '\0') {
+        qgit_seterror(QGITERR_INVKEY);
+        return -1;
+    }
+    *dot++ = '\0';
+    *sec = name;
+    *key = dot;
+    return 0;
+}
 
 #endif
