@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
 #include <libqgit/db/odb.h>
 
 size_t qgit_odb_object_size(qgit_odb_object *object)
 {
-    (void)object;
-    return 0;
+    assert(object);
+    return object->rawobj.len;
 }

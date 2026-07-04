@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
 #include <libqgit/db/odb.h>
 
 qgit_obj_type qgit_odb_object_type(qgit_odb_object *object)
 {
-    (void)object;
-    return QGIT_OBJ_BAD;
+    assert(object);
+    return object->rawobj.type;
 }

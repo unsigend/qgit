@@ -15,14 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
+#include <collection/vector.h>
 #include <libqgit/db/odb.h>
 
-int qgit_odb_write(qgit_oid *oid, qgit_odb *odb, const void *data, size_t len, qgit_obj_type type)
+int qgit_odb_write(qgit_oid *oid, qgit_odb *odb, const void *data, size_t len,
+                   qgit_obj_type type)
 {
-    (void)oid;
-    (void)odb;
-    (void)data;
-    (void)len;
-    (void)type;
-    return 0;
+    assert(oid && odb);
+
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
+        struct backend_entry *entry = vec_at(odb->backends, i);
+        if (!entry->backend->write)
+            continue;
+        int ret = entry->backend->write(oid, entry->backend, data, len, type);
+        if (ret == 0)
+            return 0;
+        /* if result is -1 try next writable backend */
+    }
+
+    /* No writable backend found */
+    return -1;
 }

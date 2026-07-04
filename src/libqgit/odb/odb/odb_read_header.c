@@ -15,13 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/db/odb.h>
+#include "odb.h"
 
-int qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb, const qgit_oid *oid)
+#include <assert.h>
+#include <collection/vector.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,
+                         const qgit_oid *oid)
 {
-    (void)len_p;
-    (void)type_p;
-    (void)odb;
-    (void)oid;
-    return 0;
+    assert(len_p && type_p && odb && oid);
+
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
+        struct backend_entry *entry = vec_at(odb->backends, i);
+        if (!entry->backend->read_header)
+            continue;
+        qgit_clear_error();
+        int ret =
+            entry->backend->read_header(len_p, type_p, entry->backend, oid);
+        if (ret == 0)
+            return 0;
+        if (ret == -1) {
+            if (qgit_error() == QGITERR_OBJNOTFOUND) {
+                *len_p = 0;
+                *type_p = QGIT_OBJ_BAD;
+                continue;
+            }
+            return -1;
+        }
+    }
+
+    qgit_seterror(QGITERR_OBJNOTFOUND);
+    return -1;
 }

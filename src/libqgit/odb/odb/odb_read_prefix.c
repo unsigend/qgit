@@ -15,13 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/db/odb.h>
+#include "odb.h"
 
-int qgit_odb_read_prefix(qgit_odb_object **out, qgit_odb *odb, const qgit_oid *short_id, unsigned int len)
+#include <assert.h>
+#include <collection/vector.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <stdlib.h>
+#include <string.h>
+
+int qgit_odb_read_prefix(qgit_odb_object **out, qgit_odb *odb,
+                         const qgit_oid *short_id, unsigned int len)
 {
-    (void)out;
-    (void)odb;
-    (void)short_id;
-    (void)len;
-    return 0;
+    assert(out && odb && short_id && len);
+
+    qgit_odb_object *object;
+    int found = 0;
+
+    object = calloc(1, sizeof(qgit_odb_object));
+    if (!object)
+        return -1;
+
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
+        struct backend_entry *entry = vec_at(odb->backends, i);
+        if (!entry->backend->read_prefix)
+            continue;
+        qgit_clear_error();
+        int ret = entry->backend->read_prefix(
+            &object->id, &object->rawobj.data, &object->rawobj.len,
+            &object->rawobj.type, entry->backend, short_id, len);
+        if (ret == 0) {
+            found = 1;
+            break;
+        }
+        if (ret == -1) {
+            if (qgit_error() == QGITERR_OBJNOTFOUND) {
+                memset(object, 0, sizeof(qgit_odb_object));
+                continue;
+            }
+            qgit_odb_object_free(object);
+            return -1;
+        }
+    }
+
+    if (found) {
+        *out = object;
+        return 0;
+    }
+
+    qgit_seterror(QGITERR_OBJNOTFOUND);
+    qgit_odb_object_free(object);
+    return -1;
 }

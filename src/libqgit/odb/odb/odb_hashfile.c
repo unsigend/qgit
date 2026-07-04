@@ -15,12 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
+#include <fs.h>
 #include <libqgit/db/odb.h>
+#include <stdlib.h>
 
 int qgit_odb_hashfile(qgit_oid *oid, const char *path, qgit_obj_type type)
 {
-    (void)oid;
-    (void)path;
-    (void)type;
+    assert(oid && path && type);
+
+    void *buf;
+    size_t buflen;
+
+    if (read_file(path, &buf, &buflen))
+        return -1;
+
+    if (qgit_odb_hash(oid, buf, buflen, type)) {
+        free(buf);
+        return -1;
+    }
+
+    free(buf);
+
     return 0;
 }

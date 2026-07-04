@@ -15,9 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ODB_INTERNAL_H
-#define ODB_INTERNAL_H
+#ifndef ODB_H
+#define ODB_H
 
-#include "rawobj/rawobj.h"
+#include "../rawobj/rawobj.h"
+
+#include <collection/vector.h>
+#include <libqgit/db/odb.h>
+
+struct backend_entry {
+    qgit_odb_backend *backend; /* backend instance */
+    int priority;
+};
+
+struct qgit_odb {
+    struct vector *backends;
+};
+
+struct qgit_odb_object {
+    qgit_oid id;
+    qgit_rawobj rawobj;
+};
 
 #endif

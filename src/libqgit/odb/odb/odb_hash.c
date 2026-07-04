@@ -15,13 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/db/odb.h>
+#include "odb.h"
 
-int qgit_odb_hash(qgit_oid *oid, const void *data, size_t len, qgit_obj_type type)
+#include <assert.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <sha1.h>
+#include <stdlib.h>
+
+int qgit_odb_hash(qgit_oid *oid, const void *data, size_t len,
+                  qgit_obj_type type)
 {
-    (void)oid;
-    (void)data;
-    (void)len;
-    (void)type;
+    assert(oid);
+
+    qgit_rawobj rawobj;
+    unsigned char sha[QGIT_OID_RAWSZ];
+    void *buf;
+    size_t buflen;
+
+    rawobj.data = (void *)data;
+    rawobj.len = len;
+    rawobj.type = type;
+
+    if (qgit_rawobj_fmt(&rawobj, &buf, &buflen))
+        return -1;
+
+    if (sha1(buf, buflen, sha)) {
+        free(buf);
+        return -1;
+    }
+
+    qgit_oid_fromraw(oid, sha);
+    free(buf);
+
     return 0;
 }

@@ -117,4 +117,6 @@ qgit_loose_backend_exists(struct qgit_odb_backend *backend,
 QGIT_INTERNAL(void)
 qgit_loose_backend_free(struct qgit_odb_backend *backend);
 
+#include "../../rawobj/rawobj.h"
+
 #endif

@@ -15,9 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
 #include <libqgit/db/odb.h>
+#include <stdlib.h>
 
 void qgit_odb_free(qgit_odb *odb)
 {
-    (void)odb;
+    if (!odb)
+        return;
+    vec_free(odb->backends);
+    free(odb);
 }

@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../odb_internal.h"
-#include "libqgit/oid.h"
 #include "loose_backend.h"
 
 #include <assert.h>

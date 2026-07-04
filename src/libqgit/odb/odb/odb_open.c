@@ -15,11 +15,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
 #include <libqgit/db/odb.h>
+#include <libqgit/db/odb_backend.h>
+
+#define LOOSE_BACKEND_PRIORITY 2
+#define PACK_BACKEND_PRIORITY 1
 
 int qgit_odb_open(qgit_odb **out, const char *objects_dir)
 {
-    (void)out;
-    (void)objects_dir;
+    assert(out && objects_dir);
+
+    qgit_odb *odb;
+    qgit_odb_backend *loose_backend;
+
+    if (qgit_odb_backend_loose(&loose_backend, objects_dir) < 0)
+        return -1;
+
+    if (qgit_odb_new(&odb) < 0) {
+        loose_backend->free(loose_backend);
+        return -1;
+    }
+
+    if (qgit_odb_add_backend(odb, loose_backend, LOOSE_BACKEND_PRIORITY) < 0) {
+        loose_backend->free(loose_backend);
+        qgit_odb_free(odb);
+        return -1;
+    }
+
+    *out = odb;
+
     return 0;
 }

@@ -15,11 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
+#include <collection/vector.h>
 #include <libqgit/db/odb.h>
 
 int qgit_odb_exists(qgit_odb *odb, const qgit_oid *oid)
 {
-    (void)odb;
-    (void)oid;
+    assert(odb && oid);
+
+    for (size_t i = 0; i < vec_size(odb->backends); i++) {
+        struct backend_entry *entry = vec_at(odb->backends, i);
+        if (!entry->backend->exists)
+            continue;
+        int ret = entry->backend->exists(entry->backend, oid);
+        if (ret == 1)
+            return 1;
+        if (ret == -1)
+            return -1;
+    }
     return 0;
 }

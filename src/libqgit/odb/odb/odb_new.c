@@ -15,10 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "odb.h"
+
+#include <assert.h>
 #include <libqgit/db/odb.h>
+#include <stdlib.h>
+
+static void backend_free(void *data)
+{
+    if (!data)
+        return;
+    struct backend_entry *entry = (struct backend_entry *)data;
+    if (entry->backend)
+        entry->backend->free(entry->backend); /* delegate */
+}
 
 int qgit_odb_new(qgit_odb **out)
 {
-    (void)out;
+    assert(out);
+    qgit_odb *odb;
+
+    odb = calloc(1, sizeof(qgit_odb));
+    if (!odb)
+        return -1;
+
+    if (vec_init(&odb->backends, sizeof(struct backend_entry), backend_free) <
+        0) /* store the pointers to struct backend */
+    {
+        free(odb);
+        return -1;
+    }
+
+    *out = odb;
+
     return 0;
 }
