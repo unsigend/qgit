@@ -141,37 +141,37 @@ QGIT_EXTERN(const char *) qgit_repository_path(qgit_repository *repo);
 QGIT_EXTERN(const char *) qgit_repository_workdir(qgit_repository *repo);
 
 /**
- * Retrieve the config associated with this repository. The caller must free it
- * with qgit_config_free
+ * Return the local config associated with this repository.
  *
- * @param out  output pointer to receive the config handle, must not be NULL
+ * The returned pointer is owned by the repository and is valid until
+ * qgit_repository_free is called. Do not free it.
+ *
  * @param repo repository to query, must not be NULL
- * @return 0 on success, -1 on error and sets errno
+ * @return config handle, or NULL on error and sets errno
  */
-QGIT_EXTERN(int)
-qgit_repository_config(qgit_config **out, qgit_repository *repo);
+QGIT_EXTERN(qgit_config *) qgit_repository_config(qgit_repository *repo);
 
 /**
- * Retrieve the ODB associated with this repository.
+ * Return the ODB associated with this repository.
  *
- * The caller must free the returned ODB with qgit_odb_free.
+ * The returned pointer is owned by the repository and is valid until
+ * qgit_repository_free is called. Do not free it.
  *
- * @param out  output pointer to receive the ODB handle, must not be NULL
  * @param repo repository to query, must not be NULL
- * @return 0 on success, -1 on error and sets errno
+ * @return ODB handle, or NULL on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_odb(qgit_odb **out, qgit_repository *repo);
+QGIT_EXTERN(qgit_odb *) qgit_repository_odb(qgit_repository *repo);
 
 /**
- * Retrieve the index associated with this repository.
+ * Return the index associated with this repository.
  *
- * The caller must free the returned index with qgit_index_free.
+ * The returned pointer is owned by the repository and is valid until
+ * qgit_repository_free is called. Do not free it.
  *
- * @param out  output pointer to receive the index handle, must not be NULL
  * @param repo repository to query, must not be NULL
- * @return 0 on success, -1 on error and sets errno
+ * @return index handle, or NULL on error and sets errno
  */
-QGIT_EXTERN(int) qgit_repository_index(qgit_index **out, qgit_repository *repo);
+QGIT_EXTERN(qgit_index *) qgit_repository_index(qgit_repository *repo);
 
 QGIT_END_DECLS
 

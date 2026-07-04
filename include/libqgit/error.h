@@ -20,7 +20,8 @@
 
 #include <libqgit/common.h>
 
-#define QGITERR_BADOID 1 /* Bad OID */
+#define QGITERR_BADOID 1       /* Bad OID */
+#define QGITERR_REPONOTFOUND 2 /* Repository not found */
 
 /**
  * Set the error code.
@@ -40,5 +41,12 @@ QGIT_EXTERN(int) qgit_error(void);
  * Clear the error code.
  */
 QGIT_EXTERN(void) qgit_clear_error(void);
+
+/**
+ * Get the error message.
+ *
+ * @return The error message.
+ */
+QGIT_EXTERN(const char *) qgit_strerror(int err);
 
 #endif

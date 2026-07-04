@@ -18,10 +18,108 @@
 #include "repository.h"
 
 #include <assert.h>
+#include <collection/string.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <libqgit/repo/config.h>
+#include <libqgit/repo/index.h>
+#include <libqgit/repo/repository.h>
+#include <stdlib.h>
+#include <string.h>
+
+static int load_config(qgit_repository *repo)
+{
+    char config[PATH_MAX];
+    if (snprintf(config, PATH_MAX, "%s/config", repo->repodir) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return qgit_config_open_ondisk(&repo->config, config);
+}
+
+static int load_index(qgit_repository *repo)
+{
+    char index[PATH_MAX];
+    if (snprintf(index, PATH_MAX, "%s/index", repo->repodir) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return qgit_index_open(&repo->index, index);
+}
+
+static int load_odb(qgit_repository *repo)
+{
+    char objects_dir[PATH_MAX];
+    if (snprintf(objects_dir, PATH_MAX, "%s/objects", repo->repodir) >=
+        PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return qgit_odb_open(&repo->odb, objects_dir);
+}
 
 int qgit_repository_open(qgit_repository **out, const char *path)
 {
-    (void)out;
-    (void)path;
+    assert(out && path);
+
+    *out = NULL;
+
+    qgit_repository *r;
+    char repodir[PATH_MAX];
+    char workdir[PATH_MAX];
+
+    if (strlen(path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (str_endswith(path, "/.qgit") ||
+        str_endswith(path, "/.qgit/")) /* path is repository directory */
+    {
+        strcpy(repodir, path);
+        strcpy(workdir, path);
+        if (str_endswith(workdir, "/.qgit/"))
+            workdir[strlen(workdir) - 1] = '\0';
+        if (str_endswith(repodir, "/.qgit/"))
+            repodir[strlen(repodir) - 1] = '\0';
+        *strrchr(workdir, '/') = '\0';
+    } else /* path is work directory */
+    {
+        if (snprintf(repodir, PATH_MAX, "%s/.qgit", path) >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            return -1;
+        }
+
+        strcpy(workdir, path);
+    }
+
+    if (!dir_exists(repodir)) {
+        qgit_seterror(QGITERR_REPONOTFOUND);
+        return -1;
+    }
+
+    r = calloc(1, sizeof(qgit_repository));
+    if (!r)
+        return -1;
+
+    r->repodir = strdup(repodir);
+    r->workdir = strdup(workdir);
+
+    if (!r->repodir || !r->workdir) {
+        qgit_repository_free(r);
+        return -1;
+    }
+
+    /* TODO: load the index */
+    if (load_config(r) || load_odb(r)) {
+        qgit_repository_free(r);
+        return -1;
+    }
+
+    *out = r;
+
     return 0;
 }

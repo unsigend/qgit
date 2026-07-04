@@ -19,11 +19,8 @@
 
 #include <assert.h>
 
-int qgit_repository_config(qgit_config **out, qgit_repository *repo)
+qgit_config *qgit_repository_config(qgit_repository *repo)
 {
-    assert(out && repo);
-
-    *out = repo->config;
-    repo->config = NULL; /* transfer ownership to the caller */
-    return 0;
+    assert(repo);
+    return repo->config;
 }

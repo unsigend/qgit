@@ -19,11 +19,8 @@
 
 #include <assert.h>
 
-int qgit_repository_index(qgit_index **out, qgit_repository *repo)
+qgit_index *qgit_repository_index(qgit_repository *repo)
 {
-    assert(out && repo);
-
-    *out = repo->index;
-    repo->index = NULL; /* transfer ownership to the caller */
-    return 0;
+    assert(repo);
+    return repo->index;
 }

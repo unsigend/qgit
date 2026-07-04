@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
 
 int qgit_repository_head(qgit_reference **out, qgit_repository *repo)
 {
-    (void)out;
-    (void)repo;
-    return 0;
+    return qgit_reference_lookup(out, repo, "HEAD");
 }

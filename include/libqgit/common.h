@@ -57,4 +57,7 @@
 
 #define QGIT_UNUSED(x) (void)(x)
 
+#define QGIT_DIRMODE 0755
+#define QGIT_FILEMODE 0644
+
 #endif

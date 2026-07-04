@@ -15,12 +15,52 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+#include <errno.h>
+#include <fs.h>
+#include <libqgit/error.h>
 #include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
 
 int qgit_repository_discover(char *out, size_t out_size, const char *start_path)
 {
-    (void)out;
-    (void)out_size;
-    (void)start_path;
-    return 0;
+    assert(out && out_size && start_path);
+
+    char path[PATH_MAX];
+    char *slash;
+    const char *parent;
+
+    if (start_path[0] != '/') /* relative path */
+    {
+        if (fabspath(start_path, path) == -1)
+            return -1;
+    } else if (strcmp(start_path, "/") == 0) /* '/' root */
+        path[0] = '\0';
+    else
+        strcpy(path, start_path);
+
+    if (snprintf(out, out_size, "%s/.qgit", path) >= (int)out_size) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (dir_exists(out))
+        return 0;
+
+    if (strcmp(start_path, "/") == 0) {
+        qgit_seterror(QGITERR_REPONOTFOUND);
+        return -1;
+    }
+
+    slash = strrchr(path, '/');
+    if (slash == path)
+        parent = "/";
+    else {
+        *slash = '\0';
+        parent = path;
+    }
+
+    return qgit_repository_discover(out, out_size, parent);
 }

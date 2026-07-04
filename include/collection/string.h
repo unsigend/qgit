@@ -507,6 +507,27 @@ extern char string_iter_get(struct string_iter *iter);
  */
 extern void string_iter_free(struct string_iter *iter);
 
+/**
+ * Test whether the null-terminated string ends with the null-terminated suffix.
+ *
+ * @param str    the string to inspect, or NULL
+ * @param suffix null-terminated suffix to match, must not be NULL
+ * @return       non-zero if str ends with suffix, zero otherwise or if str is
+ *               NULL
+ */
+extern int str_endswith(const char *str, const char *suffix);
+
+/**
+ * Test whether the null-terminated string starts with the null-terminated
+ * prefix.
+ *
+ * @param str    the string to inspect, or NULL
+ * @param prefix null-terminated prefix to match, must not be NULL
+ * @return       non-zero if str starts with prefix, zero otherwise or if str is
+ *               NULL
+ */
+extern int str_startswith(const char *str, const char *prefix);
+
 #ifdef __cplusplus
 }
 #endif

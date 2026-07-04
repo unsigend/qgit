@@ -737,3 +737,22 @@ char string_iter_get(struct string_iter *iter)
 }
 
 void string_iter_free(struct string_iter *iter) { free(iter); }
+
+int str_endswith(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t len = strlen(str);
+    size_t suffixlen = strlen(suffix);
+    return suffixlen <= len &&
+           memcmp(str + len - suffixlen, suffix, suffixlen) == 0;
+}
+
+int str_startswith(const char *str, const char *prefix)
+{
+    if (!str || !prefix)
+        return 0;
+    size_t len = strlen(str);
+    size_t prefixlen = strlen(prefix);
+    return prefixlen <= len && memcmp(str, prefix, prefixlen) == 0;
+}

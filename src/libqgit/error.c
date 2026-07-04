@@ -16,9 +16,23 @@
  */
 
 #include <libqgit/error.h>
+#include <stddef.h>
 
 static int qgit_error_code = 0; /* error code */
+
+static const char *qgit_error_messages[] = {
+    [QGITERR_BADOID] = "Bad OID",
+    [QGITERR_REPONOTFOUND] = "Repository not found",
+};
 
 void qgit_seterror(int err) { qgit_error_code = err; }
 int qgit_error(void) { return qgit_error_code; }
 void qgit_clear_error(void) { qgit_error_code = 0; }
+
+const char *qgit_strerror(int err)
+{
+    if (err < 0 || (size_t)err >= sizeof(qgit_error_messages) /
+                                      sizeof(qgit_error_messages[0]))
+        return "Unknown error";
+    return qgit_error_messages[err];
+}

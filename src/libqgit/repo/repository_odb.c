@@ -19,11 +19,8 @@
 
 #include <assert.h>
 
-int qgit_repository_odb(qgit_odb **out, qgit_repository *repo)
+qgit_odb *qgit_repository_odb(qgit_repository *repo)
 {
-    assert(out && repo);
-
-    *out = repo->odb;
-    repo->odb = NULL; /* transfer ownership to the caller */
-    return 0;
+    assert(repo);
+    return repo->odb;
 }
