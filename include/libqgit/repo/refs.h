@@ -26,9 +26,12 @@
 QGIT_BEGIN_DECLS
 
 /* Flags for qgit_reference_list, combinable with bitwise OR. */
-#define QGIT_REF_LIST_ALL 0u             /* list all refs under refs/ */
 #define QGIT_REF_LIST_BRANCHES (1u << 0) /* limit to refs/heads/ */
 #define QGIT_REF_LIST_TAGS (1u << 1)     /* limit to refs/tags/ */
+#define QGIT_REF_LIST_REMOTES (1u << 2)  /* limit to refs/remotes/ */
+#define QGIT_REF_LIST_ALL                                                      \
+    (QGIT_REF_LIST_BRANCHES | QGIT_REF_LIST_TAGS |                             \
+     QGIT_REF_LIST_REMOTES) /* list all refs under refs/ */
 
 /**
  * Look up a reference by its full name.

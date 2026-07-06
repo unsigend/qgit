@@ -29,6 +29,10 @@ static const char *qgit_error_messages[] = {
     [QGITERR_OBJNOTFOUND] = "object not found",
     [QGITERR_AMBIGUOUS] = "ambiguous object",
     [QGITERR_OBJTYPEMISMATCH] = "object type mismatch",
+    [QGITERR_BADREFNAME] = "bad reference name",
+    [QGITERR_BADREFFILE] = "bad reference file",
+    [QGITERR_BADREFTYPE] = "bad reference type",
+    [QGITERR_REFEXISTS] = "reference already exists",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

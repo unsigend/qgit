@@ -28,6 +28,10 @@
 #define QGITERR_OBJNOTFOUND 6     /* Object not found */
 #define QGITERR_AMBIGUOUS 7       /* Ambiguous object */
 #define QGITERR_OBJTYPEMISMATCH 8 /* Object type mismatch */
+#define QGITERR_BADREFNAME 9      /* Bad reference name */
+#define QGITERR_BADREFFILE 10     /* Bad reference file */
+#define QGITERR_BADREFTYPE 11     /* Bad reference type */
+#define QGITERR_REFEXISTS 12      /* Reference exists */
 
 /**
  * Set the error code.
