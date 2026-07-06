@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "../blob/blob.h"
+#include "../commit/commit.h"
+#include "../tag/tag.h"
+#include "../tree/tree.h"
 #include "object.h"
 
 #include <stdlib.h>
@@ -23,5 +27,25 @@ void qgit_object_free(qgit_object *obj)
 {
     if (!obj)
         return;
+
+    /* delegate to the subtype, the object layer free only responsible for the
+      base pointer */
+    switch (obj->type) {
+    case QGIT_OBJ_COMMIT:
+        commit_free((qgit_commit *)obj);
+        break;
+    case QGIT_OBJ_TAG:
+        tag_free((qgit_tag *)obj);
+        break;
+    case QGIT_OBJ_TREE:
+        tree_free((qgit_tree *)obj);
+        break;
+    case QGIT_OBJ_BLOB:
+        blob_free((qgit_blob *)obj);
+        break;
+    default:
+        break;
+    }
+
     free(obj);
 }

@@ -18,9 +18,11 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "libqgit/common.h"
 #include <assert.h>
 #include <libqgit/db/odb.h>
 #include <libqgit/oid.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 struct qgit_object {
@@ -37,24 +39,16 @@ struct qgit_object {
  * @param repo repository to associate with the object, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_INLINE(int)
-qgit_obj_from_odb_obj(qgit_object **out, qgit_odb_object *odb_obj,
-                      qgit_repository *repo)
-{
-    assert(out && odb_obj);
-    *out = NULL;
+QGIT_INTERNAL(int)
+qgit_object_from_odb_obj(qgit_object **out, qgit_odb_object *odb_obj,
+                         qgit_repository *repo);
 
-    qgit_object *object = calloc(1, sizeof(struct qgit_object));
-    if (!object)
-        return -1;
-
-    qgit_oid_cpy(&object->id, qgit_odb_object_id(odb_obj));
-    object->type = qgit_odb_object_type(odb_obj);
-    object->repo = repo;
-
-    *out = object;
-
-    return 0;
-}
+/**
+ * Get the memory size of a git object based on its type.
+ *
+ * @param type object type to get the memory size of
+ * @return memory size of the object
+ */
+QGIT_INTERNAL(size_t) qgit_object_mem_size(qgit_obj_type type);
 
 #endif

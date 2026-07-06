@@ -15,21 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "blob.h"
+#include "../blob/blob.h"
+#include "../commit/commit.h"
+#include "../tag/tag.h"
+#include "../tree/tree.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
-#include <string.h>
+#include <libqgit/error.h>
 
-int blob_parse(qgit_blob *out, qgit_odb_object *odb_obj)
+size_t qgit_object_mem_size(qgit_obj_type type)
 {
-    assert(out && odb_obj);
-    out->data = malloc(qgit_odb_object_size(odb_obj));
-    if (!out->data)
-        return -1;
-    memcpy(out->data, qgit_odb_object_data(odb_obj),
-           qgit_odb_object_size(odb_obj));
-    out->len = qgit_odb_object_size(odb_obj);
-
-    return 0;
+    switch (type) {
+    case QGIT_OBJ_COMMIT:
+        return sizeof(qgit_commit);
+    case QGIT_OBJ_TAG:
+        return sizeof(qgit_tag);
+    case QGIT_OBJ_TREE:
+        return sizeof(qgit_tree);
+    case QGIT_OBJ_BLOB:
+        return sizeof(qgit_blob);
+    default:
+        qgit_seterror(QGITERR_BADREFTYPE);
+        return 0;
+    }
 }

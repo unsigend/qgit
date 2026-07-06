@@ -60,7 +60,7 @@ int qgit_object_lookup(qgit_object **out, qgit_repository *repo,
         return -1;
     }
 
-    if (qgit_obj_from_odb_obj(&object, odb_object, repo) < 0) {
+    if (qgit_object_from_odb_obj(&object, odb_object, repo) < 0) {
         qgit_odb_object_free(odb_object);
         return -1;
     }
