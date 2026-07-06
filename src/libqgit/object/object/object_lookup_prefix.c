@@ -15,14 +15,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/object.h>
+#include "object.h"
 
-int qgit_object_lookup_prefix(qgit_object **out, qgit_repository *repo, const qgit_oid *id, unsigned int len, qgit_obj_type type)
+#include <assert.h>
+#include <errno.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/error.h>
+#include <libqgit/object/object.h>
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stdio.h>
+
+int qgit_object_lookup_prefix(qgit_object **out, qgit_repository *repo,
+                              const qgit_oid *id, unsigned int len,
+                              qgit_obj_type type)
 {
-    (void)out;
-    (void)repo;
-    (void)id;
-    (void)len;
-    (void)type;
+    assert(out && repo && id && len >= QGIT_OID_MINPREFIXLEN);
+    *out = NULL;
+
+    char path[PATH_MAX];
+    qgit_odb *odb;
+    qgit_odb_object *odb_object;
+    qgit_object *object;
+
+    if (snprintf(path, PATH_MAX, "%s/objects", qgit_repository_path(repo)) >=
+        PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (qgit_odb_open(&odb, path) < 0)
+        return -1;
+
+    if (qgit_odb_read_prefix(&odb_object, odb, id, len) < 0) {
+        qgit_odb_free(odb);
+        return -1;
+    }
+
+    qgit_odb_free(odb);
+
+    if (type != QGIT_OBJ_ANY && qgit_odb_object_type(odb_object) != type) {
+        qgit_odb_object_free(odb_object);
+        qgit_seterror(QGITERR_OBJTYPEMISMATCH);
+        return -1;
+    }
+
+    if (qgit_obj_from_odb_obj(&object, odb_object, repo) < 0) {
+        qgit_odb_object_free(odb_object);
+        return -1;
+    }
+
+    qgit_odb_object_free(odb_object);
+
+    *out = object;
+
     return 0;
 }

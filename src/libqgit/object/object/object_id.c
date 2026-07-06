@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/object.h>
+#include "object.h"
+
+#include <assert.h>
 
 const qgit_oid *qgit_object_id(const qgit_object *obj)
 {
-    (void)obj;
-    return NULL;
+    assert(obj);
+    return &obj->id;
 }

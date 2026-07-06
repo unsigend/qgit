@@ -28,6 +28,7 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BADOBJTYPE] = "bad object type",
     [QGITERR_OBJNOTFOUND] = "object not found",
     [QGITERR_AMBIGUOUS] = "ambiguous object",
+    [QGITERR_OBJTYPEMISMATCH] = "object type mismatch",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

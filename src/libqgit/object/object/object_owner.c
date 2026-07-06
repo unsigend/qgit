@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/object.h>
+#include "object.h"
+
+#include <assert.h>
 
 qgit_repository *qgit_object_owner(const qgit_object *obj)
 {
-    (void)obj;
-    return NULL;
+    assert(obj);
+    return obj->repo;
 }

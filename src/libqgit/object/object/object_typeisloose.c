@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/object.h>
+#include "object.h"
 
 int qgit_object_typeisloose(qgit_obj_type type)
 {
-    (void)type;
-    return 0;
+    return type == QGIT_OBJ_COMMIT || type == QGIT_OBJ_TREE ||
+           type == QGIT_OBJ_BLOB || type == QGIT_OBJ_TAG;
 }

@@ -20,13 +20,14 @@
 
 #include <libqgit/common.h>
 
-#define QGITERR_BADOID 1       /* Bad OID */
-#define QGITERR_REPONOTFOUND 2 /* Repository not found */
-#define QGITERR_INVKEY 3       /* Invalid key */
-#define QGITERR_BADOBJFILE 4   /* Bad object file */
-#define QGITERR_BADOBJTYPE 5   /* Bad object type */
-#define QGITERR_OBJNOTFOUND 6  /* Object not found */
-#define QGITERR_AMBIGUOUS 7    /* Ambiguous object */
+#define QGITERR_BADOID 1          /* Bad OID */
+#define QGITERR_REPONOTFOUND 2    /* Repository not found */
+#define QGITERR_INVKEY 3          /* Invalid key */
+#define QGITERR_BADOBJFILE 4      /* Bad object file */
+#define QGITERR_BADOBJTYPE 5      /* Bad object type */
+#define QGITERR_OBJNOTFOUND 6     /* Object not found */
+#define QGITERR_AMBIGUOUS 7       /* Ambiguous object */
+#define QGITERR_OBJTYPEMISMATCH 8 /* Object type mismatch */
 
 /**
  * Set the error code.

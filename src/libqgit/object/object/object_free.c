@@ -15,9 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/object.h>
+#include "object.h"
+
+#include <stdlib.h>
 
 void qgit_object_free(qgit_object *obj)
 {
-    (void)obj;
+    if (!obj)
+        return;
+    free(obj);
 }
