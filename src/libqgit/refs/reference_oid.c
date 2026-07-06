@@ -17,7 +17,7 @@
 
 #include "reference.h"
 
-const qgit_oid *qgit_reference_oid(qgit_reference *ref)
+const qgit_oid *qgit_reference_oid(const qgit_reference *ref)
 {
     if (!ref || ref->type != QGIT_REF_DIRECT)
         return NULL;

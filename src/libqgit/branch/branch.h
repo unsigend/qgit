@@ -15,11 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#ifndef BRANCH_H
+#define BRANCH_H
 
-const char *qgit_reference_name(const qgit_reference *ref)
+#include <libqgit/common.h>
+#include <libqgit/error.h>
+#include <string.h>
+
+/**
+ * Validate a branch name.
+ *
+ * @param name The branch name to validate.
+ * @return 0 if the name is valid, -1 if the name is invalid.
+ */
+QGIT_INLINE(int) qgit_branch_validate_name(const char *name)
 {
-    if (!ref)
-        return NULL;
-    return ref->name;
+    if (!name[0] || strstr(name, "..") || name[0] == '/') {
+        qgit_seterror(QGITERR_BADREFNAME);
+        return -1;
+    }
+    return 0;
 }
+
+#endif

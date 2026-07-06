@@ -56,9 +56,6 @@ qgit_branch_create(qgit_reference **out, qgit_repository *repo,
 /**
  * Delete an existing branch by its short name.
  *
- * Only local branches (QGIT_BRANCH_LOCAL) may be deleted in the current
- * implementation, remote branches are reserved for future use.
- *
  * @param repo        repository where the branch lives, must not be NULL
  * @param branch_name short branch name to delete (e.g. "feature-x"), must not
  *                    be NULL

@@ -17,7 +17,7 @@
 
 #include "reference.h"
 
-const char *qgit_reference_target(qgit_reference *ref)
+const char *qgit_reference_target(const qgit_reference *ref)
 {
     if (!ref || ref->type != QGIT_REF_SYMBOLIC)
         return NULL;

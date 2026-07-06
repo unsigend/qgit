@@ -15,11 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#include <assert.h>
+#include <libqgit/repo/refs.h>
+#include <string.h>
 
-const char *qgit_reference_name(const qgit_reference *ref)
+const char *qgit_branch_name(const qgit_reference *ref)
 {
-    if (!ref)
-        return NULL;
-    return ref->name;
+    assert(ref);
+
+    if (strncmp(qgit_reference_name(ref), "refs/heads/", 11) == 0)
+        return qgit_reference_name(ref) + 11;
+
+    if (strncmp(qgit_reference_name(ref), "refs/remotes/", 13) == 0)
+        return qgit_reference_name(ref) + 13;
+
+    return NULL;
 }

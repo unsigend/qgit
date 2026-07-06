@@ -99,7 +99,7 @@ qgit_reference_create_oid(qgit_reference **out, qgit_repository *repo,
  * @param ref reference to query, must not be NULL
  * @return pointer to the OID, or NULL if the reference is symbolic
  */
-QGIT_EXTERN(const qgit_oid *) qgit_reference_oid(qgit_reference *ref);
+QGIT_EXTERN(const qgit_oid *) qgit_reference_oid(const qgit_reference *ref);
 
 /**
  * Get the target name a symbolic reference points to.
@@ -109,7 +109,7 @@ QGIT_EXTERN(const qgit_oid *) qgit_reference_oid(qgit_reference *ref);
  * @param ref reference to query, must not be NULL
  * @return pointer to the target name, or NULL if the reference is direct
  */
-QGIT_EXTERN(const char *) qgit_reference_target(qgit_reference *ref);
+QGIT_EXTERN(const char *) qgit_reference_target(const qgit_reference *ref);
 
 /**
  * Get the type of a reference.
@@ -117,7 +117,7 @@ QGIT_EXTERN(const char *) qgit_reference_target(qgit_reference *ref);
  * @param ref reference to query, must not be NULL
  * @return QGIT_REF_DIRECT or QGIT_REF_SYMBOLIC
  */
-QGIT_EXTERN(qgit_ref_type) qgit_reference_type(qgit_reference *ref);
+QGIT_EXTERN(qgit_ref_type) qgit_reference_type(const qgit_reference *ref);
 
 /**
  * Get the full name of a reference.
@@ -128,7 +128,7 @@ QGIT_EXTERN(qgit_ref_type) qgit_reference_type(qgit_reference *ref);
  * @param ref reference to query, must not be NULL
  * @return the full reference name (e.g. "refs/heads/main")
  */
-QGIT_EXTERN(const char *) qgit_reference_name(qgit_reference *ref);
+QGIT_EXTERN(const char *) qgit_reference_name(const qgit_reference *ref);
 
 /**
  * Resolve a symbolic reference to the direct reference it ultimately targets.
@@ -142,7 +142,7 @@ QGIT_EXTERN(const char *) qgit_reference_name(qgit_reference *ref);
  * @return 0 on success, -1 on error and sets errno
  */
 QGIT_EXTERN(int)
-qgit_reference_resolve(qgit_reference **out, qgit_reference *ref);
+qgit_reference_resolve(qgit_reference **out, const qgit_reference *ref);
 
 /**
  * Get the repository that owns a reference.
@@ -150,7 +150,7 @@ qgit_reference_resolve(qgit_reference **out, qgit_reference *ref);
  * @param ref reference to query, must not be NULL
  * @return pointer to the owning repository
  */
-QGIT_EXTERN(qgit_repository *) qgit_reference_owner(qgit_reference *ref);
+QGIT_EXTERN(qgit_repository *) qgit_reference_owner(const qgit_reference *ref);
 
 /**
  * Update the target of a symbolic reference in memory and on disk.
@@ -210,8 +210,8 @@ QGIT_EXTERN(int) qgit_reference_cmp(qgit_reference *a, qgit_reference *b);
  * and the vector. Use vec_free to release it.
  *
  * flags controls which references are included, use QGIT_REF_LIST_ALL
- * to include every reference under refs/, or combine QGIT_REF_LIST_BRANCHES
- * and QGIT_REF_LIST_TAGS for a filtered listing.
+ * to include every reference under refs/, or combine QGIT_REF_LIST_BRANCHES,
+ * QGIT_REF_LIST_REMOTES and QGIT_REF_LIST_TAGS for a filtered listing.
  *
  * @param out   output pointer to receive a vector of char*, must not be NULL
  * @param repo  repository to list references from, must not be NULL

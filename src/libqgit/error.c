@@ -33,6 +33,7 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BADREFFILE] = "bad reference file",
     [QGITERR_BADREFTYPE] = "bad reference type",
     [QGITERR_REFEXISTS] = "reference already exists",
+    [QGITERR_BRANCHEXISTS] = "branch already exists",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

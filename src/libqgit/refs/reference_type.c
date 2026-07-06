@@ -19,7 +19,7 @@
 
 #include <assert.h>
 
-qgit_ref_type qgit_reference_type(qgit_reference *ref)
+qgit_ref_type qgit_reference_type(const qgit_reference *ref)
 {
     assert(ref);
     return ref->type;

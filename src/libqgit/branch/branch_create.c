@@ -15,11 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#include <assert.h>
+#include <errno.h>
+#include <libqgit/repo/refs.h>
+#include <limits.h>
+#include <stdio.h>
 
-const char *qgit_reference_name(const qgit_reference *ref)
+int qgit_branch_create(qgit_reference **out, qgit_repository *repo,
+                       const char *branch_name, const qgit_oid *target,
+                       int force)
 {
-    if (!ref)
-        return NULL;
-    return ref->name;
+    assert(out && repo && branch_name && target);
+
+    char path[PATH_MAX];
+
+    if (snprintf(path, PATH_MAX, "refs/heads/%s", branch_name) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (qgit_reference_create_oid(out, repo, path, target, force) < 0)
+        return -1;
+
+    return 0;
 }

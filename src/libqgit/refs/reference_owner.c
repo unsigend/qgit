@@ -17,7 +17,7 @@
 
 #include "reference.h"
 
-qgit_repository *qgit_reference_owner(qgit_reference *ref)
+qgit_repository *qgit_reference_owner(const qgit_reference *ref)
 {
     if (!ref)
         return NULL;

@@ -15,11 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reference.h"
+#include <assert.h>
+#include <libqgit/repo/branch.h>
+#include <libqgit/repo/refs.h>
+#include <libqgit/repo/repository.h>
+#include <string.h>
 
-const char *qgit_reference_name(const qgit_reference *ref)
+int qgit_branch_is_head(const qgit_reference *ref)
 {
-    if (!ref)
-        return NULL;
-    return ref->name;
+    assert(ref);
+
+    qgit_reference *head;
+
+    if (qgit_repository_head(&head, qgit_reference_owner(ref)) < 0)
+        return -1;
+
+    if (qgit_reference_type(head) == QGIT_REF_DIRECT) /* detached HEAD */
+    {
+        qgit_reference_free(head);
+        return 0;
+    }
+
+    int ret = strcmp(qgit_reference_name(ref), qgit_reference_target(head));
+    qgit_reference_free(head);
+
+    return ret == 0;
 }

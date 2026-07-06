@@ -32,6 +32,7 @@
 #define QGITERR_BADREFFILE 10     /* Bad reference file */
 #define QGITERR_BADREFTYPE 11     /* Bad reference type */
 #define QGITERR_REFEXISTS 12      /* Reference exists */
+#define QGITERR_BRANCHEXISTS 13   /* Branch exists */
 
 /**
  * Set the error code.

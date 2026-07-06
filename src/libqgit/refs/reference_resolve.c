@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int qgit_reference_resolve(qgit_reference **out, qgit_reference *ref)
+int qgit_reference_resolve(qgit_reference **out, const qgit_reference *ref)
 {
     assert(out && ref);
 
