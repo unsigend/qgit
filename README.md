@@ -52,10 +52,6 @@ make format    format .c and .h
 make flags     show compiler flags
 make docker    build and run development container
 make install   install executable globally
-make test      run all tests
-make test-NAME run one test
-make unit      build and run unit tests
-make unit-NAME run one unit test
 make help      show usage message
 ```
 
@@ -585,6 +581,8 @@ Remove files from the working tree and from the index.
 
 List references in a local repository.
 
+By default, branches, tags, and remote-tracking references are listed.
+
 #### Synopsis
 
 ```
@@ -595,9 +593,9 @@ qgit show-ref [--head] [--branches] [--tags]
 
 Displays references available in a local repository along with the associated commit IDs. The command must be run inside a qgit repository.
 
-By default, qgit lists local branch and tag references under `refs/heads` and `refs/tags`. Output is one line per reference in the form `<oid> <ref>`.
+By default, qgit lists references under `refs/heads`, `refs/tags`, and `refs/remotes`. Output is one line per reference in the form `<oid> <ref>`.
 
-qgit reads loose refs only. Remote references and `packed-refs` are not supported.
+qgit reads loose refs only. `packed-refs` is not supported. Existing remote-tracking refs under `refs/remotes` are displayed, but qgit does not support remote management commands such as fetch, pull, or push.
 
 #### Options
 
@@ -613,7 +611,7 @@ Show the `HEAD` reference, even if it would normally be filtered out.
 `--branches`
 `--tags`
 
-Limit to local branches and local tags, respectively. These options are not mutually exclusive. When both are given, references stored in `refs/heads` and `refs/tags` are displayed.
+Limit to local branches and local tags, respectively. These options are not mutually exclusive. When either or both are given, only the matching namespaces under `refs/heads` and `refs/tags` are displayed.
 
 ---
 

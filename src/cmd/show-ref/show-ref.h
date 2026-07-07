@@ -18,4 +18,41 @@
 #ifndef CMD_SHOW_REF_H
 #define CMD_SHOW_REF_H
 
+#include <argparse.h>
+
+struct cmd_show_ref_flags {
+    int head;     /* show HEAD reference */
+    int branches; /* limit to refs/heads */
+    int tags;     /* limit to refs/tags */
+};
+
+static struct cmd_show_ref_flags flags = {
+    .head = 0,
+    .branches = 0,
+    .tags = 0,
+};
+
+struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_BOOL(0, "head",
+             "Show the HEAD reference, even if it would normally be "
+             "filtered out",
+             &flags.head),
+    OPT_BOOL(0, "branches", "Limit to local branches", &flags.branches),
+    OPT_BOOL(0, "tags", "Limit to local tags", &flags.tags),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit show-ref [--head] [--branches] [--tags]",
+};
+
+struct argparse_desc desc = {
+    .prog = "qgit show-ref",
+    .desc = "List references in a local repository",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "By default, local branches and tags are listed.",
+};
+
 #endif

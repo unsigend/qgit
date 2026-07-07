@@ -17,9 +17,70 @@
 
 #include "show-ref.h"
 
+#include <die.h>
+#include <libqgit/repo/refs.h>
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+
 int cmd_show_ref(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    qgit_repository *repo;
+    char hex[QGIT_OID_HEXSZ + 1];
+    char repo_path[PATH_MAX];
+    unsigned int flag;
+    struct vector *refs;
+    qgit_oid oid;
+
+    if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
+        die_errno();
+
+    if (qgit_repository_open(&repo, repo_path) < 0)
+        die_errno();
+
+    if (flags.head) {
+        if (qgit_reference_name_to_oid(&oid, repo, "HEAD") < 0)
+            die_errno();
+
+        qgit_oid_fmt(hex, &oid);
+        hex[QGIT_OID_HEXSZ] = '\0';
+        printf("%s HEAD\n", hex);
+    }
+
+    if (!flags.branches && !flags.tags)
+        flag = QGIT_REF_LIST_ALL;
+    else {
+        flag = 0;
+        if (flags.branches)
+            flag |= QGIT_REF_LIST_BRANCHES;
+        if (flags.tags)
+            flag |= QGIT_REF_LIST_TAGS;
+    }
+
+    if (qgit_reference_list(&refs, repo, flag) < 0)
+        die_errno();
+
+    for (size_t i = 0; i < vec_size(refs); i++) {
+        const char *refname = *(char **)vec_at(refs, i);
+
+        if (qgit_reference_name_to_oid(&oid, repo, refname) < 0)
+            die_errno();
+
+        qgit_oid_fmt(hex, &oid);
+        hex[QGIT_OID_HEXSZ] = '\0';
+        printf("%s %s\n", hex, refname);
+    }
+
+    vec_free(refs);
+    qgit_repository_free(repo);
+    argparse_fini(&parser);
     return 0;
 }
