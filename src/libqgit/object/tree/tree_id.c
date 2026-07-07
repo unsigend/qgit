@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <libqgit/object/object.h>
 
 const qgit_oid *qgit_tree_id(qgit_tree *tree)
 {
-    (void)tree;
-    return NULL;
+    assert(tree);
+    return qgit_object_id(&tree->object);
 }

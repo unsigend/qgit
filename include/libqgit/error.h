@@ -35,6 +35,8 @@
 #define QGITERR_BRANCHEXISTS 13   /* Branch exists */
 #define QGITERR_BADSIGNATURE 14   /* Bad signature */
 #define QGITERR_BADCOMMITFILE 15  /* Bad commit file */
+#define QGITERR_BADTREEFILE 16    /* Bad tree file */
+#define QGITERR_NOSUBTREE 17      /* Subtree not found */
 
 /**
  * Set the error code.

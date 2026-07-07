@@ -14,14 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "tree.h"
 
-#include <libqgit/object/tree.h>
+#include <libqgit/error.h>
+#include <libqgit/object/object.h>
+#include <sys/stat.h>
 
 int qgit_tree_entry_to_object(qgit_object **out, qgit_repository *repo,
                               const qgit_tree_entry *entry)
 {
-    (void)out;
-    (void)repo;
-    (void)entry;
+    assert(out && repo && entry);
+    *out = NULL;
+
+    qgit_object *obj;
+    qgit_obj_type type;
+
+    if (S_ISDIR(entry->mode))
+        type = QGIT_OBJ_TREE;
+    else if (S_ISREG(entry->mode) || S_ISLNK(entry->mode))
+        type = QGIT_OBJ_BLOB;
+    else {
+        qgit_seterror(QGITERR_BADTREEFILE);
+        return -1;
+    }
+
+    if (qgit_object_lookup(&obj, repo, &entry->oid, type) < 0)
+        return -1;
+
+    *out = obj;
+
     return 0;
 }

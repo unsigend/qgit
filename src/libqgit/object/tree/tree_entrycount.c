@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <collection/vector.h>
 
 unsigned int qgit_tree_entrycount(qgit_tree *tree)
 {
-    (void)tree;
-    return 0;
+    assert(tree);
+    return vec_size(tree->entries);
 }

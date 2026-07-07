@@ -36,6 +36,8 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BRANCHEXISTS] = "branch already exists",
     [QGITERR_BADSIGNATURE] = "bad signature",
     [QGITERR_BADCOMMITFILE] = "bad commit file",
+    [QGITERR_BADTREEFILE] = "bad tree file",
+    [QGITERR_NOSUBTREE] = "subtree not found",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
 
 const char *qgit_tree_entry_name(const qgit_tree_entry *entry)
 {
-    (void)entry;
-    return NULL;
+    assert(entry);
+    return entry->path;
 }

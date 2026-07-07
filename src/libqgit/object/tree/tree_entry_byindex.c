@@ -15,12 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <collection/vector.h>
 
 const qgit_tree_entry *qgit_tree_entry_byindex(qgit_tree *tree,
                                                unsigned int idx)
 {
-    (void)tree;
-    (void)idx;
-    return NULL;
+    assert(tree);
+
+    if (idx >= vec_size(tree->entries))
+        return NULL;
+
+    return vec_at(tree->entries, idx);
 }

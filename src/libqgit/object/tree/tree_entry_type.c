@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <sys/stat.h>
 
 qgit_obj_type qgit_tree_entry_type(const qgit_tree_entry *entry)
 {
-    (void)entry;
-    return QGIT_OBJ_BAD;
+    assert(entry);
+    return S_ISDIR(entry->mode) ? QGIT_OBJ_TREE : QGIT_OBJ_BLOB;
 }

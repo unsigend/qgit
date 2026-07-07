@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
 
 unsigned int qgit_tree_entry_attributes(const qgit_tree_entry *entry)
 {
-    (void)entry;
-    return 0;
+    if (!entry)
+        return 0;
+    return entry->mode;
 }

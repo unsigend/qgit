@@ -17,7 +17,12 @@
 
 #include "tree.h"
 
+#include <collection/vector.h>
+
 void tree_free(qgit_tree *tree)
 {
-    (void)tree;
+    if (!tree)
+        return;
+    if (tree->entries)
+        vec_free(tree->entries);
 }

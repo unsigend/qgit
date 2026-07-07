@@ -15,13 +15,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tree.h"
+
+#include <assert.h>
+#include <libqgit/error.h>
 #include <libqgit/object/tree.h>
+#include <stdlib.h>
+#include <string.h>
 
 int qgit_tree_get_subtree(qgit_tree **out, qgit_tree *root,
                           const char *subtree_path)
 {
-    (void)out;
-    (void)root;
-    (void)subtree_path;
+    assert(out && root && subtree_path);
+    *out = NULL;
+
+    char *path = strdup(subtree_path);
+    if (!path)
+        return -1;
+
+    qgit_tree *current = root;
+    qgit_tree *next = NULL;
+    int error = 0;
+
+    char *component = strtok(path, "/");
+    while (component) {
+        const qgit_tree_entry *entry =
+            qgit_tree_entry_byname(current, component);
+        if (!entry || qgit_tree_entry_type(entry) != QGIT_OBJ_TREE) {
+            qgit_seterror(QGITERR_NOSUBTREE);
+            error = -1;
+            break;
+        }
+
+        if (qgit_tree_lookup(&next, current->object.repo,
+                             qgit_tree_entry_id(entry)) < 0) {
+            error = -1;
+            break;
+        }
+
+        if (current != root)
+            qgit_tree_free(current);
+
+        current = next;
+        component = strtok(NULL, "/");
+    }
+
+    free(path);
+
+    if (error) {
+        if (current != root)
+            qgit_tree_free(current);
+        return -1;
+    }
+
+    *out = current;
     return 0;
 }

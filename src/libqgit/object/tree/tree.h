@@ -21,12 +21,20 @@
 #include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
 
+struct qgit_tree_entry {
+    unsigned int mode;
+    char *path;
+    qgit_oid oid;
+};
+
 /* Raw payload format for tree:
      <mode> <path>\0<sha1-20>
      ...
      <mode> <path>\0<sha1-20>
 */
-struct qgit_tree { /* TODO*/
+struct qgit_tree {
+    qgit_object object;
+    struct vector *entries;
 };
 
 /**

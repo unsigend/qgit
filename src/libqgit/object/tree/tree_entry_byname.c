@@ -15,12 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <collection/vector.h>
+#include <string.h>
 
 const qgit_tree_entry *qgit_tree_entry_byname(qgit_tree *tree,
                                               const char *filename)
 {
-    (void)tree;
-    (void)filename;
+    assert(tree && filename);
+
+    for (unsigned int i = 0; i < vec_size(tree->entries); i++) {
+        if (strcmp(((qgit_tree_entry *)vec_at(tree->entries, i))->path,
+                   filename) == 0)
+            return vec_at(tree->entries, i);
+    }
     return NULL;
 }
