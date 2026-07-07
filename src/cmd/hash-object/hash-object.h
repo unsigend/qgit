@@ -18,4 +18,39 @@
 #ifndef CMD_HASH_OBJECT_H
 #define CMD_HASH_OBJECT_H
 
+#include <argparse.h>
+
+#define DEFAULT_OBJECT_TYPE "blob"
+
+struct cmd_hash_object_flags {
+    int write;        /* write object to the object database */
+    const char *type; /* object type */
+};
+
+static struct cmd_hash_object_flags flags = {
+    .type = DEFAULT_OBJECT_TYPE,
+    .write = 0,
+};
+
+static struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_STR('t', "type", "Specify the type of object", &flags.type,
+            OPT_REQUIRED),
+    OPT_BOOL('w', NULL, "Write the object to the object database",
+             &flags.write),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit hash-object [-t <type>] [-w] [--] <file>...",
+};
+
+static struct argparse_desc desc = {
+    .prog = "qgit hash-object",
+    .desc = "Compute object ID and optionally create an object from a file",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "The default object type is 'blob'.",
+};
+
 #endif

@@ -35,7 +35,7 @@ static struct cmd_init_flags flags = {
     .quiet = 0,
 };
 
-struct argparse_opt options[] = {
+static struct argparse_opt options[] = {
     OPT_HELP(),
     OPT_BOOL('q', "quiet", "Suppress verbose output", &flags.quiet),
     OPT_STR('b', "initial-branch", "Specify the branch name", &flags.branch,
@@ -49,7 +49,7 @@ static const char *usages[] = {
     "[<path>]",
 };
 
-struct argparse_desc desc = {
+static struct argparse_desc desc = {
     .prog = "qgit init",
     .desc = "Create an empty qgit repository or reinitialize an existing one",
     .usages = usages,

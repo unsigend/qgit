@@ -17,9 +17,81 @@
 
 #include "hash-object.h"
 
+#include <die.h>
+#include <fs.h>
+#include <libqgit/db/odb.h>
+#include <libqgit/object/object.h>
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 int cmd_hash_object(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    qgit_obj_type type = qgit_object_string2type(flags.type);
+    if (type == QGIT_OBJ_BAD)
+        die_errno();
+
+    if (flags.write) /* write objects to the object database */
+    {
+        char repo_path[PATH_MAX];
+        qgit_repository *repo;
+        qgit_oid oid;
+        char hex[QGIT_OID_HEXSZ + 1];
+
+        if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
+            die_errno();
+
+        if (qgit_repository_open(&repo, repo_path) < 0)
+            die_errno();
+
+        for (size_t i = 0; i < argparse_getremargc(&parser); i++) {
+            const char *path = argparse_getremargv(&parser)[i];
+            void *buf;
+            size_t len;
+
+            if (read_file(path, &buf, &len) < 0)
+                die_errno();
+
+            if (qgit_odb_write(&oid, qgit_repository_odb(repo), buf, len,
+                               type) < 0) {
+                free(buf);
+                die_errno();
+            }
+
+            free(buf);
+
+            qgit_oid_fmt(hex, &oid);
+            hex[QGIT_OID_HEXSZ] = '\0';
+            printf("%s\n", hex);
+        }
+
+        qgit_repository_free(repo);
+
+    } else /* compute hash only */
+    {
+        qgit_oid oid;
+        char hex[QGIT_OID_HEXSZ + 1];
+
+        for (size_t i = 0; i < argparse_getremargc(&parser); i++) {
+            const char *path = argparse_getremargv(&parser)[i];
+
+            if (qgit_odb_hashfile(&oid, path, type) < 0)
+                die_errno();
+
+            qgit_oid_fmt(hex, &oid);
+            hex[QGIT_OID_HEXSZ] = '\0';
+            printf("%s\n", hex);
+        }
+    }
+
+    argparse_fini(&parser);
     return 0;
 }

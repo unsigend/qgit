@@ -324,7 +324,39 @@ Remove `<key>`.
 
 ### hash-object
 
-Compute object ID and optionally create a blob from a file.
+Compute object ID and optionally create an object from a file.
+
+The default object type is `blob`.
+
+#### Synopsis
+
+```
+qgit hash-object [-t <type>] [-w] [--] <file>...
+```
+
+#### Description
+
+Computes the object ID for an object of the given type from a named file, and optionally writes the object into the object database. The object ID is printed to standard output. When no type is given, `blob` is used.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-t` `<type>`
+`--type=` `<type>`
+
+Specify the type of object to create. Possible values are `commit`, `tree`, `blob`, and `tag`. Defaults to `blob`.
+
+`-w`
+
+Write the object to the object database.
+
+`<file>...`
+
+File paths to hash.
 
 ---
 

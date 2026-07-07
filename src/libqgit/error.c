@@ -22,7 +22,7 @@ static int qgit_error_code = 0; /* error code */
 
 static const char *qgit_error_messages[] = {
     [QGITERR_BADOID] = "bad OID",
-    [QGITERR_REPONOTFOUND] = "repository not found",
+    [QGITERR_REPONOTFOUND] = "not inside a qgit repository",
     [QGITERR_INVKEY] = "invalid key format",
     [QGITERR_BADOBJFILE] = "bad object file",
     [QGITERR_BADOBJTYPE] = "bad object type",
