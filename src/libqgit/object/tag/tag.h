@@ -21,6 +21,14 @@
 #include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
 
+/* Raw payload format for annotated tag:
+     object <sha1-40>\n
+     type <commit|tree|blob|tag>\n
+     tag <name>\n
+     tagger <name> <email> <timestamp> <timezone>\n
+     \n
+     <message>
+*/
 struct qgit_tag { /* TODO*/
 };
 

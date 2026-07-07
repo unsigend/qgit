@@ -15,34 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TREE_H
-#define TREE_H
+#include <libqgit/object/commit.h>
 
-#include "../../odb/rawobj/rawobj.h"
-#include "../object/object.h"
-
-/* Raw payload format for tree:
-     <mode> <path>\0<sha1-20>
-     ...
-     <mode> <path>\0<sha1-20>
-*/
-struct qgit_tree { /* TODO*/
-};
-
-/**
- * Parse a tree object from an ODB object.
- *
- * @param out output pointer to receive the tree object, must not be NULL
- * @param odb_obj ODB object to parse from, must not be NULL
- * @return 0 on success, -1 on error and sets errno
- */
-QGIT_INTERNAL(int) tree_parse(qgit_tree *out, qgit_odb_object *odb_obj);
-
-/**
- * Free a tree object.
- *
- * @param tree tree object to free
- */
-QGIT_INTERNAL(void) tree_free(qgit_tree *tree);
-
-#endif
+const qgit_signature *qgit_commit_author(qgit_commit *commit)
+{
+    (void)commit;
+    return NULL;
+}

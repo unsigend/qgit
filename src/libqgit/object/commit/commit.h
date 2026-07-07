@@ -18,10 +18,28 @@
 #ifndef COMMIT_H
 #define COMMIT_H
 
+#include <collection/vector.h>
+#include <libqgit/object/signature.h>
+
 #include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
 
-struct qgit_commit { /* TODO*/
+/* Raw payload format for commit:
+     tree <sha1-40>\n
+     parent <sha1-40>\n (optional)
+     author <name> <email> <timestamp> <timezone>\n
+     committer <name> <email> <timestamp> <timezone>\n
+     \n
+     <message>
+*/
+
+struct qgit_commit {
+    qgit_object object;
+    qgit_oid tree_oid;
+    struct vector *parents_oids;
+    qgit_signature *author;
+    qgit_signature *committer;
+    char *message;
 };
 
 /**
