@@ -69,7 +69,13 @@ struct argparse_opt;
 struct argparse_list;
 
 #define OPT_DECL(t, s, l, h, d, f, c)                                          \
-  {.sname = s, .lname = l, .type = t, .dest = d, .help = h, .cb = c, .flags = f}
+    {.sname = s,                                                               \
+     .lname = l,                                                               \
+     .type = t,                                                                \
+     .dest = d,                                                                \
+     .help = h,                                                                \
+     .cb = c,                                                                  \
+     .flags = f}
 #define OPT_BOOL(s, l, h, d) OPT_DECL(_OPT_BOOL, s, l, h, d, OPT_NONE, NULL)
 #define OPT_INT(s, l, h, d, f) OPT_DECL(_OPT_INT, s, l, h, d, f, NULL)
 #define OPT_STR(s, l, h, d, f) OPT_DECL(_OPT_STR, s, l, h, d, f, NULL)
@@ -79,20 +85,20 @@ struct argparse_list;
 #define OPT_GROUP(h) OPT_DECL(_OPT_GROUP, '\0', NULL, h, NULL, 0, NULL)
 #define OPT_END() OPT_DECL(_OPT_END, '\0', NULL, NULL, NULL, 0, NULL)
 #define OPT_GROUP_END()                                                        \
-  OPT_DECL(_OPT_GROUP_END, '\0', NULL, NULL, NULL, 0,                          \
-           NULL) /* group end '\n' no-op */
+    OPT_DECL(_OPT_GROUP_END, '\0', NULL, NULL, NULL, 0,                        \
+             NULL) /* group end '\n' no-op */
 #define OPT_HELP()                                                             \
-  OPT_DECL(_OPT_BOOL, 'h', "help", "show this help message ", NULL, OPT_NONE,  \
-           argparse_cb_help)
+    OPT_DECL(_OPT_BOOL, 'h', "help", "show this help message ", NULL,          \
+             OPT_NONE, argparse_cb_help)
 
 #define argparse_setflags(ctx, flag) ((ctx)->flags |= (flag)) /* Set flags */
 #define argparse_clrflags(ctx, flag)                                           \
-  ((ctx)->flags &= ~(flag)) /* Clear flags                                     \
-                             */
+    ((ctx)->flags &= ~(flag)) /* Clear flags                                   \
+                               */
 #define argparse_getremargc(ctx)                                               \
-  ((ctx)->remlist.sz) /* Get positional arguments count */
+    ((ctx)->remlist.sz) /* Get positional arguments count */
 #define argparse_getremargv(ctx)                                               \
-  ((ctx)->remlist.items)                       /* Get positional arguments */
+    ((ctx)->remlist.items)                     /* Get positional arguments */
 #define argparse_strerror(ctx) ((ctx)->errstr) /* Get error string */
 #define argparse_getlist(list) ((list)->items) /* Get list items */
 #define argparse_getlistsz(list) ((list)->sz)  /* Get list size */
@@ -122,38 +128,38 @@ extern void argparse_cb_help(struct argparse *, struct argparse_opt *);
 #endif
 
 struct argparse_opt {
-  char sname;
-  const char *lname;
-  int type;
-  void *dest;
-  const char *help;
-  argparse_cb cb;
-  int flags;
+    char sname;
+    const char *lname;
+    int type;
+    void *dest;
+    const char *help;
+    argparse_cb cb;
+    int flags;
 };
 
 struct argparse_desc {
-  const char *prog;
-  const char *desc;
-  const char **usages;
-  size_t nusages;
-  const char *epilog;
+    const char *prog;
+    const char *desc;
+    const char **usages;
+    size_t nusages;
+    const char *epilog;
 };
 
 struct argparse_list {
-  char **items;
-  size_t sz;
-  size_t cap;
+    char **items;
+    size_t sz;
+    size_t cap;
 };
 
 struct argparse {
-  struct argparse_opt *opts;
-  struct argparse_desc *desc;
-  char *errstr;
-  struct argparse_list remlist;
-  struct argparse_list **lists;
-  size_t nlists;
-  size_t nlistscap;
-  int flags;
+    struct argparse_opt *opts;
+    struct argparse_desc *desc;
+    char *errstr;
+    struct argparse_list remlist;
+    struct argparse_list **lists;
+    size_t nlists;
+    size_t nlistscap;
+    int flags;
 };
 
 #endif

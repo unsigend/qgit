@@ -19,16 +19,17 @@
 #define LIBQGIT_REPO_REVWALK_H
 
 #include <libqgit/common.h>
-#include <libqgit/types.h>
 #include <libqgit/oid.h>
+#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 
-#define QGIT_SORT_NONE         0u        /* implementation-defined order (default) */
-#define QGIT_SORT_TOPOLOGICAL (1u << 0)  /* parents before children */
-#define QGIT_SORT_TIME        (1u << 1)  /* descending committer timestamp */
-#define QGIT_SORT_REVERSE     (1u << 2)  /* invert the output order */
-#define QGIT_SORT_FIRST_PARENT (1u << 3) /* follow only the first parent of each commit */
+#define QGIT_SORT_NONE 0u /* implementation-defined order (default) */
+#define QGIT_SORT_TOPOLOGICAL (1u << 0) /* parents before children */
+#define QGIT_SORT_TIME (1u << 1)        /* descending committer timestamp */
+#define QGIT_SORT_REVERSE (1u << 2)     /* invert the output order */
+#define QGIT_SORT_FIRST_PARENT                                                 \
+    (1u << 3) /* follow only the first parent of each commit */
 
 /**
  * Allocate a new revision walker for the given repository.
@@ -68,8 +69,8 @@ QGIT_EXTERN(void) qgit_revwalk_free(qgit_revwalk *walk);
  * @param walk      walker to configure, must not be NULL
  * @param sort_mode bitwise OR of QGIT_SORT_* flags
  */
-QGIT_EXTERN(void) qgit_revwalk_sorting(qgit_revwalk *walk,
-                                        unsigned int sort_mode);
+QGIT_EXTERN(void)
+qgit_revwalk_sorting(qgit_revwalk *walk, unsigned int sort_mode);
 
 /**
  * Mark a commit as a starting point for the walk.

@@ -23,9 +23,13 @@ OBJ_PATH      := $(BUILD_PATH)/obj
 DEP_PATH      := $(BUILD_PATH)/dep
 BIN_PATH      := $(BUILD_PATH)/bin
 LIB_PATH      := $(BUILD_PATH)/lib
-TESTS_PATH    := $(CUR_DIR)/tests
+TEST_PATH     := $(CUR_DIR)/test
 
 include $(CONFIG_PATH)/config.mk
+
+QGIT          := $(abspath $(BIN_PATH)/$(BIN_NAME))
+BATS          ?= bats
+GIT           ?= git
 
 PREFIX  ?= /usr/local
 BINDIR  ?= $(PREFIX)/bin
@@ -55,6 +59,7 @@ CC_FLAGS := -std=c11 -Wall -Wextra -Werror -Wshadow
 CC_FLAGS += -I$(INCLUDE_PATH)
 ifeq ($(HOST_OS), Linux)
 CC_FLAGS += -D_XOPEN_SOURCE=700
+CC_FLAGS += -D_GNU_SOURCE
 endif
 ifeq ($(LIB_BUILD),shared)
 CC_FLAGS += -fPIC
@@ -96,7 +101,9 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
 -include $(DEPS)
 
 .DEFAULT_GOAL := help
-.PHONY: all bin lib clean help create_build_dir list info clang format docker install test-% unit
+export QGIT GIT
+
+.PHONY: all bin lib clean help create_build_dir list info clang format docker install test test-%
 
 create_build_dir:
 	@mkdir -p $(OBJ_PATH)
@@ -137,7 +144,6 @@ all: bin lib
 
 clean:
 	@rm -rf $(BUILD_PATH)
-	@$(MAKE) -C $(TESTS_PATH) clean
 
 list:
 	@echo "Sources:"
@@ -176,7 +182,7 @@ help:
 	@echo "  make docker    - build and run development container"
 	@echo "  make install   - install executable globally"
 	@echo "  make test      - run all tests"
-	@echo "  make test-NAME - run one BATS file or directory"
+	@echo "  make test-NAME - run tests under test/NAME (e.g. make test-init)"
 	@echo "  make help      - this message\n"
 
 flags:
@@ -192,10 +198,23 @@ clang:
 	@bear -- $(MAKE) all
 
 test: bin
-	@$(MAKE) -C $(TESTS_PATH) test
+	@tests=$$(find $(TEST_PATH) -name '*.bats' | sort); \
+	if [ -z "$$tests" ]; then \
+		echo "No tests found under $(TEST_PATH)" >&2; exit 1; \
+	fi; \
+	$(BATS) $$tests
 
 test-%: bin
-	@$(MAKE) -C $(TESTS_PATH) test-$*
+	@target="$(TEST_PATH)/$*"; \
+	if [ -f "$$target.bats" ]; then \
+		$(BATS) "$$target.bats"; \
+	elif [ -f "$$target" ]; then \
+		$(BATS) "$$target"; \
+	elif [ -d "$$target" ]; then \
+		$(BATS) "$$target"; \
+	else \
+		echo "No test target: $$target" >&2; exit 1; \
+	fi
 
 format:
 	@for d in $(INCLUDE_PATH) $(SRC_PATH); do \

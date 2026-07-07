@@ -18,11 +18,11 @@
 #ifndef LIBQGIT_OBJECT_BLOB_H
 #define LIBQGIT_OBJECT_BLOB_H
 
-#include <stddef.h>
 #include <libqgit/common.h>
-#include <libqgit/types.h>
-#include <libqgit/oid.h>
 #include <libqgit/object/object.h>
+#include <libqgit/oid.h>
+#include <libqgit/types.h>
+#include <stddef.h>
 
 QGIT_BEGIN_DECLS
 
@@ -34,8 +34,8 @@ QGIT_BEGIN_DECLS
  * @param id   OID of the blob, must not be NULL
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_INLINE(int) qgit_blob_lookup(qgit_blob **out, qgit_repository *repo,
-                                   const qgit_oid *id)
+QGIT_INLINE(int)
+qgit_blob_lookup(qgit_blob **out, qgit_repository *repo, const qgit_oid *id)
 {
     return qgit_object_lookup((qgit_object **)out, repo, id, QGIT_OBJ_BLOB);
 }
@@ -49,8 +49,9 @@ QGIT_INLINE(int) qgit_blob_lookup(qgit_blob **out, qgit_repository *repo,
  * @param len  number of hex characters in the prefix
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_INLINE(int) qgit_blob_lookup_prefix(qgit_blob **out, qgit_repository *repo,
-                                          const qgit_oid *id, unsigned int len)
+QGIT_INLINE(int)
+qgit_blob_lookup_prefix(qgit_blob **out, qgit_repository *repo,
+                        const qgit_oid *id, unsigned int len)
 {
     return qgit_object_lookup_prefix((qgit_object **)out, repo, id, len,
                                      QGIT_OBJ_BLOB);
@@ -94,8 +95,9 @@ QGIT_EXTERN(size_t) qgit_blob_rawsize(qgit_blob *blob);
  * @param path file path relative to the repository working directory
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_blob_create_fromfile(qgit_oid *oid, qgit_repository *repo,
-                                            const char *path);
+QGIT_EXTERN(int)
+qgit_blob_create_fromfile(qgit_oid *oid, qgit_repository *repo,
+                          const char *path);
 
 /**
  * Read a file by absolute path and write it to the ODB as a loose blob.
@@ -105,20 +107,23 @@ QGIT_EXTERN(int) qgit_blob_create_fromfile(qgit_oid *oid, qgit_repository *repo,
  * @param path absolute path to the file to read
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_blob_create_fromdisk(qgit_oid *oid, qgit_repository *repo,
-                                            const char *path);
+QGIT_EXTERN(int)
+qgit_blob_create_fromdisk(qgit_oid *oid, qgit_repository *repo,
+                          const char *path);
 
 /**
  * Write an in-memory buffer to the ODB as a loose blob.
  *
- * @param oid    output pointer to receive the written blob OID, must not be NULL
+ * @param oid    output pointer to receive the written blob OID, must not be
+ * NULL
  * @param repo   repository to write into, must not be NULL
  * @param buffer data to store as the blob payload
  * @param len    length of the buffer in bytes
  * @return 0 on success, -1 on error and sets errno
  */
-QGIT_EXTERN(int) qgit_blob_create_frombuffer(qgit_oid *oid, qgit_repository *repo,
-                                              const void *buffer, size_t len);
+QGIT_EXTERN(int)
+qgit_blob_create_frombuffer(qgit_oid *oid, qgit_repository *repo,
+                            const void *buffer, size_t len);
 
 QGIT_END_DECLS
 

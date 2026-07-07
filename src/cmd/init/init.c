@@ -17,9 +17,56 @@
 
 #include "init.h"
 
+#include <die.h>
+#include <errno.h>
+#include <fs.h>
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stdio.h>
+
 int cmd_init(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    if (argparse_getremargc(&parser) > 0)
+        flags.path = argparse_getremargv(&parser)[0];
+    if (argparse_getremargc(&parser) > 1)
+        die("too many arguments");
+
+    int reinit = 0;
+    qgit_repository *repo;
+    char abspath[PATH_MAX];
+    char repodir[PATH_MAX];
+
+    if (fabspath(flags.path, abspath) < 0)
+        die_errno();
+
+    if (snprintf(repodir, PATH_MAX, "%s/.qgit", abspath) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        die_errno();
+    }
+
+    if (dir_exists(repodir))
+        reinit = 1;
+
+    if (qgit_repository_init(&repo, abspath, flags.branch) < 0)
+        die_errno();
+
+    if (!flags.quiet) {
+        if (reinit)
+            printf("Reinitialized existing repository in %s/\n",
+                   qgit_repository_path(repo));
+        else
+            printf("Initialized empty repository in %s/\n",
+                   qgit_repository_path(repo));
+    }
+
+    qgit_repository_free(repo);
+    argparse_fini(&parser);
     return 0;
 }

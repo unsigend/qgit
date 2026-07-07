@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "version.h"
+#include <libqgit/repo/index.h>
 
-int cmd_version(int argc, char **argv)
+int qgit_index_read(qgit_index *index)
 {
-    (void)argc;
-    (void)argv;
+    (void)index;
     return 0;
 }

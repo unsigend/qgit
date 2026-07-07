@@ -25,20 +25,22 @@ typedef struct qgit_odb_backend
 typedef struct qgit_odb_object
     qgit_odb_object; /* opaque object read from the ODB */
 typedef struct qgit_object
-    qgit_object;                                  /* opaque git object handle (commit, tree, blob, tag) */
-typedef struct qgit_blob qgit_blob;               /* opaque blob object */
-typedef struct qgit_commit qgit_commit;           /* opaque commit object */
-typedef struct qgit_tag qgit_tag;                 /* opaque annotated tag object */
-typedef struct qgit_tree qgit_tree;               /* opaque tree object */
-typedef struct qgit_tree_entry qgit_tree_entry;   /* opaque tree entry */
-typedef struct qgit_treebuilder qgit_treebuilder;  /* opaque in-memory tree builder */
-typedef struct qgit_time qgit_time;               /* timestamp with timezone offset */
-typedef struct qgit_signature qgit_signature;     /* name, email, and time of an action */
-typedef struct qgit_repository qgit_repository;   /* opaque repository handle */
+    qgit_object; /* opaque git object handle (commit, tree, blob, tag) */
+typedef struct qgit_blob qgit_blob;     /* opaque blob object */
+typedef struct qgit_commit qgit_commit; /* opaque commit object */
+typedef struct qgit_tag qgit_tag;       /* opaque annotated tag object */
+typedef struct qgit_tree qgit_tree;     /* opaque tree object */
+typedef struct qgit_tree_entry qgit_tree_entry; /* opaque tree entry */
+typedef struct qgit_treebuilder
+    qgit_treebuilder;               /* opaque in-memory tree builder */
+typedef struct qgit_time qgit_time; /* timestamp with timezone offset */
+typedef struct qgit_signature
+    qgit_signature; /* name, email, and time of an action */
+typedef struct qgit_repository qgit_repository; /* opaque repository handle */
 typedef struct qgit_reference qgit_reference;   /* opaque reference handle */
 typedef struct qgit_config qgit_config;         /* opaque config handle */
-typedef struct qgit_index qgit_index;             /* opaque index handle */
-typedef struct qgit_revwalk qgit_revwalk;         /* opaque commit graph walker */
+typedef struct qgit_index qgit_index;           /* opaque index handle */
+typedef struct qgit_revwalk qgit_revwalk;       /* opaque commit graph walker */
 
 /* Branch type, used to filter branch listings and operations. */
 typedef enum {

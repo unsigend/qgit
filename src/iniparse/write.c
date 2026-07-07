@@ -29,71 +29,71 @@
 
 int iniparse_fprint(struct iniFILE *fp, FILE *stream)
 {
-  int nw = 0;
-  for (size_t i = 0; i < fp->nsecs; i++) {
-    struct ini_sec *sec = &fp->secs[i];
-    for (size_t j = 0; j < sec->nentries; j++) {
-      struct ini_entry *entry = &sec->entries[j];
-      if (entry->key)
-        nw += fprintf(stream, "%s.%s=%s\n", sec->sec, entry->key,
-                      entry->val ? entry->val : "");
+    int nw = 0;
+    for (size_t i = 0; i < fp->nsecs; i++) {
+        struct ini_sec *sec = &fp->secs[i];
+        for (size_t j = 0; j < sec->nentries; j++) {
+            struct ini_entry *entry = &sec->entries[j];
+            if (entry->key)
+                nw += fprintf(stream, "%s.%s=%s\n", sec->sec, entry->key,
+                              entry->val ? entry->val : "");
+        }
     }
-  }
-  return nw;
+    return nw;
 }
 
 int iniparse_sprint(struct iniFILE *fp, char *buf)
 {
-  return iniparse_snprint(fp, buf, SIZE_MAX);
+    return iniparse_snprint(fp, buf, SIZE_MAX);
 }
 
 int iniparse_snprint(struct iniFILE *fp, char *buf, size_t bufsz)
 {
-  int nw = 0;
-  size_t remsz = bufsz;
-  for (size_t i = 0; i < fp->nsecs; i++) {
-    struct ini_sec *sec = &fp->secs[i];
-    for (size_t j = 0; j < sec->nentries; j++) {
-      struct ini_entry *entry = &sec->entries[j];
-      if (entry->key) {
-        int n = snprintf(buf + nw, remsz, "%s.%s=%s\n", sec->sec, entry->key,
-                         entry->val ? entry->val : "");
-        nw += n;
-        remsz = (size_t)nw < bufsz ? bufsz - nw : 0;
-      }
+    int nw = 0;
+    size_t remsz = bufsz;
+    for (size_t i = 0; i < fp->nsecs; i++) {
+        struct ini_sec *sec = &fp->secs[i];
+        for (size_t j = 0; j < sec->nentries; j++) {
+            struct ini_entry *entry = &sec->entries[j];
+            if (entry->key) {
+                int n = snprintf(buf + nw, remsz, "%s.%s=%s\n", sec->sec,
+                                 entry->key, entry->val ? entry->val : "");
+                nw += n;
+                remsz = (size_t)nw < bufsz ? bufsz - nw : 0;
+            }
+        }
     }
-  }
-  return nw;
+    return nw;
 }
 
 int iniparse_write(struct iniFILE *fp)
 {
-  return iniparse_writeto(fp, fp->filename);
+    return iniparse_writeto(fp, fp->filename);
 }
 
 int iniparse_writeto(struct iniFILE *fp, const char *filename)
 {
-  char buf[PATH_MAX];
-  snprintf(buf, sizeof(buf), "%s.lock", filename);
-  FILE *lockfile = fopen(buf, "w");
-  if (!lockfile)
-    return -1;
+    char buf[PATH_MAX];
+    snprintf(buf, sizeof(buf), "%s.lock", filename);
+    FILE *lockfile = fopen(buf, "w");
+    if (!lockfile)
+        return -1;
 
-  int nw = 0;
-  for (size_t i = 0; i < fp->nsecs; i++) {
-    struct ini_sec *sec = &fp->secs[i];
-    nw += fprintf(lockfile, "[%s]\n", sec->sec);
-    for (size_t j = 0; j < sec->nentries; j++) {
-      struct ini_entry *entry = &sec->entries[j];
-      if (entry->key)
-        nw += fprintf(lockfile, "\t%s=%s\n", entry->key,
-                      entry->val ? entry->val : "");
+    int nw = 0;
+    for (size_t i = 0; i < fp->nsecs; i++) {
+        struct ini_sec *sec = &fp->secs[i];
+        nw += fprintf(lockfile, "[%s]\n", sec->sec);
+        for (size_t j = 0; j < sec->nentries; j++) {
+            struct ini_entry *entry = &sec->entries[j];
+            if (entry->key)
+                nw += fprintf(lockfile, "\t%s=%s\n", entry->key,
+                              entry->val ? entry->val : "");
+        }
     }
-  }
-  fclose(lockfile);
-  if (rename(buf, filename) == -1) {
-    unlink(buf);
-    return -1;
-  }
-  return nw;
+    fclose(lockfile);
+    if (rename(buf, filename) == -1) {
+        unlink(buf);
+        return -1;
+    }
+    return nw;
 }

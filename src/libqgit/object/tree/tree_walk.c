@@ -14,15 +14,93 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "tree.h"
 
+#include <collection/vector.h>
+#include <errno.h>
 #include <libqgit/object/tree.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+
+#define STOP 1
+#define FAIL -1
+#define SUCCESS 0
+
+#define CB_STOP_SUBTREE(v) ((v) < 0)
+#define CB_STOP_TRAVERSE(v) ((v) > 0)
+
+static int foreach (qgit_tree *tree, qgit_treewalk_cb callback,
+                    qgit_treewalk_mode mode, void *payload, const char *root)
+{
+    qgit_tree_entry *entry;
+    int ret;
+
+    for (size_t i = 0; i < vec_size(tree->entries); i++) {
+        entry = vec_at(tree->entries, i);
+        if (qgit_tree_entry_type(entry) == QGIT_OBJ_TREE) {
+
+            char subpath[PATH_MAX];
+            qgit_tree *subtree;
+
+            if (snprintf(subpath, PATH_MAX, "%s%s%s", root, root[0] ? "/" : "",
+                         qgit_tree_entry_name(entry)) >= PATH_MAX) {
+                errno = ENAMETOOLONG;
+                return FAIL;
+            }
+
+            if (mode == QGIT_TREEWALK_PRE) /* pre-order traversal */
+            {
+                ret = callback(root, entry, payload);
+                if (CB_STOP_TRAVERSE(ret))
+                    return STOP;
+
+                if (!CB_STOP_SUBTREE(ret)) {
+                    if (qgit_tree_lookup(&subtree, tree->object.repo,
+                                         qgit_tree_entry_id(entry)) < 0)
+                        return FAIL;
+
+                    ret = foreach (subtree, callback, mode, payload, subpath);
+                    qgit_tree_free(subtree);
+
+                    if (ret == FAIL || ret == STOP)
+                        return ret;
+                }
+
+            } else if (mode == QGIT_TREEWALK_POST) /* post-order traversal */
+            {
+                if (qgit_tree_lookup(&subtree, tree->object.repo,
+                                     qgit_tree_entry_id(entry)) < 0)
+                    return FAIL;
+
+                ret = foreach (subtree, callback, mode, payload, subpath);
+                qgit_tree_free(subtree);
+
+                if (ret == FAIL || ret == STOP)
+                    return ret;
+
+                ret = callback(root, entry, payload);
+                if (CB_STOP_TRAVERSE(ret))
+                    return STOP;
+
+            } else
+                return FAIL;
+
+        } else if (qgit_tree_entry_type(entry) == QGIT_OBJ_BLOB) {
+            ret = callback(root, entry, payload);
+            if (CB_STOP_TRAVERSE(ret))
+                return STOP;
+        } else
+            return FAIL;
+    }
+
+    return SUCCESS;
+}
 
 int qgit_tree_walk(qgit_tree *tree, qgit_treewalk_cb callback,
                    qgit_treewalk_mode mode, void *payload)
 {
-    (void)tree;
-    (void)callback;
-    (void)mode;
-    (void)payload;
-    return 0;
+    assert(tree && callback);
+
+    return foreach (tree, callback, mode, payload, "");
 }

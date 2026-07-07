@@ -16,6 +16,8 @@
  */
 
 #include <cmd.h>
+#include <die.h>
+#include <string.h>
 
 const struct subcmd subcmds[] = {
     {"add", "Add file contents to the index", cmd_add},
@@ -46,3 +48,20 @@ const struct subcmd subcmds[] = {
 };
 
 const size_t subcmds_cnt = sizeof(subcmds) / sizeof(subcmds[0]);
+
+int exec_cmd(int argc, char **argv)
+{
+    if (argc < 1) {
+        cmd_help(argc - 1, argv + 1);
+        return 0;
+    }
+
+    const char *cmd = argv[0];
+    for (size_t i = 0; i < subcmds_cnt; i++) {
+        if (strcmp(cmd, subcmds[i].name) == 0) {
+            return subcmds[i].func(argc - 1, argv + 1);
+        }
+    }
+
+    die("'%s' is not a qgit command. See 'qgit help'.", cmd);
+}

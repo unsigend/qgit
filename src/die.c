@@ -15,22 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include <errno.h>
+#include <feature.h>
+#include <libqgit/error.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int qgit_commit_create(qgit_oid *oid, qgit_repository *repo,
-                       const char *update_ref, const qgit_signature *author,
-                       const qgit_signature *committer, const char *message,
-                       const qgit_tree *tree, int parent_count,
-                       const qgit_commit *parents[])
+void die(const char *fmt, ...)
 {
-    (void)oid;
-    (void)repo;
-    (void)update_ref;
-    (void)author;
-    (void)committer;
-    (void)message;
-    (void)tree;
-    (void)parent_count;
-    (void)parents;
-    return 0;
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "%s: ", PROG_NAME);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    va_end(args);
+    exit(EXIT_FAILURE);
+}
+
+void die_errno(void)
+{
+    fprintf(stderr, "%s: ", PROG_NAME);
+    if (qgit_error())
+        fprintf(stderr, "%s\n", qgit_strerror(qgit_error()));
+    else if (errno)
+        fprintf(stderr, "%s\n", strerror(errno));
+    else
+        fprintf(stderr, "Unknown error\n");
+    exit(EXIT_FAILURE);
 }

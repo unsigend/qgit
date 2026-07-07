@@ -19,7 +19,7 @@
 
 int main(int argc, char *argv[])
 {
-  /* Filter out the program name, delegate the rest with subcommand name and
-     arguments to exec_cmd(). */
-  return exec_cmd(argc - 1, argv + 1);
+    /* Filter out the program name, delegate the rest with subcommand name and
+       arguments to exec_cmd(). */
+    return exec_cmd(argc - 1, argv + 1);
 }

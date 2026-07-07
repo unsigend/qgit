@@ -38,16 +38,16 @@ static int load_config(qgit_repository *repo)
     return qgit_config_open_ondisk(&repo->config, config);
 }
 
-static int load_index(qgit_repository *repo)
-{
-    char index[PATH_MAX];
-    if (snprintf(index, PATH_MAX, "%s/index", repo->repodir) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
+// static int load_index(qgit_repository *repo)
+// {
+//     char index[PATH_MAX];
+//     if (snprintf(index, PATH_MAX, "%s/index", repo->repodir) >= PATH_MAX) {
+//         errno = ENAMETOOLONG;
+//         return -1;
+//     }
 
-    return qgit_index_open(&repo->index, index);
-}
+//     return qgit_index_open(&repo->index, index);
+// }
 
 static int load_odb(qgit_repository *repo)
 {

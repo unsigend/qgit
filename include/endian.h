@@ -24,28 +24,28 @@
 
 __attribute__((always_inline)) static inline uint16_t get_be16(const char *p)
 {
-  uint16_t x;
-  memcpy(&x, p, sizeof(uint16_t));
-  return ntohs(x);
+    uint16_t x;
+    memcpy(&x, p, sizeof(uint16_t));
+    return ntohs(x);
 }
 
 __attribute__((always_inline)) static inline uint32_t get_be32(const char *p)
 {
-  uint32_t x;
-  memcpy(&x, p, sizeof(uint32_t));
-  return ntohl(x);
+    uint32_t x;
+    memcpy(&x, p, sizeof(uint32_t));
+    return ntohl(x);
 }
 
 __attribute__((always_inline)) static inline void put_be16(char *p, uint16_t x)
 {
-  x = htons(x);
-  memcpy(p, &x, sizeof(uint16_t));
+    x = htons(x);
+    memcpy(p, &x, sizeof(uint16_t));
 }
 
 __attribute__((always_inline)) static inline void put_be32(char *p, uint32_t x)
 {
-  x = htonl(x);
-  memcpy(p, &x, sizeof(uint32_t));
+    x = htonl(x);
+    memcpy(p, &x, sizeof(uint32_t));
 }
 
 #endif

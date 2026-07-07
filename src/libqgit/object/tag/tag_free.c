@@ -17,7 +17,4 @@
 
 #include "tag.h"
 
-void tag_free(qgit_tag *tag)
-{
-    (void)tag;
-}
+void tag_free(qgit_tag *tag) { (void)tag; }

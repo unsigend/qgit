@@ -15,22 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include <libqgit/repo/index.h>
 
-int qgit_commit_create(qgit_oid *oid, qgit_repository *repo,
-                       const char *update_ref, const qgit_signature *author,
-                       const qgit_signature *committer, const char *message,
-                       const qgit_tree *tree, int parent_count,
-                       const qgit_commit *parents[])
+int qgit_index_write(qgit_index *index)
 {
-    (void)oid;
-    (void)repo;
-    (void)update_ref;
-    (void)author;
-    (void)committer;
-    (void)message;
-    (void)tree;
-    (void)parent_count;
-    (void)parents;
+    (void)index;
     return 0;
 }

@@ -17,7 +17,4 @@
 
 #include <libqgit/object/tree.h>
 
-void qgit_treebuilder_clear(qgit_treebuilder *builder)
-{
-    (void)builder;
-}
+void qgit_treebuilder_clear(qgit_treebuilder *builder) { (void)builder; }

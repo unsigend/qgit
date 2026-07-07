@@ -15,22 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include <feature.h>
+#include <stdio.h>
 
-int qgit_commit_create(qgit_oid *oid, qgit_repository *repo,
-                       const char *update_ref, const qgit_signature *author,
-                       const qgit_signature *committer, const char *message,
-                       const qgit_tree *tree, int parent_count,
-                       const qgit_commit *parents[])
+int cmd_version(int argc, char **argv)
 {
-    (void)oid;
-    (void)repo;
-    (void)update_ref;
-    (void)author;
-    (void)committer;
-    (void)message;
-    (void)tree;
-    (void)parent_count;
-    (void)parents;
+    (void)argc;
+    (void)argv;
+
+    printf("%s version %d.%d.%d\n", PROG_NAME, QGIT_MAJOR, QGIT_MINOR,
+           QGIT_PATCH);
     return 0;
 }

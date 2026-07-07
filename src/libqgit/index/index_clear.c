@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CMD_HELP_H
-#define CMD_HELP_H
+#include <libqgit/repo/index.h>
 
-#endif
+void qgit_index_clear(qgit_index *index) { (void)index; }

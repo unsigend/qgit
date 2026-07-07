@@ -15,7 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CMD_VERSION_H
-#define CMD_VERSION_H
+#ifndef DIE_H
+#define DIE_H
+
+#include <stdnoreturn.h>
+
+noreturn void die(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+noreturn void die_errno(void);
 
 #endif

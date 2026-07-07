@@ -18,4 +18,43 @@
 #ifndef CMD_INIT_H
 #define CMD_INIT_H
 
+#include <argparse.h>
+
+#define DEFAULT_BRANCH "main"
+#define DEFAULT_PATH "."
+
+struct cmd_init_flags {
+    int quiet;          /* quiet mode */
+    const char *branch; /* branch name */
+    const char *path;   /* path to initialize repository */
+};
+
+static struct cmd_init_flags flags = {
+    .branch = DEFAULT_BRANCH,
+    .path = DEFAULT_PATH,
+    .quiet = 0,
+};
+
+struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_BOOL('q', "quiet", "Suppress verbose output", &flags.quiet),
+    OPT_STR('b', "initial-branch", "Specify the branch name", &flags.branch,
+            OPT_REQUIRED),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit init [-q | --quiet] [-b <branch-name> | "
+    "--initial-branch=<branch-name>] "
+    "[<path>]",
+};
+
+struct argparse_desc desc = {
+    .prog = "qgit init",
+    .desc = "Create an empty qgit repository or reinitialize an existing one",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "The default initial branch is 'main'.",
+};
+
 #endif

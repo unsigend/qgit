@@ -45,7 +45,7 @@ struct qgit_repository {
  * @param out_buflen the length of the buffer, must not be NULL
  * @return 0 on success, -1 on error and set errno
  */
-QGIT_INTERNAL(int)
+QGIT_INLINE(int)
 repository_read_head(qgit_repository *repo, char **out_buf, size_t *out_buflen)
 {
     assert(repo && out_buf && out_buflen);

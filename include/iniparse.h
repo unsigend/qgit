@@ -29,24 +29,24 @@
 #include <stdio.h>
 
 struct iniFILE {
-  const char *filename;
-  char *buf;
-  size_t bufsz;
-  size_t nsecs;
-  size_t nsecscap;
-  struct ini_sec *secs;
+    const char *filename;
+    char *buf;
+    size_t bufsz;
+    size_t nsecs;
+    size_t nsecscap;
+    struct ini_sec *secs;
 };
 
 struct ini_sec {
-  const char *sec;
-  size_t nentries;
-  size_t nentriescap;
-  struct ini_entry *entries;
+    const char *sec;
+    size_t nentries;
+    size_t nentriescap;
+    struct ini_entry *entries;
 };
 
 struct ini_entry {
-  const char *key;
-  const char *val;
+    const char *key;
+    const char *val;
 };
 
 #ifdef __cplusplus
