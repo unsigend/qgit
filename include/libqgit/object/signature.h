@@ -87,6 +87,17 @@ QGIT_EXTERN(qgit_signature *) qgit_signature_dup(const qgit_signature *sig);
  */
 QGIT_EXTERN(void) qgit_signature_free(qgit_signature *sig);
 
+/**
+ * Parse a signature from a string. Modify in place.
+ *
+ * @param out output pointer to receive the new signature, must not be NULL
+ * @param start start of the string to parse
+ * @param end end of the string to parse
+ * @return pointer to the next character after the signature, or NULL on error
+ */
+QGIT_EXTERN(char *)
+qgit_signature_parse(qgit_signature **out, char *start, char *end);
+
 QGIT_END_DECLS
 
 #endif

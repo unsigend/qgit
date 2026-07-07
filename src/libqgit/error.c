@@ -34,6 +34,7 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BADREFTYPE] = "bad reference type",
     [QGITERR_REFEXISTS] = "reference already exists",
     [QGITERR_BRANCHEXISTS] = "branch already exists",
+    [QGITERR_BADSIGNATURE] = "bad signature",
     [QGITERR_BADCOMMITFILE] = "bad commit file",
 };
 

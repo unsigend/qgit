@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include "commit.h"
+
+#include <assert.h>
 
 time_t qgit_commit_time(qgit_commit *commit)
 {
-    (void)commit;
-    return 0;
+    assert(commit);
+
+    return commit->committer->when.time;
 }

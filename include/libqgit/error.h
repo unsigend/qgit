@@ -33,7 +33,8 @@
 #define QGITERR_BADREFTYPE 11     /* Bad reference type */
 #define QGITERR_REFEXISTS 12      /* Reference exists */
 #define QGITERR_BRANCHEXISTS 13   /* Branch exists */
-#define QGITERR_BADCOMMITFILE 14  /* Bad commit file */
+#define QGITERR_BADSIGNATURE 14   /* Bad signature */
+#define QGITERR_BADCOMMITFILE 15  /* Bad commit file */
 
 /**
  * Set the error code.

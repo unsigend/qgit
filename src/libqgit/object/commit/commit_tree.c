@@ -15,11 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "commit.h"
+
+#include <assert.h>
 #include <libqgit/object/commit.h>
+#include <libqgit/object/tree.h>
 
 int qgit_commit_tree(qgit_tree **out, qgit_commit *commit)
 {
-    (void)out;
-    (void)commit;
+    assert(out && commit);
+
+    if (qgit_tree_lookup(out, commit->object.repo, &commit->tree_oid) < 0)
+        return -1;
     return 0;
 }

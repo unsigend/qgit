@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include "commit.h"
+
+#include <assert.h>
 
 unsigned int qgit_commit_parentcount(qgit_commit *commit)
 {
-    (void)commit;
-    return 0;
+    assert(commit);
+
+    return vec_size(commit->parents_oids);
 }

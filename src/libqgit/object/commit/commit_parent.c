@@ -15,12 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "commit.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <errno.h>
 #include <libqgit/object/commit.h>
 
 int qgit_commit_parent(qgit_commit **out, qgit_commit *commit, unsigned int n)
 {
-    (void)out;
-    (void)commit;
-    (void)n;
+    assert(out && commit);
+
+    qgit_oid *oid;
+
+    if (n >= vec_size(commit->parents_oids)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    oid = (qgit_oid *)vec_at(commit->parents_oids, n);
+
+    if (qgit_commit_lookup(out, commit->object.repo, oid) < 0)
+        return -1;
     return 0;
 }

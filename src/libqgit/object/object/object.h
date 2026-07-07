@@ -18,8 +18,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "libqgit/common.h"
 #include <assert.h>
+#include <libqgit/common.h>
 #include <libqgit/db/odb.h>
 #include <libqgit/oid.h>
 #include <stddef.h>

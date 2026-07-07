@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include "commit.h"
+
+#include <assert.h>
 
 const qgit_signature *qgit_commit_author(qgit_commit *commit)
 {
-    (void)commit;
-    return NULL;
+    assert(commit);
+
+    return commit->author;
 }

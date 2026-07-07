@@ -15,11 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/commit.h>
+#include "commit.h"
+
+#include <assert.h>
+#include <collection/vector.h>
 
 const qgit_oid *qgit_commit_parent_oid(qgit_commit *commit, unsigned int n)
 {
-    (void)commit;
-    (void)n;
-    return NULL;
+    assert(commit);
+
+    if (n >= vec_size(commit->parents_oids))
+        return NULL;
+
+    return (const qgit_oid *)vec_at(commit->parents_oids, n);
 }

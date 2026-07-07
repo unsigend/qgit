@@ -19,5 +19,14 @@
 
 void commit_free(qgit_commit *commit)
 {
-    (void)commit;
+    if (!commit)
+        return;
+
+    vec_free(commit->parents_oids);
+    if (commit->author)
+        qgit_signature_free(commit->author);
+    if (commit->committer)
+        qgit_signature_free(commit->committer);
+    if (commit->message)
+        free(commit->message);
 }
