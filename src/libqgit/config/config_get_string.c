@@ -25,6 +25,7 @@
 int qgit_config_get_string(const char **out, qgit_config *cfg, const char *name)
 {
     assert(out && cfg && name);
+    *out = NULL;
 
     char *copy = strdup(name);
     if (!copy)

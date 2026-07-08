@@ -25,6 +25,7 @@
 int qgit_config_get_bool(int *out, qgit_config *cfg, const char *name)
 {
     assert(out && cfg && name);
+    *out = 0;
 
     char *copy = strdup(name);
     const char *value;
