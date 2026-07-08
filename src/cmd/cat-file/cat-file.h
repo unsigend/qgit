@@ -19,6 +19,16 @@
 #define CMD_CAT_FILE_H
 
 #include <argparse.h>
+#include <die.h>
+#include <libqgit/object/blob.h>
+#include <libqgit/object/commit.h>
+#include <libqgit/object/object.h>
+#include <libqgit/object/tag.h>
+#include <libqgit/object/tree.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct cmd_cat_file_flags {
     int pretty;     /* -p pretty-print object contents */
@@ -53,5 +63,84 @@ static struct argparse_desc desc = {
     .epilog = "Only one of -p, -t, or -s may be used. Supported types: "
               "blob, commit, tree, tag.",
 };
+
+static void pretty_print_commit(qgit_commit *commit)
+{
+    char hex[QGIT_OID_HEXSZ + 1];
+    const qgit_signature *signature;
+    const char *message = qgit_commit_message(commit);
+
+    qgit_oid_fmt(hex, qgit_commit_tree_oid(commit));
+    hex[QGIT_OID_HEXSZ] = '\0';
+    fprintf(stdout, "tree %s\n", hex);
+
+    for (size_t i = 0; i < qgit_commit_parentcount(commit); i++) {
+        qgit_oid_fmt(hex, qgit_commit_parent_oid(commit, i));
+        hex[QGIT_OID_HEXSZ] = '\0';
+        fprintf(stdout, "parent %s\n", hex);
+    }
+
+    signature = qgit_commit_author(commit);
+    if (signature) {
+        fprintf(stdout, "author %s <%s> %ld %c%.2d%.2d\n", signature->name,
+                signature->email, signature->when.time,
+                (signature->when.offset >= 0 ? '+' : '-'),
+                abs(signature->when.offset / 60),
+                abs(signature->when.offset % 60));
+    }
+
+    signature = qgit_commit_committer(commit);
+    if (signature) {
+        fprintf(stdout, "committer %s <%s> %ld %c%.2d%.2d\n", signature->name,
+                signature->email, signature->when.time,
+                (signature->when.offset >= 0 ? '+' : '-'),
+                abs(signature->when.offset / 60),
+                abs(signature->when.offset % 60));
+    }
+
+    fprintf(stdout, "\n%s", message ? message : "");
+}
+
+static void pretty_print_tree(qgit_tree *tree)
+{
+    const qgit_tree_entry *entry;
+    char hex[QGIT_OID_HEXSZ + 1];
+
+    for (size_t i = 0; i < qgit_tree_entrycount(tree); i++) {
+        entry = qgit_tree_entry_byindex(tree, i);
+        qgit_oid_fmt(hex, qgit_tree_entry_id(entry));
+        hex[QGIT_OID_HEXSZ] = '\0';
+        fprintf(stdout, "%.6o %s %s\t%s\n", qgit_tree_entry_attributes(entry),
+                qgit_tree_entry_type(entry) == QGIT_OBJ_TREE ? "tree" : "blob",
+                hex, qgit_tree_entry_name(entry));
+    }
+}
+
+static void pretty_print_blob(qgit_blob *blob)
+{
+    fwrite(qgit_blob_rawcontent(blob), 1, qgit_blob_rawsize(blob), stdout);
+}
+
+static void pretty_print_tag(qgit_tag *tag) { (void)tag; /* TODO: implement */ }
+
+static void pretty_print_object(qgit_object *object)
+{
+    switch (qgit_object_type(object)) {
+    case QGIT_OBJ_COMMIT:
+        pretty_print_commit((qgit_commit *)object);
+        break;
+    case QGIT_OBJ_TREE:
+        pretty_print_tree((qgit_tree *)object);
+        break;
+    case QGIT_OBJ_BLOB:
+        pretty_print_blob((qgit_blob *)object);
+        break;
+    case QGIT_OBJ_TAG:
+        pretty_print_tag((qgit_tag *)object);
+        break;
+    default:
+        die("unknown object type");
+    }
+}
 
 #endif

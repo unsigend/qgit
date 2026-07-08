@@ -17,12 +17,9 @@
 
 #include "cat-file.h"
 
-#include <die.h>
 #include <libqgit/db/odb.h>
-#include <libqgit/object/object.h>
 #include <libqgit/oid.h>
 #include <libqgit/repo/repository.h>
-#include <libqgit/types.h>
 #include <limits.h>
 #include <stdio.h>
 
@@ -69,7 +66,7 @@ int cmd_cat_file(int argc, char **argv)
         qgit_odb_object *odb_obj;
         qgit_obj_type obj_type;
 
-        /* for now assume the object name can only be an oid */
+        /* TODO: implement revision parsing */
         if (qgit_oid_fromstr(&oid, object_name) < 0)
             die_errno();
 
@@ -98,29 +95,43 @@ int cmd_cat_file(int argc, char **argv)
 
         const char *object_name = argparse_getremargv(&parser)[0];
         qgit_oid oid;
-        qgit_odb *odb;
-        qgit_odb_object *odb_obj;
 
+        /* TODO: implement revision parsing */
         if (qgit_oid_fromstr(&oid, object_name) < 0)
             die_errno();
 
-        if ((odb = qgit_repository_odb(repo)) == NULL)
-            die_errno();
+        if (flags.print_size ||
+            flags.print_type) /* use odb directly to read the raw payload */
+        {
+            qgit_odb *odb;
+            qgit_odb_object *odb_obj;
 
-        if (qgit_odb_read(&odb_obj, odb, &oid) < 0)
-            die_errno();
+            if ((odb = qgit_repository_odb(repo)) == NULL)
+                die_errno();
 
-        if (flags.print_size)
-            fprintf(stdout, "%zu\n", qgit_odb_object_size(odb_obj));
-        else if (flags.print_type)
-            fprintf(stdout, "%s\n",
-                    qgit_object_type2string(qgit_odb_object_type(odb_obj)));
-        else {
-            /* TODO: print the object */
-            die("not implemented");
+            if (qgit_odb_read(&odb_obj, odb, &oid) < 0)
+                die_errno();
+
+            if (flags.print_size)
+                fprintf(stdout, "%zu\n", qgit_odb_object_size(odb_obj));
+            else if (flags.print_type)
+                fprintf(stdout, "%s\n",
+                        qgit_object_type2string(qgit_odb_object_type(odb_obj)));
+
+            qgit_odb_object_free(odb_obj);
         }
 
-        qgit_odb_object_free(odb_obj);
+        else /* use object lookup to parse the object */
+        {
+            qgit_object *object;
+
+            if (qgit_object_lookup(&object, repo, &oid, QGIT_OBJ_ANY) < 0)
+                die_errno();
+
+            pretty_print_object(object);
+
+            qgit_object_free(object);
+        }
     }
 
     qgit_repository_free(repo);

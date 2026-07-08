@@ -33,26 +33,16 @@ int qgit_object_lookup(qgit_object **out, qgit_repository *repo,
     assert(out && repo && id);
     *out = NULL;
 
-    char path[PATH_MAX];
     qgit_odb *odb;
     qgit_odb_object *odb_object;
     qgit_object *object;
 
-    if (snprintf(path, PATH_MAX, "%s/objects", qgit_repository_path(repo)) >=
-        PATH_MAX) {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-
-    if (qgit_odb_open(&odb, path) < 0)
+    odb = qgit_repository_odb(repo);
+    if (!odb)
         return -1;
 
-    if (qgit_odb_read(&odb_object, odb, id) < 0) {
-        qgit_odb_free(odb);
+    if (qgit_odb_read(&odb_object, odb, id) < 0)
         return -1;
-    }
-
-    qgit_odb_free(odb);
 
     if (type != QGIT_OBJ_ANY && qgit_odb_object_type(odb_object) != type) {
         qgit_odb_object_free(odb_object);
