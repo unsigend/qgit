@@ -32,10 +32,16 @@ typedef enum {
         1, /* post-order: children before their parent directory */
 } qgit_treewalk_mode;
 
-/* Callback invoked once per entry during qgit_tree_walk.
- * root is the relative directory path of the entry (empty string for the
- * root tree), entry is the current entry. Return a negative value to skip
- * descending into a subtree. Return non-zero to stop the traversal. */
+/**
+ * Callback invoked once per entry during qgit_tree_walk.
+ *
+ * @param root  relative directory path of the entry (empty string for the root
+ *              tree)
+ * @param entry current entry
+ * @param payload opaque pointer forwarded to each callback invocation
+ * @return 0 to continue the traversal, negative value to skip descending into
+ * a subtree, or positive value to stop the traversal on error
+ */
 typedef int (*qgit_treewalk_cb)(const char *root, qgit_tree_entry *entry,
                                 void *payload);
 

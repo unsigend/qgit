@@ -16,10 +16,49 @@
  */
 
 #include "ls-tree.h"
+#include "libqgit/object/tree.h"
+#include "libqgit/types.h"
+
+#include <libqgit/repo/repository.h>
+#include <limits.h>
 
 int cmd_ls_tree(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    if (argparse_getremargc(&parser) != 1)
+        die("<tree-ish> is required");
+
+    qgit_repository *repo;
+    char repo_path[PATH_MAX];
+    const char *tree_ish = argparse_getremargv(&parser)[0];
+    qgit_oid oid;
+    qgit_tree *tree;
+
+    if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
+        die_errno();
+
+    if (qgit_repository_open(&repo, repo_path) < 0)
+        die_errno();
+
+    /* TODO: implement revision parsing */
+    if (qgit_oid_fromstr(&oid, tree_ish) < 0)
+        die_errno();
+
+    if (qgit_tree_lookup(&tree, repo, &oid) < 0)
+        die_errno();
+
+    if (qgit_tree_walk(tree, pretty_print_tree_entry, QGIT_TREEWALK_PRE,
+                       &flags) < 0)
+        die_errno();
+
+    qgit_tree_free(tree);
+    qgit_repository_free(repo);
+    argparse_fini(&parser);
     return 0;
 }
