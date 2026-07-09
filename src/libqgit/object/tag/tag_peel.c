@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <libqgit/object/tag.h>
 
 int qgit_tag_peel(qgit_object **out, qgit_tag *tag)
 {
-    (void)out;
-    (void)tag;
-    return 0;
+    assert(out && tag);
+
+    return qgit_object_peel(out, (qgit_object *)tag, QGIT_OBJ_ANY);
 }

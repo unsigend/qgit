@@ -98,6 +98,35 @@ QGIT_EXTERN(qgit_repository *) qgit_object_owner(const qgit_object *obj);
 QGIT_EXTERN(void) qgit_object_free(qgit_object *obj);
 
 /**
+ * Create an in-memory deep copy of an object. The copy must be explicitly
+ * freed.
+ *
+ * @param dest   output pointer to receive the copy, must not be NULL
+ * @param source object to copy, must not be NULL
+ * @return 0 on success, -1 on error and sets errno
+ */
+QGIT_EXTERN(int) qgit_object_dup(qgit_object **dest, const qgit_object *source);
+
+/**
+ * Recursively peel an object until an object of the specified type is met. The
+ * returned object must be freed with qgit_object_free.
+ *
+ * If target_type is QGIT_OBJ_ANY, the object is peeled until the type
+ * changes (e.g. a tag is chased until the referenced object is no longer
+ * a tag).
+ *
+ * @param peeled      output pointer to receive the peeled object, must not be
+ *                    NULL
+ * @param object      object to peel, must not be NULL
+ * @param target_type requested type: QGIT_OBJ_COMMIT, QGIT_OBJ_TREE,
+ *                    QGIT_OBJ_BLOB, QGIT_OBJ_TAG, or QGIT_OBJ_ANY
+ * @return 0 on success, -1 on error and sets errno
+ */
+QGIT_EXTERN(int)
+qgit_object_peel(qgit_object **peeled, const qgit_object *object,
+                 qgit_obj_type target_type);
+
+/**
  * Convert a qgit_obj_type to its canonical string representation.
  *
  * The returned pointer refers to static storage and must not be freed.

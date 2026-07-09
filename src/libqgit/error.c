@@ -40,6 +40,8 @@ static const char *qgit_error_messages[] = {
     [QGITERR_NOSUBTREE] = "subtree not found",
     [QGITERR_BADTAGFILE] = "bad tag file",
     [QGITERR_BADTAGNAME] = "bad tag name",
+    [QGITERR_BADPEEL] = "could not peel object",
+    [QGITERR_BADREV] = "bad revision",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

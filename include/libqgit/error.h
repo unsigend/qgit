@@ -39,6 +39,8 @@
 #define QGITERR_NOSUBTREE 17      /* Subtree not found */
 #define QGITERR_BADTAGFILE 18     /* Bad tag file */
 #define QGITERR_BADTAGNAME 19     /* Bad tag name */
+#define QGITERR_BADPEEL 20        /* Bad peel */
+#define QGITERR_BADREV 21         /* Bad revision */
 
 /**
  * Set the error code.

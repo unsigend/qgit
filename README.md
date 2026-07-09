@@ -63,7 +63,7 @@ Most qgit commands that accept an object name use a common resolution order. Giv
 2. `HEAD`.
 3. A full reference path such as `refs/heads/main` or `refs/tags/v1.0`.
 4. A branch or tag name under `refs/heads` or `refs/tags`.
-5. An abbreviated SHA-1 of at least seven hex digits.
+5. An abbreviated SHA-1 of at least four hex digits.
 
 When the same bare name exists as both a branch and a tag, both references must point at the same object.
 

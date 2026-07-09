@@ -22,15 +22,26 @@
 
 int qgit_oid_fromstrn(qgit_oid *out, const char *str, size_t length)
 {
+    size_t p;
+
     if (length > QGIT_OID_HEXSZ || !length)
         return -1;
 
-    memset(out->id, 0, QGIT_OID_RAWSZ);
-
-    for (size_t i = 0; i < length / 2; i++) /* parse N - 1 if N is odd */
-    {
-        if (qgit_oid_fromstr_one(out->id + i, str[i * 2], str[i * 2 + 1]))
+    for (p = 0; p + 1 < length; p += 2) {
+        if (qgit_oid_fromstr_one(out->id + p / 2, str[p], str[p + 1]) < 0)
             return -1;
     }
+
+    if (length % 2) {
+        int hi = hexval(str[p]);
+        if (hi < 0) {
+            qgit_seterror(QGITERR_BADOID);
+            return -1;
+        }
+        out->id[p / 2] = (unsigned char)(hi << 4);
+        p += 2;
+    }
+
+    memset(out->id + p / 2, 0, QGIT_OID_RAWSZ - p / 2);
     return 0;
 }

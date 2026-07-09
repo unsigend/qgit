@@ -47,8 +47,8 @@ QGIT_EXTERN(int) qgit_oid_fromstr(qgit_oid *out, const char *str);
 /**
  * Parse the first N hex characters of a string into a qgit_oid.
  *
- * If N is odd, N-1 characters are parsed instead. The remaining bytes
- * in the oid are zeroed.
+ * If N is odd, the final hex digit is stored as the high nibble of the
+ * next byte. Remaining bytes in the oid are zeroed.
  *
  * @param out    oid structure the result is written into, must not be NULL
  * @param str    input hex string of at least length characters

@@ -15,26 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_H
-#define LIBQGIT_H
-
-#include <libqgit/common.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/db/odb_backend.h>
-#include <libqgit/object/blob.h>
-#include <libqgit/object/commit.h>
 #include <libqgit/object/object.h>
-#include <libqgit/object/signature.h>
-#include <libqgit/object/tag.h>
-#include <libqgit/object/tree.h>
-#include <libqgit/oid.h>
-#include <libqgit/repo/branch.h>
-#include <libqgit/repo/config.h>
-#include <libqgit/repo/index.h>
-#include <libqgit/repo/refs.h>
-#include <libqgit/repo/repository.h>
-#include <libqgit/repo/revwalk.h>
-#include <libqgit/revparse.h>
-#include <libqgit/types.h>
 
-#endif
+int qgit_object_dup(qgit_object **dest, const qgit_object *source)
+{
+    return qgit_object_lookup(dest, qgit_object_owner(source),
+                              qgit_object_id(source), QGIT_OBJ_ANY);
+}
