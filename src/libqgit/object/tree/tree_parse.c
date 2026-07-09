@@ -84,13 +84,10 @@ int tree_parse(qgit_tree *out, qgit_odb_object *odb_obj)
     while (p < end) {
         qgit_tree_entry entry;
         p = parse_entry(&entry, p, end);
-        if (!p) {
-            tree_free(out);
+        if (!p)
             return -1;
-        }
         if (vec_pushback(out->entries, &entry) < 0) {
             free(entry.path);
-            tree_free(out);
             return -1;
         }
     }

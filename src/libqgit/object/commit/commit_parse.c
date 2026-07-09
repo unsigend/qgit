@@ -150,15 +150,11 @@ int commit_parse(qgit_commit *out, qgit_odb_object *odb_obj)
         header_end = end;
     }
 
-    if (vec_init(&out->parents_oids, sizeof(qgit_oid), NULL) < 0) {
-        commit_free(out);
+    if (vec_init(&out->parents_oids, sizeof(qgit_oid), NULL) < 0)
         return -1;
-    }
 
-    if (parse_header(out, payload, header_end) < 0) {
-        commit_free(out);
+    if (parse_header(out, payload, header_end) < 0)
         return -1;
-    }
 
     return 0;
 }

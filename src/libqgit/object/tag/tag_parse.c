@@ -31,8 +31,8 @@ static int parse_header(qgit_tag *out, char *start, char *end)
 {
     char *p = start;
     size_t rem;
-    int target_oid_parsed, type_parsed, tag_name_parsed;
-    target_oid_parsed = type_parsed = tag_name_parsed = 0;
+    int target_oid_parsed, type_parsed, tag_name_parsed, tagger_parsed;
+    target_oid_parsed = type_parsed = tag_name_parsed = tagger_parsed = 0;
 
     while (p < end) {
         if (*p == '\n') /* skip \n */
@@ -119,6 +119,11 @@ static int parse_header(qgit_tag *out, char *start, char *end)
                 return -1;
         } else if (rem >= 7 && strncmp(p, "tagger ", 7) == 0) /* tagger field */
         {
+            if (tagger_parsed) {
+                qgit_seterror(QGITERR_BADTAGFILE);
+                return -1;
+            }
+            tagger_parsed = 1;
             p += 7;
 
             if (p >= end) {
@@ -135,7 +140,8 @@ static int parse_header(qgit_tag *out, char *start, char *end)
         }
     }
 
-    if (!target_oid_parsed || !type_parsed || !tag_name_parsed) {
+    if (!target_oid_parsed || !type_parsed || !tag_name_parsed ||
+        !tagger_parsed) {
         qgit_seterror(QGITERR_BADTAGFILE);
         return -1;
     }
@@ -163,10 +169,8 @@ int tag_parse(qgit_tag *out, qgit_odb_object *odb_obj)
         header_end = end;
     }
 
-    if (parse_header(out, payload, header_end) < 0) {
-        tag_free(out);
+    if (parse_header(out, payload, header_end) < 0)
         return -1;
-    }
 
     return 0;
 }

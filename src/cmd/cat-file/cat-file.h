@@ -121,7 +121,32 @@ static void pretty_print_blob(qgit_blob *blob)
     fwrite(qgit_blob_rawcontent(blob), 1, qgit_blob_rawsize(blob), stdout);
 }
 
-static void pretty_print_tag(qgit_tag *tag) { (void)tag; /* TODO: implement */ }
+static void pretty_print_tag(qgit_tag *tag)
+{
+    char hex[QGIT_OID_HEXSZ + 1];
+    qgit_obj_type type;
+    const qgit_signature *signature;
+    const char *message = qgit_tag_message(tag);
+
+    qgit_oid_fmt(hex, qgit_tag_target_oid(tag));
+    hex[QGIT_OID_HEXSZ] = '\0';
+    fprintf(stdout, "object %s\n", hex);
+
+    type = qgit_tag_type(tag);
+    fprintf(stdout, "type %s\n", qgit_object_type2string(type));
+
+    fprintf(stdout, "tag %s\n", qgit_tag_name(tag));
+    signature = qgit_tag_tagger(tag);
+    if (signature) {
+        fprintf(stdout, "tagger %s <%s> %ld %c%.2d%.2d\n", signature->name,
+                signature->email, signature->when.time,
+                (signature->when.offset >= 0 ? '+' : '-'),
+                abs(signature->when.offset / 60),
+                abs(signature->when.offset % 60));
+    }
+
+    fprintf(stdout, "\n%s", message ? message : "");
+}
 
 static void pretty_print_object(qgit_object *object)
 {
