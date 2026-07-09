@@ -15,11 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
+
+#include <errno.h>
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+#include <stdio.h>
+#include <unistd.h>
 
 int qgit_tag_delete(qgit_repository *repo, const char *tag_name)
 {
-    (void)repo;
-    (void)tag_name;
-    return 0;
+    assert(repo && tag_name);
+
+    if (qgit_tag_validate_name(tag_name) < 0)
+        return -1;
+
+    char refname[PATH_MAX];
+    if (snprintf(refname, PATH_MAX, "%s/refs/tags/%s",
+                 qgit_repository_path(repo), tag_name) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    return unlink(refname);
 }

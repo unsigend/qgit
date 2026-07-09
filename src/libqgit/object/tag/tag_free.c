@@ -17,4 +17,15 @@
 
 #include "tag.h"
 
-void tag_free(qgit_tag *tag) { (void)tag; }
+#include <libqgit/object/signature.h>
+
+void tag_free(qgit_tag *tag)
+{
+    if (!tag)
+        return;
+    if (tag->tag_name)
+        free(tag->tag_name);
+    if (tag->message)
+        free(tag->message);
+    qgit_signature_free(tag->tagger);
+}

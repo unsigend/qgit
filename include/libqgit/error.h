@@ -37,6 +37,8 @@
 #define QGITERR_BADCOMMITFILE 15  /* Bad commit file */
 #define QGITERR_BADTREEFILE 16    /* Bad tree file */
 #define QGITERR_NOSUBTREE 17      /* Subtree not found */
+#define QGITERR_BADTAGFILE 18     /* Bad tag file */
+#define QGITERR_BADTAGNAME 19     /* Bad tag name */
 
 /**
  * Set the error code.

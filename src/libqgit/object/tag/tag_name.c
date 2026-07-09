@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
 
 const char *qgit_tag_name(qgit_tag *tag)
 {
-    (void)tag;
-    return NULL;
+    assert(tag);
+
+    return tag->tag_name;
 }

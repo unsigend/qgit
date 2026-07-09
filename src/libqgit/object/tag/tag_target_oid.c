@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
 
 const qgit_oid *qgit_tag_target_oid(qgit_tag *tag)
 {
-    (void)tag;
-    return NULL;
+    assert(tag);
+
+    return &tag->target_oid;
 }

@@ -20,6 +20,10 @@
 
 #include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
+#include "libqgit/types.h"
+
+#include <libqgit/error.h>
+#include <string.h>
 
 /* Raw payload format for annotated tag:
      object <sha1-40>\n
@@ -29,7 +33,14 @@
      \n
      <message>
 */
-struct qgit_tag { /* TODO*/
+
+struct qgit_tag {
+    qgit_object object;
+    qgit_oid target_oid;
+    qgit_obj_type target_type;
+    char *tag_name;
+    qgit_signature *tagger;
+    char *message;
 };
 
 /**
@@ -47,5 +58,20 @@ QGIT_INTERNAL(int) tag_parse(qgit_tag *out, qgit_odb_object *odb_obj);
  * @param tag tag object to free
  */
 QGIT_INTERNAL(void) tag_free(qgit_tag *tag);
+
+/**
+ * Validate a tag name.
+ *
+ * @param name The tag name to validate.
+ * @return 0 if the name is valid, -1 if the name is invalid.
+ */
+QGIT_INLINE(int) qgit_tag_validate_name(const char *name)
+{
+    if (!name[0] || strstr(name, "..") || name[0] == '/') {
+        qgit_seterror(QGITERR_BADTAGNAME);
+        return -1;
+    }
+    return 0;
+}
 
 #endif

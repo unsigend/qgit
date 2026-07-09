@@ -38,6 +38,8 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BADCOMMITFILE] = "bad commit file",
     [QGITERR_BADTREEFILE] = "bad tree file",
     [QGITERR_NOSUBTREE] = "subtree not found",
+    [QGITERR_BADTAGFILE] = "bad tag file",
+    [QGITERR_BADTAGNAME] = "bad tag name",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

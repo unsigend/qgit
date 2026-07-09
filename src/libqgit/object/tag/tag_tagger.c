@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
 
 const qgit_signature *qgit_tag_tagger(qgit_tag *tag)
 {
-    (void)tag;
-    return NULL;
+    assert(tag);
+
+    return tag->tagger;
 }

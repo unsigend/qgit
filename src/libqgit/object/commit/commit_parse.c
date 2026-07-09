@@ -41,7 +41,8 @@ static int parse_header(qgit_commit *out, char *start, char *end)
 
         rem = end - p; /* remaining length of the line */
 
-        if (rem >= 5 && strncmp(p, "tree ", 5) == 0) {
+        if (rem >= 5 && strncmp(p, "tree ", 5) == 0) /* tree oid field */
+        {
             if (tree_parsed) {
                 qgit_seterror(QGITERR_BADCOMMITFILE);
                 return -1;
@@ -59,7 +60,9 @@ static int parse_header(qgit_commit *out, char *start, char *end)
             }
             p += QGIT_OID_HEXSZ;
 
-        } else if (rem >= 7 && strncmp(p, "parent ", 7) == 0) {
+        } else if (rem >= 7 &&
+                   strncmp(p, "parent ", 7) == 0) /* parent oid field */
+        {
             p += 7;
             qgit_oid parent_oid;
 
@@ -78,7 +81,8 @@ static int parse_header(qgit_commit *out, char *start, char *end)
             if (vec_pushback(out->parents_oids, &parent_oid) < 0)
                 return -1;
 
-        } else if (rem >= 7 && strncmp(p, "author ", 7) == 0) {
+        } else if (rem >= 7 && strncmp(p, "author ", 7) == 0) /* author field */
+        {
             if (author_parsed) {
                 qgit_seterror(QGITERR_BADCOMMITFILE);
                 return -1;
@@ -94,7 +98,9 @@ static int parse_header(qgit_commit *out, char *start, char *end)
             if ((p = qgit_signature_parse(&out->author, p, end)) == NULL)
                 return -1;
 
-        } else if (rem >= 10 && strncmp(p, "committer ", 10) == 0) {
+        } else if (rem >= 10 &&
+                   strncmp(p, "committer ", 10) == 0) /* committer field */
+        {
             if (committer_parsed) {
                 qgit_seterror(QGITERR_BADCOMMITFILE);
                 return -1;

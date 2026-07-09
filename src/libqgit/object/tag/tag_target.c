@@ -15,11 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
+
+#include <libqgit/object/object.h>
 
 int qgit_tag_target(qgit_object **out, qgit_tag *tag)
 {
-    (void)out;
-    (void)tag;
-    return 0;
+    assert(out && tag);
+
+    return qgit_object_lookup(out, tag->object.repo, &tag->target_oid,
+                              tag->target_type);
 }

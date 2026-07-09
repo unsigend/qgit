@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "tag.h"
 
 qgit_obj_type qgit_tag_type(qgit_tag *tag)
 {
-    (void)tag;
-    return QGIT_OBJ_BAD;
+    assert(tag);
+
+    return tag->target_type;
 }

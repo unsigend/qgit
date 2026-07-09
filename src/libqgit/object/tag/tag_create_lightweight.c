@@ -15,16 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tag.h>
+#include "libqgit/repo/refs.h"
+#include "tag.h"
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
 
 int qgit_tag_create_lightweight(qgit_oid *oid, qgit_repository *repo,
                                 const char *tag_name, const qgit_oid *target,
                                 int force)
 {
-    (void)oid;
-    (void)repo;
-    (void)tag_name;
-    (void)target;
-    (void)force;
+    assert(oid && tag_name);
+
+    char refname[PATH_MAX];
+    qgit_reference *ref;
+
+    if (snprintf(refname, PATH_MAX, "refs/tags/%s", tag_name) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if (qgit_reference_create_oid(&ref, repo, refname, target, force) < 0)
+        return -1;
+
+    qgit_oid_cpy(oid, qgit_reference_oid(ref));
+    qgit_reference_free(ref);
+
     return 0;
 }
