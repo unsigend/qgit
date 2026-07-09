@@ -17,9 +17,46 @@
 
 #include "rev-parse.h"
 
+#include <die.h>
+#include <libqgit/object/object.h>
+#include <libqgit/oid.h>
+#include <libqgit/repo/repository.h>
+#include <libqgit/revparse.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+
 int cmd_rev_parse(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    char repo_path[PATH_MAX];
+    qgit_repository *repo;
+
+    if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
+        die_errno();
+    if (qgit_repository_open(&repo, repo_path) < 0)
+        die_errno();
+
+    for (size_t i = 0; i < argparse_getremargc(&parser); i++) {
+        const char *spec = argparse_getremargv(&parser)[i];
+        char hex[QGIT_OID_HEXSZ + 1];
+        qgit_object *object;
+
+        if (qgit_revparse_single(&object, repo, spec) < 0)
+            die_errno();
+
+        qgit_oid_fmt(hex, qgit_object_id(object));
+        hex[QGIT_OID_HEXSZ] = '\0';
+        printf("%s\n", hex);
+        qgit_object_free(object);
+    }
+
+    qgit_repository_free(repo);
+    argparse_fini(&parser);
     return 0;
 }

@@ -18,4 +18,24 @@
 #ifndef CMD_REV_PARSE_H
 #define CMD_REV_PARSE_H
 
+#include <argparse.h>
+
+static struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit rev-parse [options] <args>",
+};
+
+static struct argparse_desc desc = {
+    .prog = "qgit rev-parse",
+    .desc = "Pick out and massage parameters",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "Resolves each revision argument to a full 40-character object "
+              "name. Name resolution follows qgit revision syntax.",
+};
+
 #endif

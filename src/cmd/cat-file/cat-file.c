@@ -20,6 +20,7 @@
 #include <libqgit/db/odb.h>
 #include <libqgit/oid.h>
 #include <libqgit/repo/repository.h>
+#include <libqgit/revparse.h>
 #include <limits.h>
 #include <stdio.h>
 
@@ -47,6 +48,7 @@ int cmd_cat_file(int argc, char **argv)
     int rawmode = !flags.pretty && !flags.print_type && !flags.print_size;
     qgit_repository *repo;
     char repo_path[PATH_MAX];
+    qgit_object *object;
 
     if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
         die_errno();
@@ -61,19 +63,17 @@ int cmd_cat_file(int argc, char **argv)
 
         const char *type = argparse_getremargv(&parser)[0];
         const char *object_name = argparse_getremargv(&parser)[1];
-        qgit_oid oid;
         qgit_odb *odb;
         qgit_odb_object *odb_obj;
         qgit_obj_type obj_type;
 
-        /* TODO: implement revision parsing */
-        if (qgit_oid_fromstr(&oid, object_name) < 0)
+        if (qgit_revparse_single(&object, repo, object_name) < 0)
             die_errno();
 
         if ((odb = qgit_repository_odb(repo)) == NULL)
             die_errno();
 
-        if (qgit_odb_read(&odb_obj, odb, &oid) < 0)
+        if (qgit_odb_read(&odb_obj, odb, qgit_object_id(object)) < 0)
             die_errno();
 
         if ((obj_type = qgit_object_string2type(type)) == QGIT_OBJ_BAD)
@@ -94,10 +94,8 @@ int cmd_cat_file(int argc, char **argv)
             die("<object> is missing");
 
         const char *object_name = argparse_getremargv(&parser)[0];
-        qgit_oid oid;
 
-        /* TODO: implement revision parsing */
-        if (qgit_oid_fromstr(&oid, object_name) < 0)
+        if (qgit_revparse_single(&object, repo, object_name) < 0)
             die_errno();
 
         if (flags.print_size ||
@@ -109,7 +107,7 @@ int cmd_cat_file(int argc, char **argv)
             if ((odb = qgit_repository_odb(repo)) == NULL)
                 die_errno();
 
-            if (qgit_odb_read(&odb_obj, odb, &oid) < 0)
+            if (qgit_odb_read(&odb_obj, odb, qgit_object_id(object)) < 0)
                 die_errno();
 
             if (flags.print_size)
@@ -119,21 +117,11 @@ int cmd_cat_file(int argc, char **argv)
                         qgit_object_type2string(qgit_odb_object_type(odb_obj)));
 
             qgit_odb_object_free(odb_obj);
-        }
-
-        else /* use object lookup to parse the object */
-        {
-            qgit_object *object;
-
-            if (qgit_object_lookup(&object, repo, &oid, QGIT_OBJ_ANY) < 0)
-                die_errno();
-
+        } else
             pretty_print_object(object);
-
-            qgit_object_free(object);
-        }
     }
 
+    qgit_object_free(object);
     qgit_repository_free(repo);
     argparse_fini(&parser);
     return 0;

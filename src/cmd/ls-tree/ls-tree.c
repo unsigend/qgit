@@ -16,10 +16,9 @@
  */
 
 #include "ls-tree.h"
-#include "libqgit/object/tree.h"
-#include "libqgit/types.h"
 
 #include <libqgit/repo/repository.h>
+#include <libqgit/revparse.h>
 #include <limits.h>
 
 int cmd_ls_tree(int argc, char **argv)
@@ -37,7 +36,7 @@ int cmd_ls_tree(int argc, char **argv)
     qgit_repository *repo;
     char repo_path[PATH_MAX];
     const char *tree_ish = argparse_getremargv(&parser)[0];
-    qgit_oid oid;
+    qgit_object *object;
     qgit_tree *tree;
 
     if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
@@ -46,12 +45,18 @@ int cmd_ls_tree(int argc, char **argv)
     if (qgit_repository_open(&repo, repo_path) < 0)
         die_errno();
 
-    /* TODO: implement revision parsing */
-    if (qgit_oid_fromstr(&oid, tree_ish) < 0)
+    if (qgit_revparse_single(&object, repo, tree_ish) < 0)
         die_errno();
 
-    if (qgit_tree_lookup(&tree, repo, &oid) < 0)
-        die_errno();
+    if (qgit_object_type(object) != QGIT_OBJ_TREE) {
+        qgit_object *peeled;
+        if (qgit_object_peel(&peeled, object, QGIT_OBJ_TREE) <
+            0) /* user may not specify a tree object then auto peel to a tree */
+            die_errno();
+        qgit_object_free(object);
+        object = peeled;
+    }
+    tree = (qgit_tree *)object;
 
     if (qgit_tree_walk(tree, pretty_print_tree_entry, QGIT_TREEWALK_PRE,
                        &flags) < 0)
