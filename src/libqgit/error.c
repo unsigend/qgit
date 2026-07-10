@@ -42,6 +42,14 @@ static const char *qgit_error_messages[] = {
     [QGITERR_BADTAGNAME] = "bad tag name",
     [QGITERR_BADPEEL] = "could not peel object",
     [QGITERR_BADREV] = "bad revision",
+    [QGITERR_NOCREDENTIALS] =
+        ""
+        "Author identity unknown\n\nRun\n  qgit config --set --global "
+        "user.email "
+        "<email>\n  qgit config --set --global user.name <name>\n\nOmit "
+        "--global "
+        "to set the identity only in this repository."
+        "",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

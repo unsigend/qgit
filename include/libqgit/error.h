@@ -41,6 +41,7 @@
 #define QGITERR_BADTAGNAME 19     /* Bad tag name */
 #define QGITERR_BADPEEL 20        /* Bad peel */
 #define QGITERR_BADREV 21         /* Bad revision */
+#define QGITERR_NOCREDENTIALS 22  /* No credentials */
 
 /**
  * Set the error code.

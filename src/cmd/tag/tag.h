@@ -18,4 +18,93 @@
 #ifndef CMD_TAG_H
 #define CMD_TAG_H
 
+#include <argparse.h>
+#include <die.h>
+#include <libqgit/error.h>
+#include <libqgit/object/signature.h>
+#include <libqgit/repo/config.h>
+#include <libqgit/repo/repository.h>
+
+#define DEFAULT_TARGET "HEAD"
+
+struct cmd_tag_flags {
+    int list;            /* -l --list */
+    int delete;          /* -d --delete */
+    int force;           /* -f --force */
+    int annotate;        /* -a --annotate */
+    const char *message; /* -m --message */
+};
+
+static struct cmd_tag_flags flags = {
+    .list = 0,
+    .delete = 0,
+    .force = 0,
+    .annotate = 0,
+    .message = NULL,
+};
+
+static struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_BOOL('l', "list", "List tags", &flags.list),
+    OPT_BOOL('d', "delete", "Delete existing tags with the given names",
+             &flags.delete),
+    OPT_BOOL('f', "force",
+             "Replace an existing tag with the given name instead of failing",
+             &flags.force),
+    OPT_BOOL('a', "annotate", "Make an unsigned, annotated tag object",
+             &flags.annotate),
+    OPT_STR('m', "message", "Use the given tag message", &flags.message,
+            OPT_REQUIRED),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit tag [options] <tagname> [<commit>]",
+    "qgit tag [options] -d <tagname>",
+};
+
+static struct argparse_desc desc = {
+    .prog = "qgit tag",
+    .desc = "Create, list, or delete tags",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "Annotated tags require -a and -m. With no arguments, list "
+              "tags. <commit> defaults to HEAD.",
+};
+
+static void mutex_check(void)
+{
+    if (flags.delete && flags.list)
+        die("Cannot use -d and -l together");
+    if (flags.annotate && !flags.message)
+        die("annotated tags require message use -m ");
+}
+
+static void get_credentials(qgit_signature **out, qgit_repository *repo)
+{
+    qgit_config *local_config, *global_config = NULL;
+
+    qgit_config_open_global(&global_config);
+    local_config = qgit_repository_config(repo);
+
+    const char *name = NULL, *email = NULL;
+    qgit_config_get_string(&name, local_config, "user.name");
+    if (!name && global_config)
+        qgit_config_get_string(&name, global_config, "user.name");
+
+    qgit_config_get_string(&email, local_config, "user.email");
+    if (!email && global_config)
+        qgit_config_get_string(&email, global_config, "user.email");
+
+    if (!name || !email) {
+        qgit_seterror(QGITERR_NOCREDENTIALS);
+        die_errno();
+    }
+
+    if (qgit_signature_now(out, name, email) < 0)
+        die_errno();
+
+    qgit_config_free(global_config);
+}
+
 #endif
