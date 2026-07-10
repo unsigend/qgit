@@ -151,14 +151,14 @@ QGIT_EXTERN(int) qgit_tag_peel(qgit_object **out, qgit_tag *tag);
 /**
  * Create a new annotated tag object and write a reference under refs/tags/.
  *
- * qgit requires annotated tags to point at a commit. The tag object is
- * written to the ODB and refs/tags/<tag_name> is created (or replaced
- * when force is non-zero).
+ * The target may be any existing object (commit, tree, blob, or tag).
+ * The tag object is written to the ODB and refs/tags/<tag_name> is
+ * created (or replaced when force is non-zero).
  *
  * @param oid      output pointer to receive the new tag OID, must not be NULL
  * @param repo     repository to write into, must not be NULL
  * @param tag_name short tag name (e.g. "v1.0"), must not be NULL
- * @param target   OID of the commit to tag, must not be NULL
+ * @param target   OID of the object to tag, must not be NULL
  * @param tagger   tagger signature, must not be NULL
  * @param message  tag message, must not be NULL
  * @param force    if non-zero, overwrite an existing tag with the same name

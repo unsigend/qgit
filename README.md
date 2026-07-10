@@ -625,7 +625,7 @@ Show the working tree status.
 
 Create, list, or delete tags.
 
-qgit supports lightweight and annotated tags. Annotated tags require a message and may only point at commits. Signing and verification are not supported.
+qgit supports lightweight and annotated tags. Annotated tags require a message. The tagged object may be a commit, tree, blob, or tag. Signing and verification are not supported.
 
 #### Synopsis
 
@@ -640,11 +640,11 @@ Add a tag reference in `refs/tags/`, unless `-d` or `-l` is given to delete or l
 
 Unless `-f` is given, the named tag must not yet exist.
 
-If `-a` is passed, qgit creates an annotated tag object and requires `-m`. The tagger name and email come from `user.name` and `user.email` in the repository or global config. Annotated tags must refer to a commit.
+If `-a` is passed, qgit creates an annotated tag object and requires `-m`. The tagger name and email come from `user.name` and `user.email` in the repository or global config.
 
 Otherwise, qgit creates a lightweight tag that points directly at the given object.
 
-With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. With `-d`, qgit deletes the named tag.
+With no arguments, qgit lists all tags. With `<tagname>`, qgit creates a tag pointing at `<commit>`, or at `HEAD` when `<commit>` is omitted. `<commit>` is resolved with revision syntax and may name any object. With `-d`, qgit deletes the named tag.
 
 #### Options
 
