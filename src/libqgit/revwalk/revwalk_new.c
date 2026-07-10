@@ -19,6 +19,54 @@
 #include <assert.h>
 #include <stdlib.h>
 
+/* priority queue store qgit_commit* helper functions: pq_cmp_time,
+ * pq_free_commit */
+static int pq_commit_cmp_time(void *a, void *b)
+{
+    qgit_commit *ca = *(qgit_commit **)a;
+    qgit_commit *cb = *(qgit_commit **)b;
+
+    time_t tca = qgit_commit_time(ca);
+    time_t tcb = qgit_commit_time(cb);
+
+    if (tca == tcb)
+        return 0;
+    return tcb > tca ? -1 : 1;
+}
+
+static void pq_commit_free(void *data)
+{
+    if (!data)
+        return;
+    qgit_commit *commit = *(qgit_commit **)data;
+    qgit_commit_free(commit);
+}
+
+/* set store qgit_oid* for visited commits. helper functions:
+ * set_oid_hash, set_oid_cmp, set_oid_free */
+static uint32_t set_oid_hash(void *data)
+{
+    uint32_t hash = 0;
+    qgit_oid *oid = (qgit_oid *)data;
+    memcpy(&hash, oid->id, sizeof(uint32_t));
+    return hash;
+}
+
+static int set_oid_cmp(void *a, void *b)
+{
+    qgit_oid *oa = (qgit_oid *)a;
+    qgit_oid *ob = (qgit_oid *)b;
+
+    return qgit_oid_cmp(oa, ob);
+}
+
+static void set_oid_free(void *data)
+{
+    if (!data)
+        return;
+    free(data);
+}
+
 int qgit_revwalk_new(qgit_revwalk **out, qgit_repository *repo)
 {
     assert(out && repo);

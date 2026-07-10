@@ -24,16 +24,6 @@
 #include <limits.h>
 #include <stdio.h>
 
-static void mutex_check(void)
-{
-    if (flags.pretty && flags.print_type)
-        die("Cannot use -p and -t together");
-    if (flags.pretty && flags.print_size)
-        die("Cannot use -p and -s together");
-    if (flags.print_type && flags.print_size)
-        die("Cannot use -t and -s together");
-}
-
 int cmd_cat_file(int argc, char **argv)
 {
     struct argparse parser;
