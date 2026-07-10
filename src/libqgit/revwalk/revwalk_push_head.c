@@ -15,26 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_H
-#define LIBQGIT_H
+#include "revwalk.h"
 
-#include <libqgit/common.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/db/odb_backend.h>
-#include <libqgit/object/blob.h>
-#include <libqgit/object/commit.h>
-#include <libqgit/object/object.h>
-#include <libqgit/object/signature.h>
-#include <libqgit/object/tag.h>
-#include <libqgit/object/tree.h>
-#include <libqgit/oid.h>
-#include <libqgit/repo/branch.h>
-#include <libqgit/repo/config.h>
-#include <libqgit/repo/index.h>
+#include <assert.h>
 #include <libqgit/repo/refs.h>
-#include <libqgit/repo/repository.h>
-#include <libqgit/revparse.h>
-#include <libqgit/revwalk.h>
-#include <libqgit/types.h>
 
-#endif
+int qgit_revwalk_push_head(qgit_revwalk *walk)
+{
+    assert(walk);
+
+    qgit_oid oid;
+    if (qgit_reference_name_to_oid(&oid, walk->repo, "HEAD") < 0)
+        return -1;
+
+    return qgit_revwalk_push(walk, &oid);
+}

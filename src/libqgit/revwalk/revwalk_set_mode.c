@@ -15,26 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBQGIT_H
-#define LIBQGIT_H
+#include "revwalk.h"
 
-#include <libqgit/common.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/db/odb_backend.h>
-#include <libqgit/object/blob.h>
-#include <libqgit/object/commit.h>
-#include <libqgit/object/object.h>
-#include <libqgit/object/signature.h>
-#include <libqgit/object/tag.h>
-#include <libqgit/object/tree.h>
-#include <libqgit/oid.h>
-#include <libqgit/repo/branch.h>
-#include <libqgit/repo/config.h>
-#include <libqgit/repo/index.h>
-#include <libqgit/repo/refs.h>
-#include <libqgit/repo/repository.h>
-#include <libqgit/revparse.h>
-#include <libqgit/revwalk.h>
-#include <libqgit/types.h>
+#include <assert.h>
 
-#endif
+void qgit_revwalk_set_mode(qgit_revwalk *walk, enum qgit_revwalk_mode mode)
+{
+    assert(walk);
+
+    walk->mode = mode;
+}
