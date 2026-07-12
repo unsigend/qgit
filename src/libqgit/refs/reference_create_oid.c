@@ -52,6 +52,9 @@ int qgit_reference_create_oid(qgit_reference **out, qgit_repository *repo,
         return -1;
     }
 
+    if (qgit_reference_ensure_parentdir(path) < 0)
+        return -1;
+
     qgit_oid_fmt(hex, oid);
     hex[QGIT_OID_HEXSZ] = '\n';
 

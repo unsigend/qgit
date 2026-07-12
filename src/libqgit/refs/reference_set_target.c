@@ -49,6 +49,9 @@ int qgit_reference_set_target(qgit_reference *ref, const char *target)
         return -1;
     }
 
+    if (qgit_reference_ensure_parentdir(path) < 0)
+        return -1;
+
     if (snprintf(content, PATH_MAX, "ref: %s\n", target) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;

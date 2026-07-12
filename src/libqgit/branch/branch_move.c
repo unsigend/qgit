@@ -16,7 +16,6 @@
  */
 
 #include "branch.h"
-#include "libqgit/types.h"
 
 #include <assert.h>
 #include <errno.h>

@@ -54,6 +54,9 @@ int qgit_reference_create_symbolic(qgit_reference **out, qgit_repository *repo,
         return -1;
     }
 
+    if (qgit_reference_ensure_parentdir(path) < 0)
+        return -1;
+
     if (snprintf(content, PATH_MAX, "ref: %s\n", target) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;

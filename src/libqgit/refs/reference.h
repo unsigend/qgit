@@ -18,9 +18,13 @@
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
+#include <errno.h>
+#include <fs.h>
 #include <libqgit/error.h>
 #include <libqgit/oid.h>
 #include <libqgit/types.h>
+#include <limits.h>
+#include <stdio.h>
 #include <string.h>
 
 struct qgit_reference {
@@ -47,6 +51,38 @@ QGIT_INLINE(int) qgit_reference_validate_name(const char *name)
         qgit_seterror(QGITERR_BADREFNAME);
         return -1;
     }
+    return 0;
+}
+
+/**
+ * Ensure the parent directory of a reference path exists. Create it if it does
+ * not exist.
+ *
+ * @param path The reference path to ensure the parent directory exists.
+ * @return 0 if successful, -1 if failed.
+ */
+QGIT_INLINE(int)
+qgit_reference_ensure_parentdir(const char *path)
+{
+    char parent[PATH_MAX];
+    char *slash;
+
+    if (snprintf(parent, PATH_MAX, "%s", path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    slash = strrchr(parent, '/');
+    if (!slash) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (slash == parent)
+        parent[1] = '\0';
+    else
+        *slash = '\0';
+    if (mkdirp(parent, QGIT_DIRMODE) < 0)
+        return -1;
     return 0;
 }
 

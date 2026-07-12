@@ -47,6 +47,9 @@ int qgit_reference_set_oid(qgit_reference *ref, const qgit_oid *oid)
     qgit_oid_fmt(hex, oid);
     hex[QGIT_OID_HEXSZ] = '\n';
 
+    if (qgit_reference_ensure_parentdir(path) < 0)
+        return -1;
+
     if (write_file(path, hex, QGIT_OID_HEXSZ + 1) < 0)
         return -1;
 
