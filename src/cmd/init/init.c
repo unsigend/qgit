@@ -19,7 +19,7 @@
 
 #include <die.h>
 #include <errno.h>
-#include <fs.h>
+#include <fileutil.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>
 #include <stdio.h>

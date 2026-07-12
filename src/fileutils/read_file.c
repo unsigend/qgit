@@ -17,45 +17,48 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
-#include <stdio.h>
+#include <fileutil.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
-#include "fs.h"
-
-int write_file(const char *path, const void *buf, size_t buflen)
+int read_file(const char *path, void **buf, size_t *len)
 {
-    if (buflen == 0 || !buf) {
+    int fd = -1;
+    struct stat st;
+    void *tmpbuf = NULL;
+
+    if (stat(path, &st) == -1)
+        return -1;
+    if (!S_ISREG(st.st_mode)) {
         errno = EINVAL;
         return -1;
     }
 
-    int fd;
-    char tmppath[PATH_MAX];
-
-    if (snprintf(tmppath, PATH_MAX, "%s.tmp", path) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
-        return -1;
+    if (st.st_size == 0) {
+        *buf = NULL;
+        *len = 0;
+        return 0;
     }
 
-    if ((fd = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
+    if ((fd = open(path, O_RDONLY)) == -1)
         return -1;
 
-    if (write_all(fd, buf, buflen) != (ssize_t)buflen) {
+    tmpbuf = malloc(st.st_size + 1);
+    if (!tmpbuf) {
         close(fd);
-        unlink(tmppath);
+        return -1;
+    }
+    ((char *)tmpbuf)[st.st_size] = '\0';
+
+    if (read_all(fd, tmpbuf, st.st_size) != (ssize_t)st.st_size) {
+        free(tmpbuf);
+        close(fd);
         return -1;
     }
 
-    if (close(fd) == -1) {
-        unlink(tmppath);
-        return -1;
-    }
-
-    if (rename(tmppath, path) == -1) {
-        unlink(tmppath);
-        return -1;
-    }
-
+    *buf = tmpbuf;
+    *len = st.st_size;
+    close(fd);
     return 0;
 }

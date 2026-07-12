@@ -17,17 +17,16 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <fileutil.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 
-#include "fs.h"
-
-int copy_dir(const char *src, const char *dst)
+int copy_dir(const char *dest, const char *src)
 {
     struct stat srcst, dstst;
-    if (stat(src, &srcst) == -1 || stat(dst, &dstst) == -1) {
+    if (stat(src, &srcst) == -1 || stat(dest, &dstst) == -1) {
         errno = ENOENT;
         return -1;
     }
@@ -52,7 +51,7 @@ int copy_dir(const char *src, const char *dst)
             closedir(dir);
             return -1;
         }
-        if (snprintf(dstpath, sizeof(dstpath), "%s/%s", dst, entry->d_name) >=
+        if (snprintf(dstpath, sizeof(dstpath), "%s/%s", dest, entry->d_name) >=
             PATH_MAX) {
             errno = ENAMETOOLONG;
             closedir(dir);
@@ -61,12 +60,12 @@ int copy_dir(const char *src, const char *dst)
         struct stat st;
         if (stat(srcpath, &st) == 0 && S_ISDIR(st.st_mode)) {
             if (mkdirp(dstpath, st.st_mode) == -1 ||
-                copy_dir(srcpath, dstpath) == -1) {
+                copy_dir(dstpath, srcpath) == -1) {
                 closedir(dir);
                 return -1;
             }
         } else {
-            if (copy_file(srcpath, dstpath) == -1) {
+            if (copy_file(dstpath, srcpath) == -1) {
                 closedir(dir);
                 return -1;
             }

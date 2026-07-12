@@ -18,7 +18,7 @@
 #include "hash-object.h"
 
 #include <die.h>
-#include <fs.h>
+#include <fileutil.h>
 #include <libqgit/db/odb.h>
 #include <libqgit/object/object.h>
 #include <libqgit/repo/repository.h>

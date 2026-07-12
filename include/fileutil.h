@@ -15,10 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FS_H
-#define FS_H
+#ifndef FILEUTIL_H
+#define FILEUTIL_H
 
-#include <sys/stat.h>
 #include <sys/types.h>
 
 /* Read or Write all data from/to a file descriptor. Retry on EINTR or EAGAIN.
@@ -36,13 +35,13 @@ extern int read_file(const char *path, void **buf, size_t *len);
    not exists. Return 0 on success, -1 on error and set errno. */
 extern int write_file(const char *path, const void *buf, size_t buflen);
 
-/* Copy file from src to dst, create dst file if it does not exist, Return 0 on
-   success, -1 on error and set errno. */
-extern int copy_file(const char *src, const char *dst);
+/* Copy file from src to dest, create dest file if it does not exist. Return 0
+   on success, -1 on error and set errno. */
+extern int copy_file(const char *dest, const char *src);
 
-/* Copy one directory's content to another directory, both src and dst must
-   exists. Return 0 on success, -1 on error and set errno. */
-extern int copy_dir(const char *src, const char *dst);
+/* Copy one directory's content to another directory, both dest and src must
+   exist. Return 0 on success, -1 on error and set errno. */
+extern int copy_dir(const char *dest, const char *src);
 
 /* Check if path exists, Return 1 if it exists, 0 if it does not exist. */
 extern int path_exists(const char *path);
@@ -68,30 +67,5 @@ extern int fabspath(const char *path, char *buf);
 /* Get the basename of a given path. Return the basename on success, NULL on
    error and set errno. Compatible with POSIX and BSD. */
 extern char *fbasename(const char *path, char *buf);
-
-/* Crossplatform function to get the nanoseconds of the ctime */
-__attribute__((always_inline)) inline long
-stat_ctime_nsec(const struct stat *st)
-{
-#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
-    return st->st_ctimespec.tv_nsec;
-#elif defined(__linux__)
-    return st->st_ctim.tv_nsec;
-#else
-    return 0;
-#endif
-}
-/* Crossplatform function to get the nanoseconds of the mtime */
-__attribute__((always_inline)) inline long
-stat_mtime_nsec(const struct stat *st)
-{
-#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
-    return st->st_mtimespec.tv_nsec;
-#elif defined(__linux__)
-    return st->st_mtim.tv_nsec;
-#else
-    return 0;
-#endif
-}
 
 #endif

@@ -19,7 +19,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <fs.h>
+#include <fileutil.h>
 #include <libqgit/repo/branch.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>

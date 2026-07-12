@@ -15,30 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "blob.h"
+#ifndef QGIT_STAT_H
+#define QGIT_STAT_H
 
-#include <assert.h>
-#include <fileutil.h>
-#include <libqgit/object/blob.h>
-#include <stdlib.h>
+#include <sys/stat.h>
 
-int qgit_blob_create_fromdisk(qgit_oid *oid, qgit_repository *repo,
-                              const char *path)
+/* Crossplatform function to get the nanoseconds of the ctime */
+__attribute__((always_inline)) inline long
+stat_ctime_nsec(const struct stat *st)
 {
-    assert(oid && repo && path);
-
-    void *buf;
-    size_t len;
-
-    if (read_file(path, &buf, &len) < 0)
-        return -1;
-
-    if (qgit_blob_create_frombuffer(oid, repo, buf, len) < 0) {
-        free(buf);
-        return -1;
-    }
-
-    free(buf);
-
+#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    return st->st_ctimespec.tv_nsec;
+#elif defined(__linux__)
+    return st->st_ctim.tv_nsec;
+#else
     return 0;
+#endif
 }
+
+/* Crossplatform function to get the nanoseconds of the mtime */
+__attribute__((always_inline)) inline long
+stat_mtime_nsec(const struct stat *st)
+{
+#if defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    return st->st_mtimespec.tv_nsec;
+#elif defined(__linux__)
+    return st->st_mtim.tv_nsec;
+#else
+    return 0;
+#endif
+}
+
+#endif

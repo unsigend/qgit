@@ -15,56 +15,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <fcntl.h>
-#include <sys/stat.h>
+#include <fileutil.h>
+#include <limits.h>
+#include <stdio.h>
 #include <unistd.h>
 
-#include "fs.h"
-
-int copy_file(const char *src, const char *dst)
+int write_file(const char *path, const void *buf, size_t buflen)
 {
-    int srcfd = -1, dstfd = -1;
-    struct stat st;
-    mode_t mode;
-    char buf[4096];
-    ssize_t n;
-
-    if (stat(src, &st) == -1)
-        return -1;
-    mode = st.st_mode;
-
-    if ((srcfd = open(src, O_RDONLY)) == -1)
-        return -1;
-
-    if ((dstfd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, mode)) == -1) {
-        close(srcfd);
+    if (buflen == 0 || !buf) {
+        errno = EINVAL;
         return -1;
     }
 
-    while (1) {
-        n = read_all(srcfd, buf, sizeof(buf));
-        if (n == -1) {
-            close(srcfd);
-            close(dstfd);
-            unlink(dst);
-            return -1;
-        }
-        if (n == 0)
-            break;
-        if (write_all(dstfd, buf, n) == -1) {
-            close(srcfd);
-            close(dstfd);
-            unlink(dst);
-            return -1;
-        }
+    int fd;
+    char tmppath[PATH_MAX];
+
+    if (snprintf(tmppath, PATH_MAX, "%s.tmp", path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
     }
 
-    if (close(srcfd) == -1) {
-        close(dstfd);
+    if ((fd = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
+        return -1;
+
+    if (write_all(fd, buf, buflen) != (ssize_t)buflen) {
+        close(fd);
+        unlink(tmppath);
         return -1;
     }
-    if (close(dstfd) == -1)
+
+    if (close(fd) == -1) {
+        unlink(tmppath);
         return -1;
+    }
+
+    if (rename(tmppath, path) == -1) {
+        unlink(tmppath);
+        return -1;
+    }
 
     return 0;
 }

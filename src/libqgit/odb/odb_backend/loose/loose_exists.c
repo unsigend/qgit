@@ -19,9 +19,10 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <fs.h>
+#include <fileutil.h>
 #include <libqgit/db/odb_backend.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 int qgit_loose_backend_exists(struct qgit_odb_backend *backend,
                               const qgit_oid *oid)

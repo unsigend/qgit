@@ -20,7 +20,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <fs.h>
+#include <fileutil.h>
 #include <libqgit/common.h>
 #include <libqgit/types.h>
 #include <limits.h>

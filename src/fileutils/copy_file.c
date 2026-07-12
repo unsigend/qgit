@@ -15,51 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
 #include <fcntl.h>
-#include <stdlib.h>
+#include <fileutil.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "fs.h"
-
-int read_file(const char *path, void **buf, size_t *len)
+int copy_file(const char *dest, const char *src)
 {
-    int fd = -1;
+    int srcfd = -1, dstfd = -1;
     struct stat st;
-    void *tmpbuf = NULL;
+    mode_t mode;
+    char buf[4096];
+    ssize_t n;
 
-    if (stat(path, &st) == -1)
+    if (stat(src, &st) == -1)
         return -1;
-    if (!S_ISREG(st.st_mode)) {
-        errno = EINVAL;
-        return -1;
-    }
+    mode = st.st_mode;
 
-    if (st.st_size == 0) {
-        *buf = NULL;
-        *len = 0;
-        return 0;
-    }
-
-    if ((fd = open(path, O_RDONLY)) == -1)
+    if ((srcfd = open(src, O_RDONLY)) == -1)
         return -1;
 
-    tmpbuf = malloc(st.st_size + 1);
-    if (!tmpbuf) {
-        close(fd);
-        return -1;
-    }
-    ((char *)tmpbuf)[st.st_size] = '\0';
-
-    if (read_all(fd, tmpbuf, st.st_size) != (ssize_t)st.st_size) {
-        free(tmpbuf);
-        close(fd);
+    if ((dstfd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, mode)) == -1) {
+        close(srcfd);
         return -1;
     }
 
-    *buf = tmpbuf;
-    *len = st.st_size;
-    close(fd);
+    while (1) {
+        n = read_all(srcfd, buf, sizeof(buf));
+        if (n == -1) {
+            close(srcfd);
+            close(dstfd);
+            unlink(dest);
+            return -1;
+        }
+        if (n == 0)
+            break;
+        if (write_all(dstfd, buf, n) == -1) {
+            close(srcfd);
+            close(dstfd);
+            unlink(dest);
+            return -1;
+        }
+    }
+
+    if (close(srcfd) == -1) {
+        close(dstfd);
+        return -1;
+    }
+    if (close(dstfd) == -1)
+        return -1;
+
     return 0;
 }
