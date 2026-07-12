@@ -44,6 +44,8 @@ const struct subcmd subcmds[] = {
     {"status", "Show the working tree status", cmd_status},
     {"tag", "Create, list, delete or verify a tag object signed with GPG",
      cmd_tag},
+    {"update-ref", "Update the object name stored in a ref safely",
+     cmd_update_ref},
     {"version", "Show the version", cmd_version},
 };
 

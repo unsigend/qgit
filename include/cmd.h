@@ -54,6 +54,7 @@ extern int cmd_status(int argc, char **argv);
 extern int cmd_tag(int argc, char **argv);
 extern int cmd_help(int argc, char **argv);
 extern int cmd_config(int argc, char **argv);
+extern int cmd_update_ref(int argc, char **argv);
 extern int cmd_version(int argc, char **argv);
 
 #endif

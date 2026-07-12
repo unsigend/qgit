@@ -25,6 +25,7 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
    * [show-ref](#show-ref)
    * [status](#status)
    * [tag](#tag)
+   * [update-ref](#update-ref)
    * [version](#version)
 4. [Contribution](#contribution)
 
@@ -685,6 +686,61 @@ The name of the tag to create, list, or delete.
 `<commit>`
 
 The object that the new tag will refer to, usually a commit. Defaults to `HEAD`.
+
+---
+
+### update-ref
+
+Update the object name stored in a ref safely.
+
+qgit writes loose refs only. Reflogs, `--stdin` batch updates, and `-m` log messages are not supported.
+
+#### Synopsis
+
+```
+qgit update-ref [--no-deref] <ref> <new-oid> [<old-oid>]
+qgit update-ref [--no-deref] -d <ref> [<old-oid>]
+```
+
+#### Description
+
+Stores `<new-oid>` in `<ref>`, after optionally verifying that the current value matches `<old-oid>`. The command must be run inside a qgit repository.
+
+With two arguments, qgit updates `<ref>` to `<new-oid>`. Symbolic refs are dereferenced by default, so updating `HEAD` updates the branch it points at.
+
+With three arguments, qgit updates `<ref>` only if its current value is `<old-oid>`. Use forty `0` characters as `<old-oid>` to require that `<ref>` does not yet exist.
+
+`<new-oid>` and `<old-oid>` are resolved with [Revision Syntax](#revision-syntax), except that a forty-zero OID is treated as the null OID.
+
+With `-d`, qgit deletes `<ref>`. If `<old-oid>` is given, the delete happens only when the current value matches.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-d`
+`--delete`
+
+Delete the named ref after verifying `<old-oid>` when it is given.
+
+`--no-deref`
+
+Update or delete `<ref>` itself instead of following symbolic pointers.
+
+`<ref>`
+
+Full reference name to update or delete, such as `HEAD` or `refs/heads/main`.
+
+`<new-oid>`
+
+New object name to store in the ref.
+
+`<old-oid>`
+
+Optional expected current value used as a compare-and-swap check.
 
 ---
 
