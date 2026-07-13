@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "../index/index.h"
 #include "repository.h"
 
 #include <assert.h>
@@ -38,16 +39,20 @@ static int load_config(qgit_repository *repo)
     return qgit_config_open_ondisk(&repo->config, config);
 }
 
-// static int load_index(qgit_repository *repo)
-// {
-//     char index[PATH_MAX];
-//     if (snprintf(index, PATH_MAX, "%s/index", repo->repodir) >= PATH_MAX) {
-//         errno = ENAMETOOLONG;
-//         return -1;
-//     }
+static int load_index(qgit_repository *repo)
+{
+    char index[PATH_MAX];
+    if (snprintf(index, PATH_MAX, "%s/index", repo->repodir) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
 
-//     return qgit_index_open(&repo->index, index);
-// }
+    int ret = qgit_index_open(&repo->index, index);
+    if (ret < 0)
+        return -1;
+    repo->index->owner = repo; /* set the owner of the index */
+    return 0;
+}
 
 static int load_odb(qgit_repository *repo)
 {
@@ -113,8 +118,7 @@ int qgit_repository_open(qgit_repository **out, const char *path)
         return -1;
     }
 
-    /* TODO: load the index */
-    if (load_config(r) || load_odb(r)) {
+    if (load_config(r) || load_odb(r) || load_index(r)) {
         qgit_repository_free(r);
         return -1;
     }

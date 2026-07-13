@@ -17,9 +17,46 @@
 
 #include "add.h"
 
+#include <libqgit/repo/repository.h>
+#include <limits.h>
+
 int cmd_add(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    struct argparse parser;
+
+    if (argparse_init(&parser, options, &desc) < 0)
+        die("%s", argparse_strerror(&parser));
+    if (argparse_parse(&parser, argc, argv) < 0)
+        die("%s", argparse_strerror(&parser));
+
+    int remargc = argparse_getremargc(&parser);
+    char repo_path[PATH_MAX];
+    qgit_repository *repo;
+    qgit_index *index;
+
+    if (remargc == 0)
+        die("nothing specified, nothing added.");
+
+    if (qgit_repository_discover(repo_path, PATH_MAX, ".") < 0)
+        die_errno();
+    if (qgit_repository_open(&repo, repo_path) < 0)
+        die_errno();
+
+    index = qgit_repository_index(repo);
+
+    for (int i = 0; i < remargc; i++) {
+        const char *path = argparse_getremargv(&parser)[i];
+        if (strcmp(path, "..") ==
+            0) /* simplified out-of-repo check, only check whether is
+                  ".." */
+            die("'%s' is outside repository", path);
+        add_path(index, path);
+    }
+
+    if (qgit_index_write(index) < 0)
+        die_errno();
+
+    qgit_repository_free(repo);
+    argparse_fini(&parser);
     return 0;
 }

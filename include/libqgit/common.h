@@ -61,5 +61,6 @@
 #define QGIT_FILEMODE 0644
 
 #define QGIT_GLOBAL_CONFIG_NAME ".qgitconfig"
+#define QGIT_REPO_DIR_NAME ".qgit"
 
 #endif

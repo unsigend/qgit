@@ -18,4 +18,39 @@
 #ifndef CMD_LS_FILES_H
 #define CMD_LS_FILES_H
 
+#include <argparse.h>
+
+struct cmd_ls_files_flags {
+    int cached; /* show cached files in the index (default) */
+    int stage;  /* show mode, object, and stage number */
+};
+
+static struct cmd_ls_files_flags flags = {
+    .cached = 0,
+    .stage = 0,
+};
+
+static struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_BOOL('c', "cached", "Show cached files in the index (default)",
+             &flags.cached),
+    OPT_BOOL('s', "stage",
+             "Show staged contents' mode bits, object name and stage number",
+             &flags.stage),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit ls-files [-c | --cached] [-s | --stage] [<path>]",
+};
+
+static struct argparse_desc desc = {
+    .prog = "qgit ls-files",
+    .desc = "Show information about files in the index",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "With no options, prints each cached path. Optional <path> is a "
+              "repository-relative prefix match.",
+};
+
 #endif

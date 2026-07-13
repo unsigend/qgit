@@ -182,7 +182,6 @@ int qgit_repository_init(qgit_repository **out, const char *path,
         repodir_created = 1;
     }
 
-    /* TODO: create the index */
     if (create_structure(repodir) < 0 || create_config(repodir) < 0 ||
         create_head(repodir, branch) < 0 || create_description(repodir) < 0) {
         if (work_created)

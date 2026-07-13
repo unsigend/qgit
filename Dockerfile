@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libssl-dev \
     zlib1g-dev \
+    python3 \
+    cloc \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

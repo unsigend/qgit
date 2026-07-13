@@ -27,10 +27,21 @@
 #include <libqgit/repo/repository.h>
 #include <limits.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+
+/* Check if the file is unchanged. Return 1 if unchanged, 0 if changed. */
+static int file_unchanged(const qgit_index_entry *entry, const struct stat *st)
+{
+    return entry->file_size == st->st_size &&
+           entry->mtime.seconds == st->st_mtime &&
+           entry->mtime.nanoseconds == stat_mtime_nsec(st) &&
+           entry->mode == st->st_mode && entry->ino == st->st_ino &&
+           entry->dev == (uint32_t)st->st_dev;
+}
 
 int qgit_index_add(qgit_index *index, const char *path, int stage)
 {
@@ -38,9 +49,10 @@ int qgit_index_add(qgit_index *index, const char *path, int stage)
 
     char fullpath[PATH_MAX];
     struct stat st;
-    qgit_index_entry entry;
+    qgit_index_entry entry, existing;
     qgit_oid oid;
     size_t len = strlen(path);
+    int existing_index;
 
     if (!index->owner) {
         errno = EINVAL;
@@ -60,6 +72,14 @@ int qgit_index_add(qgit_index *index, const char *path, int stage)
 
     if (stat(fullpath, &st) < 0)
         return -1;
+
+    if ((existing_index = qgit_index_find2(index, path, stage)) >=
+        0) /* optimize for duplicate hash and write, if file unchanged skip */
+    {
+        existing = *(qgit_index_entry *)vec_at(index->entries, existing_index);
+        if (file_unchanged(&existing, &st))
+            return 0;
+    }
 
     if (qgit_blob_create_fromfile(&oid, index->owner, path) < 0)
         return -1;
