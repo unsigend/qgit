@@ -17,11 +17,14 @@
 
 #include "index.h"
 
-#include <assert.h>
+#include <libqgit/repo/index.h>
+#include <stdlib.h>
 
-unsigned int qgit_index_entrycount(qgit_index *index)
+void qgit_index_entry_free(void *data)
 {
-    assert(index);
-
-    return vec_size(index->entries);
+    if (!data)
+        return;
+    qgit_index_entry *entry = (qgit_index_entry *)data;
+    if (entry->path)
+        free(entry->path);
 }

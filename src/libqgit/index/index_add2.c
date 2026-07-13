@@ -15,11 +15,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
 #include <libqgit/repo/index.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 int qgit_index_add2(qgit_index *index, const qgit_index_entry *source_entry)
 {
-    (void)index;
-    (void)source_entry;
+    assert(index && source_entry);
+    int position = qgit_index_find2(index, source_entry->path,
+                                    qgit_index_entry_stage(source_entry));
+
+    if (position != -1) /* replace */
+    {
+        qgit_index_entry *entry =
+            (qgit_index_entry *)vec_at(index->entries, position);
+        char *path = strdup(source_entry->path);
+        if (!path)
+            return -1;
+        free(entry->path);
+        memcpy(entry, source_entry, sizeof(qgit_index_entry));
+        entry->path = path;
+
+    } else /* append a deep copy at end */
+    {
+        if (vec_pushback(index->entries, (void *)source_entry) < 0)
+            return -1;
+        qgit_index_entry *last = (qgit_index_entry *)vec_back(index->entries);
+        last->path = NULL;
+        last->path = strdup(source_entry->path);
+        if (!last->path) {
+            vec_popback(index->entries, NULL);
+            return -1;
+        }
+    }
+
     return 0;
 }

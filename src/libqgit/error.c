@@ -50,6 +50,10 @@ static const char *qgit_error_messages[] = {
         "--global "
         "to set the identity only in this repository."
         "",
+    [QGITERR_BADINDEXFILE] = "bad index file",
+    [QGITERR_BADINDEXMAGIC] = "bad index magic",
+    [QGITERR_BADINDEXVERSION] = "bad index version",
+    [QGITERR_BADINDEXCHECKSUM] = "bad index checksum",
 };
 
 void qgit_seterror(int err) { qgit_error_code = err; }

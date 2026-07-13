@@ -15,11 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <errno.h>
 #include <libqgit/repo/index.h>
 
 qgit_index_entry *qgit_index_get(qgit_index *index, unsigned int n)
 {
-    (void)index;
-    (void)n;
-    return NULL;
+    assert(index);
+
+    if (n >= vec_size(index->entries)) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    return (qgit_index_entry *)vec_at(index->entries, n);
 }

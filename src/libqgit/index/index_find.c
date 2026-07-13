@@ -15,11 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
+#include <collection/vector.h>
 #include <libqgit/repo/index.h>
+#include <string.h>
 
 int qgit_index_find(qgit_index *index, const char *path)
 {
-    (void)index;
-    (void)path;
+    assert(index && path);
+
+    for (unsigned int i = 0; i < vec_size(index->entries); i++) {
+        qgit_index_entry *entry = (qgit_index_entry *)vec_at(index->entries, i);
+        if (strcmp(entry->path, path) == 0)
+            return i;
+    }
+
     return -1;
 }

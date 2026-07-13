@@ -131,6 +131,17 @@ qgit_index_get(qgit_index *index, unsigned int n);
 QGIT_EXTERN(int) qgit_index_find(qgit_index *index, const char *path);
 
 /**
+ * Find the position of the entry matching path and stage.
+ *
+ * @param index index to search, must not be NULL
+ * @param path  repository-relative path to find
+ * @param stage merge stage number (0 for a normal entry, 1-3 for a conflict)
+ * @return position >= 0 if found, -1 if not found
+ */
+QGIT_EXTERN(int)
+qgit_index_find2(qgit_index *index, const char *path, int stage);
+
+/**
  * Add or update an index entry from a file in the working directory.
  *
  * Reads the file at path (relative to the repository working directory),
@@ -148,7 +159,7 @@ QGIT_EXTERN(int) qgit_index_add(qgit_index *index, const char *path, int stage);
  * Add or update an index entry from an in-memory entry struct.
  *
  * A full copy of source_entry (including the path string) is stored.
- * If an entry for the same path already exists it is replaced.
+ * If an entry for the same path and stage already exists it is replaced.
  *
  * @param index        index to modify, must not be NULL
  * @param source_entry entry to copy into the index, must not be NULL
@@ -165,7 +176,7 @@ qgit_index_add2(qgit_index *index, const qgit_index_entry *source_entry);
  * @return 0 on success, -1 if position is out of range or on error and sets
  * errno
  */
-QGIT_EXTERN(int) qgit_index_remove(qgit_index *index, int position);
+QGIT_EXTERN(int) qgit_index_remove(qgit_index *index, unsigned int position);
 
 /**
  * Extract the merge stage number from an entry's flags field.

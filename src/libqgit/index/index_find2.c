@@ -18,10 +18,20 @@
 #include "index.h"
 
 #include <assert.h>
+#include <collection/vector.h>
+#include <libqgit/repo/index.h>
+#include <string.h>
 
-unsigned int qgit_index_entrycount(qgit_index *index)
+int qgit_index_find2(qgit_index *index, const char *path, int stage)
 {
-    assert(index);
+    assert(index && path);
 
-    return vec_size(index->entries);
+    for (unsigned int i = 0; i < vec_size(index->entries); i++) {
+        qgit_index_entry *entry = (qgit_index_entry *)vec_at(index->entries, i);
+        if (strcmp(entry->path, path) == 0 &&
+            qgit_index_entry_stage(entry) == stage)
+            return i;
+    }
+
+    return -1;
 }

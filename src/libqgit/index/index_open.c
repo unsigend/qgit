@@ -15,11 +15,85 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <libqgit/repo/index.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 int qgit_index_open(qgit_index **out, const char *index_path)
 {
-    (void)out;
-    (void)index_path;
+    assert(out && index_path);
+    *out = NULL;
+
+    qgit_index *index = calloc(1, sizeof(qgit_index));
+    void *buf = NULL;
+    size_t buflen = 0;
+    struct stat st;
+    int fd;
+
+    if (!index)
+        return -1;
+
+    index->path = strdup(index_path);
+    if (!index->path) {
+        qgit_index_free(index);
+        return -1;
+    }
+
+    if (vec_init(&index->entries, sizeof(qgit_index_entry),
+                 qgit_index_entry_free) < 0) {
+        qgit_index_free(index);
+        return -1;
+    }
+
+    if ((fd = open(index_path, O_RDONLY)) < 0) {
+        if (errno == ENOENT) /* empty in-memory instance */
+        {
+            index->version = QGIT_INDEX_VERSION;
+            *out = index;
+            return 0;
+        }
+        qgit_index_free(index);
+        return -1;
+    }
+
+    if (fstat(fd, &st) < 0) {
+        close(fd);
+        qgit_index_free(index);
+        return -1;
+    }
+
+    buflen = st.st_size;
+    if (!buflen) {
+        close(fd);
+        index->version = QGIT_INDEX_VERSION;
+        *out = index;
+        return 0;
+    }
+
+    if ((buf = mmap(NULL, buflen, PROT_READ, MAP_PRIVATE, fd, 0)) ==
+        MAP_FAILED) {
+        close(fd);
+        qgit_index_free(index);
+        return -1;
+    }
+
+    if (qgit_index_parse(index, buf, buflen) < 0) {
+        munmap(buf, buflen);
+        close(fd);
+        qgit_index_free(index);
+        return -1;
+    }
+
+    munmap(buf, buflen);
+    close(fd);
+    *out = index;
     return 0;
 }

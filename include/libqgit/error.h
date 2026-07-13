@@ -20,28 +20,32 @@
 
 #include <libqgit/common.h>
 
-#define QGITERR_BADOID 1          /* Bad OID */
-#define QGITERR_REPONOTFOUND 2    /* Repository not found */
-#define QGITERR_INVKEY 3          /* Invalid key */
-#define QGITERR_BADOBJFILE 4      /* Bad object file */
-#define QGITERR_BADOBJTYPE 5      /* Bad object type */
-#define QGITERR_OBJNOTFOUND 6     /* Object not found */
-#define QGITERR_AMBIGUOUS 7       /* Ambiguous object */
-#define QGITERR_OBJTYPEMISMATCH 8 /* Object type mismatch */
-#define QGITERR_BADREFNAME 9      /* Bad reference name */
-#define QGITERR_BADREFFILE 10     /* Bad reference file */
-#define QGITERR_BADREFTYPE 11     /* Bad reference type */
-#define QGITERR_REFEXISTS 12      /* Reference exists */
-#define QGITERR_BRANCHEXISTS 13   /* Branch exists */
-#define QGITERR_BADSIGNATURE 14   /* Bad signature */
-#define QGITERR_BADCOMMITFILE 15  /* Bad commit file */
-#define QGITERR_BADTREEFILE 16    /* Bad tree file */
-#define QGITERR_NOSUBTREE 17      /* Subtree not found */
-#define QGITERR_BADTAGFILE 18     /* Bad tag file */
-#define QGITERR_BADTAGNAME 19     /* Bad tag name */
-#define QGITERR_BADPEEL 20        /* Bad peel */
-#define QGITERR_BADREV 21         /* Bad revision */
-#define QGITERR_NOCREDENTIALS 22  /* No credentials */
+#define QGITERR_BADOID 1            /* Bad OID */
+#define QGITERR_REPONOTFOUND 2      /* Repository not found */
+#define QGITERR_INVKEY 3            /* Invalid key */
+#define QGITERR_BADOBJFILE 4        /* Bad object file */
+#define QGITERR_BADOBJTYPE 5        /* Bad object type */
+#define QGITERR_OBJNOTFOUND 6       /* Object not found */
+#define QGITERR_AMBIGUOUS 7         /* Ambiguous object */
+#define QGITERR_OBJTYPEMISMATCH 8   /* Object type mismatch */
+#define QGITERR_BADREFNAME 9        /* Bad reference name */
+#define QGITERR_BADREFFILE 10       /* Bad reference file */
+#define QGITERR_BADREFTYPE 11       /* Bad reference type */
+#define QGITERR_REFEXISTS 12        /* Reference exists */
+#define QGITERR_BRANCHEXISTS 13     /* Branch exists */
+#define QGITERR_BADSIGNATURE 14     /* Bad signature */
+#define QGITERR_BADCOMMITFILE 15    /* Bad commit file */
+#define QGITERR_BADTREEFILE 16      /* Bad tree file */
+#define QGITERR_NOSUBTREE 17        /* Subtree not found */
+#define QGITERR_BADTAGFILE 18       /* Bad tag file */
+#define QGITERR_BADTAGNAME 19       /* Bad tag name */
+#define QGITERR_BADPEEL 20          /* Bad peel */
+#define QGITERR_BADREV 21           /* Bad revision */
+#define QGITERR_NOCREDENTIALS 22    /* No credentials */
+#define QGITERR_BADINDEXFILE 23     /* Bad index file */
+#define QGITERR_BADINDEXMAGIC 24    /* Bad index magic */
+#define QGITERR_BADINDEXVERSION 25  /* Bad index version */
+#define QGITERR_BADINDEXCHECKSUM 26 /* Bad index checksum */
 
 /**
  * Set the error code.

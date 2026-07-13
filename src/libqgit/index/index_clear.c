@@ -15,6 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/repo/index.h>
+#include "index.h"
 
-void qgit_index_clear(qgit_index *index) { (void)index; }
+#include <assert.h>
+
+void qgit_index_clear(qgit_index *index)
+{
+    assert(index);
+
+    vec_clear(index->entries);
+}

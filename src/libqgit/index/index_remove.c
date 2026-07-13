@@ -15,11 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
+#include <errno.h>
 #include <libqgit/repo/index.h>
 
-int qgit_index_remove(qgit_index *index, int position)
+int qgit_index_remove(qgit_index *index, unsigned int position)
 {
-    (void)index;
-    (void)position;
-    return 0;
+    assert(index);
+
+    if (position >= vec_size(index->entries)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return vec_remove(index->entries, position, NULL);
 }

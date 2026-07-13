@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/repo/index.h>
+#include "index.h"
 
-void qgit_index_free(qgit_index *index) { (void)index; }
+#include <stdlib.h>
+
+void qgit_index_free(qgit_index *index)
+{
+    if (!index)
+        return;
+    vec_free(index->entries);
+    if (index->path)
+        free(index->path);
+    free(index);
+}

@@ -15,10 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "index.h"
+
+#include <assert.h>
 #include <libqgit/repo/index.h>
 
 int qgit_index_entry_stage(const qgit_index_entry *entry)
 {
-    (void)entry;
-    return 0;
+    assert(entry);
+
+    return (entry->flags & QGIT_IDXENTRY_STAGEMASK) >> QGIT_IDXENTRY_STAGESHIFT;
 }
