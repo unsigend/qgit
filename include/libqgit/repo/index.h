@@ -33,6 +33,11 @@ QGIT_BEGIN_DECLS
     12 /* right-shift flags by this to get stage                               \
         */
 
+#define QGIT_IDXENTRY_STAGE_NORMAL 0 /* base stage */
+#define QGIT_IDXENTRY_STAGE_BASE 1   /* merge base stage */
+#define QGIT_IDXENTRY_STAGE_OURS 2
+#define QGIT_IDXENTRY_STAGE_THEIRS 3
+
 /* Stat timestamp stored per-entry for change detection. */
 typedef struct {
     time_t seconds;           /* whole seconds */
@@ -146,7 +151,7 @@ qgit_index_find2(qgit_index *index, const char *path, int stage);
  *
  * Reads the file at path (relative to the repository working directory),
  * writes it to the ODB as a blob, and records or updates the index entry.
- * If an entry for path already exists it is replaced.
+ * If an entry for the same path and stage already exists it is replaced.
  *
  * @param index index to modify, must not be NULL
  * @param path  repository-relative path of the file to stage

@@ -27,8 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ALIGN(size, align) (((size) + (align - 1)) & ~(align - 1))
-
 /* Parse an entry from the index file, return the address of the next entry */
 static const char *parse_entry(qgit_index_entry *entry, const char *start,
                                const char *end)
@@ -155,8 +153,10 @@ int qgit_index_parse(qgit_index *index, const void *buf, size_t buflen)
         if (!p)
             return -1;
 
-        if (vec_pushback(index->entries, &entry) == -1)
+        if (vec_pushback(index->entries, &entry) == -1) {
+            free(entry.path);
             return -1;
+        }
     }
 
     while (p < checksum) /* parse extensions */

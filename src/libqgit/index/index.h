@@ -33,6 +33,9 @@ struct qgit_index {
 #define QGIT_INDEX_MAGIC "DIRC"
 #define QGIT_INDEX_ALIGNMENT 8
 
+#define ALIGN(size, align)                                                     \
+    (((size) + (align - 1)) & ~(align - 1)) /* Align the size to alignment */
+
 /**
  * Parse an index file into a qgit_index structure. Assume the index's entries
  * are valid states.
@@ -51,5 +54,12 @@ qgit_index_parse(qgit_index *index, const void *buf, size_t buflen);
  * @param data The index entry to free
  */
 QGIT_INTERNAL(void) qgit_index_entry_free(void *data);
+
+/**
+ * Sort the index entries by path.
+ *
+ * @param index The index to sort
+ */
+QGIT_INTERNAL(void) qgit_index_sort(qgit_index *index);
 
 #endif
