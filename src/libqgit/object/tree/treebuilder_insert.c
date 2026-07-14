@@ -15,16 +15,54 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "libqgit/types.h"
+#include "tree.h"
+
+#include <assert.h>
+#include <collection/vector.h>
 #include <libqgit/object/tree.h>
+#include <string.h>
 
 int qgit_treebuilder_insert(qgit_tree_entry **entry_out,
                             qgit_treebuilder *builder, const char *filename,
                             const qgit_oid *id, unsigned int attributes)
 {
-    (void)entry_out;
-    (void)builder;
-    (void)filename;
-    (void)id;
-    (void)attributes;
-    return 0;
+    assert(builder && filename && id);
+    if (entry_out)
+        *entry_out = NULL;
+
+    const qgit_tree_entry *existing;
+
+    if ((existing = qgit_treebuilder_get(builder, filename)) !=
+        NULL) /* update existing entry */
+    {
+        qgit_tree_entry *mutate = (qgit_tree_entry *)existing;
+
+        mutate->oid = *id;
+        mutate->mode = attributes;
+
+        if (entry_out)
+            *entry_out = mutate;
+        return 0;
+
+    } else /* pushback new entry */
+    {
+        qgit_tree_entry entry = {0};
+
+        entry.path = strdup(filename);
+        if (!entry.path)
+            return -1;
+
+        entry.oid = *id;
+        entry.mode = attributes;
+
+        if (vec_pushback(builder->entries, &entry) < 0) {
+            free(entry.path);
+            return -1;
+        }
+
+        if (entry_out)
+            *entry_out = vec_back(builder->entries);
+        return 0;
+    }
 }

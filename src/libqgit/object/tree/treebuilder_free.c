@@ -15,10 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <collection/vector.h>
 
 void qgit_treebuilder_free(qgit_treebuilder *builder)
 {
     if (!builder)
         return;
+    vec_free(builder->entries);
+    free(builder);
 }

@@ -16,8 +16,8 @@
  */
 
 #include "ls-files.h"
-#include "collection/string.h"
 
+#include <collection/string.h>
 #include <die.h>
 #include <libqgit/repo/index.h>
 #include <libqgit/repo/repository.h>

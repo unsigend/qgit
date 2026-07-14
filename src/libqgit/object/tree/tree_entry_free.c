@@ -17,19 +17,9 @@
 
 #include "tree.h"
 
-#include <assert.h>
-#include <collection/vector.h>
-#include <string.h>
-
-const qgit_tree_entry *qgit_treebuilder_get(qgit_treebuilder *builder,
-                                            const char *filename)
+void tree_entry_free(void *p)
 {
-    assert(builder && filename);
-
-    for (unsigned int i = 0; i < vec_size(builder->entries); i++) {
-        qgit_tree_entry *entry = vec_at(builder->entries, i);
-        if (strcmp(entry->path, filename) == 0)
-            return entry;
-    }
-    return NULL;
+    qgit_tree_entry *entry = (qgit_tree_entry *)p;
+    if (entry->path)
+        free(entry->path);
 }

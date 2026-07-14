@@ -20,10 +20,12 @@
 
 #include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
+#include "libqgit/common.h"
 
 struct qgit_tree_entry {
-    unsigned int mode;
-    char *path;
+    unsigned int
+        mode;   /* UNIX file mode for the entry (e.g. 0100644, 0040000) */
+    char *path; /* path of the entry */
     qgit_oid oid;
 };
 
@@ -34,6 +36,10 @@ struct qgit_tree_entry {
 */
 struct qgit_tree {
     qgit_object object;
+    struct vector *entries;
+};
+
+struct qgit_treebuilder {
     struct vector *entries;
 };
 
@@ -52,5 +58,22 @@ QGIT_INTERNAL(int) tree_parse(qgit_tree *out, qgit_odb_object *odb_obj);
  * @param tree tree object to free
  */
 QGIT_INTERNAL(void) tree_free(qgit_tree *tree);
+
+/**
+ * Free a tree entry.
+ *
+ * @param p tree entry to free
+ */
+QGIT_INTERNAL(void) tree_entry_free(void *p);
+
+/**
+ * Sort a vector of tree entries in Git tree order.
+ *
+ * Names are compared byte-wise, directory entries sort as if their name
+ * had a trailing '/'.
+ *
+ * @param entries vector of tree entries to sort
+ */
+QGIT_INTERNAL(void) tree_entry_sort(struct vector *entries);
 
 #endif

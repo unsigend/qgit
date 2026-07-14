@@ -15,6 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
 
-void qgit_treebuilder_clear(qgit_treebuilder *builder) { (void)builder; }
+#include <assert.h>
+#include <collection/vector.h>
+
+void qgit_treebuilder_clear(qgit_treebuilder *builder)
+{
+    assert(builder);
+
+    vec_clear(builder->entries);
+}

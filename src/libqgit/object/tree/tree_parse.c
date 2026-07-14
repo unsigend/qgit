@@ -23,13 +23,6 @@
 #include <libqgit/oid.h>
 #include <string.h>
 
-static void tree_entry_free(void *p)
-{
-    qgit_tree_entry *entry = (qgit_tree_entry *)p;
-    if (entry->path)
-        free(entry->path);
-}
-
 static char *parse_entry(qgit_tree_entry *entry, char *start, char *end)
 {
     char *p = start;

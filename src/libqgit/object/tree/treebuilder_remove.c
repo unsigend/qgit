@@ -15,11 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libqgit/object/tree.h>
+#include "tree.h"
+
+#include <assert.h>
+#include <collection/vector.h>
+#include <string.h>
 
 int qgit_treebuilder_remove(qgit_treebuilder *builder, const char *filename)
 {
-    (void)builder;
-    (void)filename;
-    return 0;
+    assert(builder && filename);
+
+    for (unsigned int i = 0; i < vec_size(builder->entries); i++) {
+        qgit_tree_entry *entry = vec_at(builder->entries, i);
+        if (strcmp(entry->path, filename) == 0) {
+            if (vec_remove(builder->entries, i, NULL) < 0)
+                return -1;
+            return 0;
+        }
+    }
+    return -1;
 }
