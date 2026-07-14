@@ -15,48 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <string.h>
+#include <fcntl.h>
+#include <fileutil.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-int rmdirr(const char *path)
+int copy_file(const char *dest, const char *src)
 {
+    int srcfd, destfd;
     struct stat st;
-    if (stat(path, &st) == -1)
+    mode_t mode;
+    char buf[4096];
+    ssize_t n;
+
+    if (stat(src, &st) == -1)
         return -1;
-    if (!S_ISDIR(st.st_mode)) {
-        return unlink(path);
+    mode = st.st_mode;
+
+    if ((srcfd = open(src, O_RDONLY)) == -1)
+        return -1;
+
+    if ((destfd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, mode)) == -1) {
+        close(srcfd);
+        return -1;
     }
 
-    if (rmdir(path) == 0)
-        return 0;
-    if (errno != ENOTEMPTY && errno != EEXIST)
-        return -1;
-
-    DIR *dir = opendir(path);
-    if (dir == NULL)
-        return -1;
-
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-            continue;
-        char buf[PATH_MAX];
-        if (snprintf(buf, sizeof(buf), "%s/%s", path, entry->d_name) >=
-            PATH_MAX) {
-            errno = ENAMETOOLONG;
-            closedir(dir);
+    while (1) {
+        n = read_all(srcfd, buf, sizeof(buf));
+        if (n == -1) {
+            close(srcfd);
+            close(destfd);
+            unlink(dest);
             return -1;
         }
-        if (rmdirr(buf) == -1) {
-            closedir(dir);
+        if (n == 0)
+            break;
+        if (write_all(destfd, buf, n) == -1) {
+            close(srcfd);
+            close(destfd);
+            unlink(dest);
             return -1;
         }
     }
-    closedir(dir);
-    return rmdir(path);
+
+    if (close(srcfd) == -1) {
+        close(destfd);
+        return -1;
+    }
+    if (close(destfd) == -1)
+        return -1;
+
+    return 0;
 }

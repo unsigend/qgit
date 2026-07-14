@@ -15,50 +15,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <dirent.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <fileutil.h>
-#include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-int read_file(const char *path, void **buf, size_t *len)
+int rmdirr(const char *path)
 {
-    int fd = -1;
     struct stat st;
-    void *tmpbuf = NULL;
+    DIR *dir;
+    struct dirent *entry;
+    char buf[PATH_MAX];
 
     if (stat(path, &st) == -1)
         return -1;
-    if (!S_ISREG(st.st_mode)) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    if (st.st_size == 0) {
-        *buf = NULL;
-        *len = 0;
+    if (!S_ISDIR(st.st_mode))
+        return unlink(path);
+    if (rmdir(path) == 0)
         return 0;
-    }
 
-    if ((fd = open(path, O_RDONLY)) == -1)
+    if (errno != ENOTEMPTY && errno != EEXIST)
         return -1;
 
-    tmpbuf = malloc(st.st_size + 1);
-    if (!tmpbuf) {
-        close(fd);
+    if ((dir = opendir(path)) == NULL)
         return -1;
-    }
-    ((char *)tmpbuf)[st.st_size] = '\0';
 
-    if (read_all(fd, tmpbuf, st.st_size) != (ssize_t)st.st_size) {
-        free(tmpbuf);
-        close(fd);
-        return -1;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+        if (snprintf(buf, PATH_MAX, "%s/%s", path, entry->d_name) >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            closedir(dir);
+            return -1;
+        }
+        if (rmdirr(buf) == -1) {
+            closedir(dir);
+            return -1;
+        }
     }
-
-    *buf = tmpbuf;
-    *len = st.st_size;
-    close(fd);
-    return 0;
+    closedir(dir);
+    return rmdir(path);
 }

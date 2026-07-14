@@ -16,43 +16,33 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
-#include <fileutil.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-int write_file(const char *path, const void *buf, size_t buflen)
+int fabspath(const char *path, char *buf)
 {
-    if (buflen == 0 || !buf) {
-        errno = EINVAL;
+    char cwd[PATH_MAX];
+
+    if (realpath(path, buf))
+        return 0;
+    if (errno != ENOENT)
         return -1;
+
+    if (*path == '/') {
+        if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            return -1;
+        }
+        return 0;
     }
 
-    int fd;
-    char tmppath[PATH_MAX];
+    if (getcwd(cwd, PATH_MAX) == NULL)
+        return -1;
 
-    if (snprintf(tmppath, PATH_MAX, "%s.tmp", path) >= PATH_MAX) {
+    if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
-        return -1;
-    }
-
-    if ((fd = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
-        return -1;
-
-    if (write_all(fd, buf, buflen) != (ssize_t)buflen) {
-        close(fd);
-        unlink(tmppath);
-        return -1;
-    }
-
-    if (close(fd) == -1) {
-        unlink(tmppath);
-        return -1;
-    }
-
-    if (rename(tmppath, path) == -1) {
-        unlink(tmppath);
         return -1;
     }
 

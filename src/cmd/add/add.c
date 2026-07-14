@@ -18,7 +18,6 @@
 #include "add.h"
 
 #include <libqgit/repo/repository.h>
-#include <limits.h>
 
 int cmd_add(int argc, char **argv)
 {
@@ -46,11 +45,7 @@ int cmd_add(int argc, char **argv)
 
     for (int i = 0; i < remargc; i++) {
         const char *path = argparse_getremargv(&parser)[i];
-        if (strcmp(path, "..") ==
-            0) /* simplified out-of-repo check, only check whether is
-                  ".." */
-            die("'%s' is outside repository", path);
-        add_path(index, path);
+        add_path(index, path, qgit_repository_workdir(repo));
     }
 
     if (qgit_index_write(index) < 0)

@@ -17,32 +17,41 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
 
-int fabspath(const char *path, char *buf)
+int mkdirp(const char *path, mode_t mode)
 {
-    if (realpath(path, buf))
-        return 0;
-    if (errno != ENOENT)
-        return -1;
+    char parent[PATH_MAX];
+    char *slash;
 
-    if (*path == '/') {
-        if (snprintf(buf, PATH_MAX, "%s", path) >= PATH_MAX) {
-            errno = ENAMETOOLONG;
-            return -1;
-        }
+    if (mkdir(path, mode) == 0)
         return 0;
+    if (errno == EEXIST) {
+        struct stat st;
+        if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
+            return 0;
     }
 
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, PATH_MAX) == NULL)
+    if (errno != ENOENT)
         return -1;
-
-    if (snprintf(buf, PATH_MAX, "%s/%s", cwd, path) >= PATH_MAX) {
+    if (strlen(path) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         return -1;
     }
-    return 0;
+
+    strncpy(parent, path, PATH_MAX - 1);
+    parent[PATH_MAX - 1] = '\0';
+    slash = strrchr(parent, '/');
+
+    if (slash == NULL) {
+        errno = EINVAL;
+        return -1;
+    } else
+        *slash = '\0';
+
+    if (mkdirp(parent, mode) == -1)
+        return -1;
+
+    return mkdir(path, mode);
 }

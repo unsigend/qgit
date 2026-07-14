@@ -23,8 +23,10 @@
 #include <die.h>
 #include <dirent.h>
 #include <errno.h>
+#include <fileutil.h>
 #include <libqgit/repo/index.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -47,89 +49,101 @@ static struct argparse_desc desc = {
               "recursively.",
 };
 
-/* Return 1 if path is .git / .qgit or lies under one of those directories. */
-static int path_contain_repo_meta(const char *path)
+/* Normalize the path to a repository-relative path. Reject and die the program
+ * when the path is invalid or outside the repository. Assume buf is at least
+ * PATH_MAX bytes long. workdir must be an absolute path without a trailing
+ * slash (except for "/"). */
+static void normalize_path(const char *path, const char *workdir, char *buf)
 {
-    if (!path || !path[0])
-        return 0;
-    if (strcmp(path, ".git") == 0 || strcmp(path, QGIT_REPO_DIR_NAME) == 0)
-        return 1;
-    if (str_startswith(path, ".git/") ||
-        str_startswith(path, QGIT_REPO_DIR_NAME "/"))
-        return 1;
-    if (str_endswith(path, "/.git") ||
-        str_endswith(path, "/" QGIT_REPO_DIR_NAME))
-        return 1;
-    if (strstr(path, "/.git/") || strstr(path, "/" QGIT_REPO_DIR_NAME "/"))
-        return 1;
-    return 0;
-}
+    char fullpath[PATH_MAX];
+    size_t len = strlen(workdir);
+    size_t fullpathlen;
 
-/* Join dir and name into a repository-relative path. Treats "." / "" as root.
- */
-static void path_join(char *buf, size_t bufsz, const char *dir,
-                      const char *name)
-{
-    int n;
+    if (fabspath(path, fullpath) < 0)
+        die_errno();
 
-    if (!dir[0] || strcmp(dir, ".") == 0)
-        n = snprintf(buf, bufsz, "%s", name);
-    else
-        n = snprintf(buf, bufsz, "%s/%s", dir, name);
+    /* reject .git / .qgit as a path component */
+    if (str_endswith(fullpath, "/.git") ||
+        str_endswith(fullpath, "/" QGIT_REPO_DIR_NAME) ||
+        strstr(fullpath, "/.git/") ||
+        strstr(fullpath, "/" QGIT_REPO_DIR_NAME "/"))
+        die("can't add '%s' to the index", path);
 
-    if (n < 0 || (size_t)n >= bufsz) {
+    if (!str_startswith(fullpath, workdir))
+        die("'%s' is outside repository", path);
+
+    fullpathlen = strlen(fullpath);
+    if (fullpathlen == len) {
+        /* path resolves to the workdir itself */
+        if (snprintf(buf, PATH_MAX, ".") >= PATH_MAX) {
+            errno = ENAMETOOLONG;
+            die_errno();
+        }
+        return;
+    }
+
+    if (fullpath[len] != '/')
+        die("'%s' is outside repository", path);
+
+    if (snprintf(buf, PATH_MAX, "%s", fullpath + len + 1) >= PATH_MAX) {
         errno = ENAMETOOLONG;
         die_errno();
     }
 }
 
-/* Add path (repository-relative): a regular file, or a directory recursively.
- */
-static void add_path(qgit_index *index, const char *path)
+static void add_path(qgit_index *index, const char *path, const char *workdir)
 {
-    DIR *dir;
-    struct dirent *entry;
     struct stat st;
-    char fullpath[PATH_MAX];
+    char normpath[PATH_MAX];
 
-    if (path_contain_repo_meta(path))
-        die("can't add '%s' to the index", path);
+    normalize_path(path, workdir, normpath);
 
     if (lstat(path, &st) < 0)
         die_errno();
 
-    if (S_ISREG(st.st_mode)) /* add a regular file */
+    if (S_ISLNK(st.st_mode)) /* skip symbolic links */
+        return;
+
+    if (S_ISREG(st.st_mode)) /* regular file */
     {
-        if (qgit_index_add(index, path, QGIT_IDXENTRY_STAGE_NORMAL) < 0)
+        if (qgit_index_add(index, normpath, QGIT_IDXENTRY_STAGE_NORMAL) < 0)
             die_errno();
         return;
     }
 
-    if (!S_ISDIR(st.st_mode))
-        return;
-
-    if (!(dir = opendir(path)))
-        die_errno();
-
-    while ((entry = readdir(dir))) /* add a directory recursively */
+    if (S_ISDIR(st.st_mode)) /* directory */
     {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-            continue;
-        if (path_contain_repo_meta(entry->d_name))
-            continue;
+        DIR *dir;
+        struct dirent *entry;
+        char entry_path[PATH_MAX];
+        int n;
 
-        path_join(fullpath, PATH_MAX, path, entry->d_name);
-
-        if (lstat(fullpath, &st) < 0)
+        if ((dir = opendir(path)) == NULL)
             die_errno();
-        if (S_ISDIR(st.st_mode))
-            add_path(index, fullpath);
-        else if (S_ISREG(st.st_mode)) {
-            if (qgit_index_add(index, fullpath, QGIT_IDXENTRY_STAGE_NORMAL) < 0)
+
+        while ((entry = readdir(dir)) != NULL) {
+            if (strcmp(entry->d_name, ".") == 0 ||
+                strcmp(entry->d_name, "..") == 0 ||
+                strcmp(entry->d_name, ".git") == 0 ||
+                strcmp(entry->d_name, QGIT_REPO_DIR_NAME) == 0)
+                continue;
+
+            if (strcmp(path, ".") == 0)
+                n = snprintf(entry_path, PATH_MAX, "%s", entry->d_name);
+            else
+                n = snprintf(entry_path, PATH_MAX, "%s/%s", path,
+                             entry->d_name);
+
+            if (n >= PATH_MAX) {
+                errno = ENAMETOOLONG;
                 die_errno();
+            }
+
+            add_path(index, entry_path, workdir);
         }
+
+        closedir(dir);
     }
-    closedir(dir);
 }
 
 #endif

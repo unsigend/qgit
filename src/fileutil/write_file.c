@@ -16,40 +16,45 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
+#include <fileutil.h>
 #include <limits.h>
-#include <string.h>
-#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
 
-int mkdirp(const char *path, mode_t mode)
+int write_file(const char *path, const void *buf, size_t buflen)
 {
-    if (mkdir(path, mode) == 0)
-        return 0;
+    int fd;
+    char tmppath[PATH_MAX];
 
-    if (errno == EEXIST) {
-        struct stat st;
-        if (stat(path, &st) == 0 && S_ISDIR(st.st_mode))
-            return 0;
-    }
-
-    if (errno != ENOENT)
-        return -1;
-
-    char parent[PATH_MAX];
-    if (strlen(path) >= PATH_MAX) {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-    strncpy(parent, path, PATH_MAX - 1);
-    parent[PATH_MAX - 1] = '\0';
-    char *slash = strrchr(parent, '/');
-    if (slash == NULL) {
+    if (buflen == 0 || !buf) {
         errno = EINVAL;
         return -1;
     }
 
-    *slash = '\0';
-    if (mkdirp(parent, mode) == -1)
+    if (snprintf(tmppath, PATH_MAX, "%s.tmp", path) >= PATH_MAX) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+
+    if ((fd = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
         return -1;
 
-    return mkdir(path, mode);
+    if (write_all(fd, buf, buflen) != (ssize_t)buflen) {
+        close(fd);
+        unlink(tmppath);
+        return -1;
+    }
+
+    if (close(fd) == -1) {
+        unlink(tmppath);
+        return -1;
+    }
+
+    if (rename(tmppath, path) == -1) {
+        unlink(tmppath);
+        return -1;
+    }
+
+    return 0;
 }
