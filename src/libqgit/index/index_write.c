@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <collection/vector.h>
 #include <errno.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/repo/index.h>
 #include <sha1.h>
 #include <stddef.h>

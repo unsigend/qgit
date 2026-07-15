@@ -18,7 +18,7 @@
 #include "blob.h"
 
 #include <assert.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/object/blob.h>
 #include <stdlib.h>
 

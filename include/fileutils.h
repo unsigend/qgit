@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FILEUTIL_H
-#define FILEUTIL_H
+#ifndef FILEUTILS_H
+#define FILEUTILS_H
 
 #include <sys/types.h>
 

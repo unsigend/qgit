@@ -19,7 +19,7 @@
 #define REFERENCE_H
 
 #include <errno.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/error.h>
 #include <libqgit/oid.h>
 #include <libqgit/types.h>

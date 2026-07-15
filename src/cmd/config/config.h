@@ -21,7 +21,7 @@
 #include <argparse.h>
 #include <die.h>
 #include <errno.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/error.h>
 #include <libqgit/repo/config.h>
 #include <limits.h>

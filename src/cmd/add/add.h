@@ -23,7 +23,7 @@
 #include <die.h>
 #include <dirent.h>
 #include <errno.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/repo/index.h>
 #include <limits.h>
 #include <stddef.h>

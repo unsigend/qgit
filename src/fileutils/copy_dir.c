@@ -17,7 +17,7 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>

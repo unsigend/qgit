@@ -18,7 +18,7 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <fileutil.h>
+#include <fileutils.h>
 #include <libqgit/db/odb.h>
 #include <stdlib.h>
 
