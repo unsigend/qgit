@@ -19,9 +19,7 @@
 #include "../commit/commit.h"
 #include "../tag/tag.h"
 #include "../tree/tree.h"
-#include "object.h"
 
-#include <stdlib.h>
 
 void qgit_object_free(qgit_object *obj)
 {

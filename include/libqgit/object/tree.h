@@ -18,10 +18,7 @@
 #ifndef LIBQGIT_OBJECT_TREE_H
 #define LIBQGIT_OBJECT_TREE_H
 
-#include <libqgit/common.h>
 #include <libqgit/object/object.h>
-#include <libqgit/oid.h>
-#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 

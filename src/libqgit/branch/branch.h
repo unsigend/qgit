@@ -18,7 +18,6 @@
 #ifndef BRANCH_H
 #define BRANCH_H
 
-#include <libqgit/common.h>
 #include <libqgit/error.h>
 #include <string.h>
 

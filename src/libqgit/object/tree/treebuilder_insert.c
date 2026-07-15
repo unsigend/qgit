@@ -15,10 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "libqgit/types.h"
 #include "tree.h"
 
-#include <assert.h>
 #include <collection/vector.h>
 #include <libqgit/object/tree.h>
 #include <string.h>

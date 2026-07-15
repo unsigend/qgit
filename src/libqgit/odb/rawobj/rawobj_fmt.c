@@ -18,7 +18,6 @@
 #include "rawobj.h"
 
 #include <assert.h>
-#include <libqgit/error.h>
 #include <libqgit/object/object.h>
 #include <stdio.h>
 #include <stdlib.h>

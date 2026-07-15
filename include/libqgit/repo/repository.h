@@ -18,10 +18,7 @@
 #ifndef LIBQGIT_REPO_REPOSITORY_H
 #define LIBQGIT_REPO_REPOSITORY_H
 
-#include <libqgit/common.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
-#include <stddef.h>
 
 QGIT_BEGIN_DECLS
 

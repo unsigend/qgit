@@ -18,8 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/error.h>
 #include <sha1.h>
 #include <stdlib.h>
 

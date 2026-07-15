@@ -18,11 +18,7 @@
 #ifndef LIBQGIT_OBJECT_BLOB_H
 #define LIBQGIT_OBJECT_BLOB_H
 
-#include <libqgit/common.h>
 #include <libqgit/object/object.h>
-#include <libqgit/oid.h>
-#include <libqgit/types.h>
-#include <stddef.h>
 
 QGIT_BEGIN_DECLS
 

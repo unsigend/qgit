@@ -18,7 +18,6 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <string.h>
 
 int qgit_reference_cmp(qgit_reference *a, qgit_reference *b)
 {

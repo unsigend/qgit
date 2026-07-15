@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 const qgit_signature *qgit_commit_author(qgit_commit *commit)
 {

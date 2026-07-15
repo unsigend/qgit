@@ -17,14 +17,8 @@
 
 #include "object.h"
 
-#include <assert.h>
-#include <errno.h>
-#include <libqgit/db/odb.h>
 #include <libqgit/error.h>
-#include <libqgit/object/object.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
 
 int qgit_object_lookup_prefix(qgit_object **out, qgit_repository *repo,
                               const qgit_oid *id, unsigned int len,

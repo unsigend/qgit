@@ -18,7 +18,6 @@
 #include "config.h"
 
 #include <assert.h>
-#include <iniparse.h>
 #include <libqgit/repo/config.h>
 
 int qgit_config_save(qgit_config *cfg)

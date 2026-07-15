@@ -18,9 +18,7 @@
 #ifndef TAG_H
 #define TAG_H
 
-#include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
-#include "libqgit/types.h"
 
 #include <libqgit/error.h>
 #include <string.h>

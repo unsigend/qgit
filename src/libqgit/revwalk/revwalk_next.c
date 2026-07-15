@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "libqgit/object/commit.h"
 #include "revwalk.h"
 
 #include <assert.h>

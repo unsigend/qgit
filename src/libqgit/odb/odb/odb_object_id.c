@@ -18,7 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
 
 const qgit_oid *qgit_odb_object_id(qgit_odb_object *object)
 {

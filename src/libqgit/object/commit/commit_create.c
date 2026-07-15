@@ -18,13 +18,9 @@
 
 #include <errno.h>
 #include <libqgit/object/commit.h>
-#include <libqgit/object/tree.h>
-#include <libqgit/oid.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 static int commit_fmt(char *buf, size_t buflen, const qgit_signature *author,

@@ -22,16 +22,11 @@
 #include <errno.h>
 #include <fileutils.h>
 #include <libqgit/object/blob.h>
-#include <libqgit/oid.h>
 #include <libqgit/repo/index.h>
-#include <libqgit/repo/repository.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 /* Check if the file is unchanged. Return 1 if unchanged, 0 if changed. */
 static int file_unchanged(const qgit_index_entry *entry, const struct stat *st)

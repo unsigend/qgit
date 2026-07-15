@@ -18,9 +18,7 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
-#include "libqgit/common.h"
 
 struct qgit_tree_entry {
     unsigned int

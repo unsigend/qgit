@@ -18,13 +18,7 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <errno.h>
-#include <fileutils.h>
-#include <libqgit/error.h>
-#include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 int qgit_reference_set_target(qgit_reference *ref, const char *target)

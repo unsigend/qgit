@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <libqgit/repo/branch.h>
 #include <libqgit/repo/refs.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 

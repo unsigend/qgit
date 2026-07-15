@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 unsigned int qgit_commit_parentcount(qgit_commit *commit)
 {

@@ -18,10 +18,8 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <libqgit/error.h>
 #include <libqgit/repo/refs.h>
 #include <stdlib.h>
-#include <string.h>
 
 int qgit_reference_resolve(qgit_reference **out, const qgit_reference *ref)
 {

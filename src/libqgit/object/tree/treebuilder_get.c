@@ -17,7 +17,6 @@
 
 #include "tree.h"
 
-#include <assert.h>
 #include <collection/vector.h>
 #include <string.h>
 

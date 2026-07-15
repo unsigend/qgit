@@ -18,7 +18,6 @@
 #include "oid.h"
 
 #include <libqgit/oid.h>
-#include <stddef.h>
 
 char *qgit_oid_tostr(char *out, size_t n, const qgit_oid *oid)
 {

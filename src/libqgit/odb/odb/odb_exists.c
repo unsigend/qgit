@@ -18,8 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
 
 int qgit_odb_exists(qgit_odb *odb, const qgit_oid *oid)
 {

@@ -17,12 +17,7 @@
 
 #include "commit.h"
 
-#include <assert.h>
-#include <collection/vector.h>
 #include <libqgit/error.h>
-#include <libqgit/object/commit.h>
-#include <libqgit/oid.h>
-#include <stddef.h>
 #include <string.h>
 
 static int parse_header(qgit_commit *out, char *start, char *end)

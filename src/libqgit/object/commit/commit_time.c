@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 time_t qgit_commit_time(qgit_commit *commit)
 {

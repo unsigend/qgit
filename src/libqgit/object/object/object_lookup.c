@@ -17,15 +17,8 @@
 
 #include "object.h"
 
-#include <assert.h>
-#include <errno.h>
-#include <libqgit/db/odb.h>
 #include <libqgit/error.h>
-#include <libqgit/object/object.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 int qgit_object_lookup(qgit_object **out, qgit_repository *repo,
                        const qgit_oid *id, qgit_obj_type type)

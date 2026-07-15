@@ -17,7 +17,6 @@
 
 #include "object.h"
 
-#include <assert.h>
 
 qgit_obj_type qgit_object_type(const qgit_object *obj)
 {

@@ -17,7 +17,6 @@
 
 #include "repository.h"
 
-#include <assert.h>
 
 qgit_index *qgit_repository_index(qgit_repository *repo)
 {

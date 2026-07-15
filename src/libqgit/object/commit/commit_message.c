@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 const char *qgit_commit_message(qgit_commit *commit)
 {

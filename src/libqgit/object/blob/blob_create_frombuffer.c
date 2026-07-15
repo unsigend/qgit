@@ -17,7 +17,6 @@
 
 #include "blob.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>

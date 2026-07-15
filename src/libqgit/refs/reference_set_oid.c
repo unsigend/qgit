@@ -18,13 +18,7 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <errno.h>
-#include <fileutils.h>
-#include <libqgit/error.h>
-#include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
 
 int qgit_reference_set_oid(qgit_reference *ref, const qgit_oid *oid)
 {

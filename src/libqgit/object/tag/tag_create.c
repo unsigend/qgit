@@ -19,11 +19,9 @@
 #include <libqgit/db/odb.h>
 #include <libqgit/object/object.h>
 #include <libqgit/object/signature.h>
-#include <libqgit/object/tag.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 

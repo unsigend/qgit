@@ -17,8 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
-#include <collection/vector.h>
 #include <errno.h>
 #include <libqgit/object/commit.h>
 

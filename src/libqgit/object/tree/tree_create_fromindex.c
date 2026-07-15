@@ -19,12 +19,10 @@
 #include "collection/string.h"
 #include "tree.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <libqgit/object/tree.h>
 #include <libqgit/repo/index.h>
 #include <limits.h>
-#include <stddef.h>
 #include <string.h>
 
 /* Write one tree for entries under prefix. The parameter cur is a shared index

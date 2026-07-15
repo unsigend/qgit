@@ -18,7 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
 #include <stdlib.h>
 
 static void backend_free(void *data)

@@ -19,11 +19,9 @@
 
 #include <die.h>
 #include <libqgit/object/object.h>
-#include <libqgit/oid.h>
 #include <libqgit/repo/repository.h>
 #include <libqgit/revparse.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 
 int cmd_rev_parse(int argc, char **argv)

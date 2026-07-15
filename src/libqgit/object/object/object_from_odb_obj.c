@@ -19,14 +19,8 @@
 #include "../commit/commit.h"
 #include "../tag/tag.h"
 #include "../tree/tree.h"
-#include "object.h"
 
-#include <assert.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/error.h>
 #include <libqgit/object/object.h>
-#include <stddef.h>
-#include <stdlib.h>
 
 int qgit_object_from_odb_obj(qgit_object **out, qgit_odb_object *odb_obj,
                              qgit_repository *repo)

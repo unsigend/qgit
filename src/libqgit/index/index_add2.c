@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <libqgit/repo/index.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 

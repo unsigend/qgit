@@ -17,7 +17,6 @@
 
 #include "object.h"
 
-#include <assert.h>
 
 qgit_repository *qgit_object_owner(const qgit_object *obj)
 {

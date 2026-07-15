@@ -17,7 +17,6 @@
 #include "revwalk.h"
 
 #include <assert.h>
-#include <stdlib.h>
 
 /* priority queue store qgit_commit* helper functions: pq_cmp_time,
  * pq_free_commit */
@@ -29,9 +28,11 @@ static int pq_commit_cmp_time(void *a, void *b)
     time_t tca = qgit_commit_time(ca);
     time_t tcb = qgit_commit_time(cb);
 
-    if (tca == tcb)
-        return 0;
-    return tcb > tca ? -1 : 1;
+    if (tca > tcb)
+        return -1;
+    if (tca < tcb)
+        return 1;
+    return 0;
 }
 
 static void pq_commit_free(void *data)

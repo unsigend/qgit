@@ -18,11 +18,8 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
 #include <unistd.h>
 
 int qgit_reference_delete(qgit_reference *ref)

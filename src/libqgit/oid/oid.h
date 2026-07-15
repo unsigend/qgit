@@ -18,7 +18,6 @@
 #ifndef OID_H
 #define OID_H
 
-#include <libqgit/common.h>
 #include <libqgit/error.h>
 
 QGIT_INLINE(int) hexval(char c)

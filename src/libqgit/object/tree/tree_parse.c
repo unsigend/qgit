@@ -20,7 +20,6 @@
 #include <collection/vector.h>
 #include <errno.h>
 #include <libqgit/error.h>
-#include <libqgit/oid.h>
 #include <string.h>
 
 static char *parse_entry(qgit_tree_entry *entry, char *start, char *end)
@@ -31,8 +30,8 @@ static char *parse_entry(qgit_tree_entry *entry, char *start, char *end)
     errno = 0;
     entry->mode = strtoul(start, &endstr, 8);
     if (errno || endstr == start || *endstr != ' ') {
-        if (!errno)
-            qgit_seterror(QGITERR_INVKEY);
+        errno = 0;
+        qgit_seterror(QGITERR_INVKEY);
         return NULL;
     }
 

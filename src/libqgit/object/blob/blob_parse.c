@@ -17,8 +17,6 @@
 
 #include "blob.h"
 
-#include <assert.h>
-#include <libqgit/db/odb.h>
 #include <string.h>
 
 int blob_parse(qgit_blob *out, qgit_odb_object *odb_obj)

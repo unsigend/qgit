@@ -18,13 +18,11 @@
 #include "../index/index.h"
 #include "repository.h"
 
-#include <assert.h>
 #include <collection/string.h>
 #include <libqgit/db/odb.h>
 #include <libqgit/error.h>
 #include <libqgit/repo/config.h>
 #include <libqgit/repo/index.h>
-#include <libqgit/repo/repository.h>
 #include <stdlib.h>
 #include <string.h>
 

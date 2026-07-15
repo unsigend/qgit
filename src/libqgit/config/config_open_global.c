@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
-#include <iniparse.h>
 #include <libqgit/repo/config.h>
 #include <limits.h>
 

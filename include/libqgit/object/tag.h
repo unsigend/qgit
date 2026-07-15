@@ -19,11 +19,7 @@
 #define LIBQGIT_OBJECT_TAG_H
 
 #include <collection/vector.h>
-#include <libqgit/common.h>
 #include <libqgit/object/object.h>
-#include <libqgit/object/signature.h>
-#include <libqgit/oid.h>
-#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 

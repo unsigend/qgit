@@ -19,13 +19,10 @@
 #include "index.h"
 
 #include <assert.h>
-#include <collection/vector.h>
 #include <errno.h>
 #include <fileutils.h>
 #include <libqgit/repo/index.h>
 #include <sha1.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 /* Format the index entries into a buffer, if buffer is NULL or buflen is 0,

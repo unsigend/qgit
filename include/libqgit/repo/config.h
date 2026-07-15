@@ -20,7 +20,6 @@
 
 #include <libqgit/common.h>
 #include <libqgit/types.h>
-#include <stddef.h>
 #include <stdio.h>
 
 QGIT_BEGIN_DECLS

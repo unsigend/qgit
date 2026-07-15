@@ -17,7 +17,6 @@
 
 #include "blob.h"
 
-#include <assert.h>
 
 const void *qgit_blob_rawcontent(qgit_blob *blob)
 {

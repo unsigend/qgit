@@ -22,7 +22,6 @@
 #include <libqgit/repo/repository.h>
 #include <limits.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 int qgit_branch_delete(qgit_repository *repo, const char *branch_name,

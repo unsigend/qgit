@@ -17,9 +17,6 @@
 
 #include "config.h"
 
-#include <errno.h>
-#include <libqgit/error.h>
-#include <libqgit/repo/config.h>
 #include <libqgit/repo/repository.h>
 #include <stdlib.h>
 

@@ -17,7 +17,6 @@
 
 #include "object.h"
 
-#include <assert.h>
 
 const qgit_oid *qgit_object_id(const qgit_object *obj)
 {

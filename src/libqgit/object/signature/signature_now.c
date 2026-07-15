@@ -17,9 +17,6 @@
 
 #include <assert.h>
 #include <libqgit/object/signature.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 int qgit_signature_now(qgit_signature **out, const char *name,
                        const char *email)

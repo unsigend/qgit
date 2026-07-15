@@ -17,10 +17,8 @@
 
 #include "blob.h"
 
-#include <assert.h>
 #include <fileutils.h>
 #include <libqgit/object/blob.h>
-#include <stdlib.h>
 
 int qgit_blob_create_fromdisk(qgit_oid *oid, qgit_repository *repo,
                               const char *path)

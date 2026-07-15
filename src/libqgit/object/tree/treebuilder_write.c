@@ -17,13 +17,8 @@
 
 #include "tree.h"
 
-#include <assert.h>
 #include <collection/vector.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/object/object.h>
-#include <libqgit/object/tree.h>
 #include <libqgit/repo/repository.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 

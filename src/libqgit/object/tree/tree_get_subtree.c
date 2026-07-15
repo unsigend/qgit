@@ -17,10 +17,8 @@
 
 #include "tree.h"
 
-#include <assert.h>
 #include <libqgit/error.h>
 #include <libqgit/object/tree.h>
-#include <stdlib.h>
 #include <string.h>
 
 int qgit_tree_get_subtree(qgit_tree **out, qgit_tree *root,

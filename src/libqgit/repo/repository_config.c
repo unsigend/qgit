@@ -17,7 +17,6 @@
 
 #include "repository.h"
 
-#include <assert.h>
 
 qgit_config *qgit_repository_config(qgit_repository *repo)
 {

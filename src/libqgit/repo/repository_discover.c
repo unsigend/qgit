@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <fileutils.h>
 #include <libqgit/error.h>
-#include <libqgit/repo/repository.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>

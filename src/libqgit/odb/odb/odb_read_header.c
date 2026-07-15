@@ -18,11 +18,7 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
 #include <libqgit/error.h>
-#include <stdlib.h>
-#include <string.h>
 
 int qgit_odb_read_header(size_t *len_p, qgit_obj_type *type_p, qgit_odb *odb,
                          const qgit_oid *oid)

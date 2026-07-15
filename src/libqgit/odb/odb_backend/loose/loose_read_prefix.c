@@ -20,8 +20,6 @@
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
-#include <fileutils.h>
-#include <libqgit/db/odb_backend.h>
 #include <libqgit/error.h>
 #include <limits.h>
 #include <stdio.h>

@@ -19,7 +19,6 @@
 #define QGIT_ENDIAN_H
 
 #include <arpa/inet.h>
-#include <stdint.h>
 #include <string.h>
 
 __attribute__((always_inline)) static inline uint16_t get_be16(const char *p)

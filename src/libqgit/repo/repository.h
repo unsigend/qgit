@@ -24,7 +24,6 @@
 #include <libqgit/common.h>
 #include <libqgit/types.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 
 struct qgit_repository {

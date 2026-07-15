@@ -19,9 +19,7 @@
 #define LIBQGIT_REPO_REFS_H
 
 #include <collection/vector.h>
-#include <libqgit/common.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 

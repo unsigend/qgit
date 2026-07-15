@@ -20,8 +20,6 @@
 #include "../tag/tag.h"
 #include "../tree/tree.h"
 
-#include <assert.h>
-#include <libqgit/error.h>
 
 size_t qgit_object_mem_size(qgit_obj_type type)
 {

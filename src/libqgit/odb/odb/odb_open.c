@@ -18,8 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
-#include <libqgit/db/odb_backend.h>
 
 #define LOOSE_BACKEND_PRIORITY 2
 #define PACK_BACKEND_PRIORITY 1

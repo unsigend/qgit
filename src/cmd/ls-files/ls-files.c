@@ -22,7 +22,6 @@
 #include <libqgit/repo/index.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 

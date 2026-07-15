@@ -18,7 +18,6 @@
 #ifndef BLOB_H
 #define BLOB_H
 
-#include "../../odb/rawobj/rawobj.h"
 #include "../object/object.h"
 
 struct qgit_blob {

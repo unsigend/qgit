@@ -19,7 +19,6 @@
 
 #include <libqgit/repo/repository.h>
 #include <libqgit/revparse.h>
-#include <limits.h>
 
 int cmd_ls_tree(int argc, char **argv)
 {

@@ -17,13 +17,8 @@
 
 #include "repository.h"
 
-#include <assert.h>
 #include <iniparse.h>
-#include <libqgit/common.h>
-#include <libqgit/error.h>
 #include <libqgit/repo/repository.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 static const char *dirs[] = {"objects", "refs/heads", "refs/tags",

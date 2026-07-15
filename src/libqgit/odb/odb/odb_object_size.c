@@ -18,7 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
 
 size_t qgit_odb_object_size(qgit_odb_object *object)
 {

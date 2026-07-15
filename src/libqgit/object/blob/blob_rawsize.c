@@ -17,7 +17,6 @@
 
 #include "blob.h"
 
-#include <assert.h>
 
 size_t qgit_blob_rawsize(qgit_blob *blob)
 {

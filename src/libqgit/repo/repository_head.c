@@ -16,7 +16,6 @@
  */
 
 #include <libqgit/repo/refs.h>
-#include <libqgit/repo/repository.h>
 
 int qgit_repository_head(qgit_reference **out, qgit_repository *repo)
 {

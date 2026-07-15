@@ -21,8 +21,6 @@
 #include <compress.h>
 #include <errno.h>
 #include <fileutils.h>
-#include <libqgit/db/odb_backend.h>
-#include <libqgit/oid.h>
 #include <limits.h>
 #include <sha1.h>
 #include <stdio.h>

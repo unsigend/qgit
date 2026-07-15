@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <libqgit/repo/config.h>
 #include <stdlib.h>
-#include <strings.h>
 
 int qgit_config_get_bool(int *out, qgit_config *cfg, const char *name)
 {

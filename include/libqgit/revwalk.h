@@ -18,9 +18,7 @@
 #ifndef LIBQGIT_REVWALK_H
 #define LIBQGIT_REVWALK_H
 
-#include <libqgit/common.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 

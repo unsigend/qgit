@@ -18,7 +18,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <libqgit/db/odb_backend.h>
-#include <libqgit/oid.h>
 #include <stdio.h>
 
 int qgit_loose_backend_path(const char *objects_dir, const qgit_oid *oid,

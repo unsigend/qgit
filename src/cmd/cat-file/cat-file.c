@@ -18,11 +18,9 @@
 #include "cat-file.h"
 
 #include <libqgit/db/odb.h>
-#include <libqgit/oid.h>
 #include <libqgit/repo/repository.h>
 #include <libqgit/revparse.h>
 #include <limits.h>
-#include <stdio.h>
 
 int cmd_cat_file(int argc, char **argv)
 {

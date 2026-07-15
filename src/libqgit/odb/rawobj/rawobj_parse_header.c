@@ -22,7 +22,6 @@
 #include <libqgit/error.h>
 #include <libqgit/object/object.h>
 #include <stdlib.h>
-#include <string.h>
 
 int qgit_rawobj_parse_header(qgit_rawobj **out, void *buf, size_t buflen)
 {

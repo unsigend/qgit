@@ -17,10 +17,8 @@
 
 #include "libqgit/object/commit.h"
 #include "libqgit/object/tag.h"
-#include "libqgit/types.h"
 #include <assert.h>
 #include <libqgit/error.h>
-#include <libqgit/object/object.h>
 
 /* Peel object once, tag to target and commit to tree, else return -1. */
 static int peel_once(qgit_object **out, const qgit_object *object)

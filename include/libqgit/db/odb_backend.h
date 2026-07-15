@@ -18,10 +18,7 @@
 #ifndef LIBQGIT_DB_ODB_BACKEND_H
 #define LIBQGIT_DB_ODB_BACKEND_H
 
-#include <libqgit/common.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
-#include <stddef.h>
 
 QGIT_BEGIN_DECLS
 

@@ -18,13 +18,10 @@
 #include "tag.h"
 
 #include <credentials.h>
-#include <libqgit/object/object.h>
 #include <libqgit/object/tag.h>
-#include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
 #include <libqgit/revparse.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 
 int cmd_tag(int argc, char **argv)

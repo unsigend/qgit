@@ -17,7 +17,6 @@
 
 #include "revwalk.h"
 
-#include <stdlib.h>
 
 void qgit_revwalk_free(qgit_revwalk *walk)
 {

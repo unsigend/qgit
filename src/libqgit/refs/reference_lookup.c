@@ -18,16 +18,9 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <errno.h>
-#include <fileutils.h>
-#include <libqgit/error.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int qgit_reference_lookup(qgit_reference **out, qgit_repository *repo,
                           const char *name)

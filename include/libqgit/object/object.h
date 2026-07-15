@@ -18,9 +18,7 @@
 #ifndef LIBQGIT_OBJECT_OBJECT_H
 #define LIBQGIT_OBJECT_OBJECT_H
 
-#include <libqgit/common.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
 
 QGIT_BEGIN_DECLS
 

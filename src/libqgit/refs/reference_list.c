@@ -18,13 +18,9 @@
 #include "reference.h"
 
 #include <assert.h>
-#include <collection/vector.h>
 #include <dirent.h>
-#include <errno.h>
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
-#include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 

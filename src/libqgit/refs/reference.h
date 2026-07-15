@@ -22,7 +22,6 @@
 #include <fileutils.h>
 #include <libqgit/error.h>
 #include <libqgit/oid.h>
-#include <libqgit/types.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>

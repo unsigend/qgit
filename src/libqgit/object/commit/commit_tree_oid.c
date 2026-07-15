@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 const qgit_oid *qgit_commit_tree_oid(qgit_commit *commit)
 {

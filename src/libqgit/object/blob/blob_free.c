@@ -17,7 +17,6 @@
 
 #include "blob.h"
 
-#include <assert.h>
 
 void blob_free(qgit_blob *blob)
 {

@@ -18,7 +18,6 @@
 #include "index.h"
 
 #include <assert.h>
-#include <collection/vector.h>
 #include <libqgit/repo/index.h>
 #include <string.h>
 

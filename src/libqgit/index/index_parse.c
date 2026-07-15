@@ -22,10 +22,7 @@
 #include <libqgit/error.h>
 #include <libqgit/repo/index.h>
 #include <sha1.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 /* Parse an entry from the index file, return the address of the next entry */
 static const char *parse_entry(qgit_index_entry *entry, const char *start,

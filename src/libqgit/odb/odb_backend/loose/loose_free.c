@@ -17,7 +17,6 @@
 
 #include "loose_backend.h"
 
-#include <libqgit/db/odb_backend.h>
 #include <stdlib.h>
 
 void qgit_loose_backend_free(struct qgit_odb_backend *backend)

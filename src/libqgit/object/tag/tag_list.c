@@ -18,7 +18,6 @@
 #include "tag.h"
 
 #include <libqgit/repo/refs.h>
-#include <string.h>
 
 static void tag_name_free(void *data)
 {

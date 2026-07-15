@@ -21,7 +21,6 @@
 #include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 
 int cmd_show_ref(int argc, char **argv)

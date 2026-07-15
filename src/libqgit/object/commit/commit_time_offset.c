@@ -17,7 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
 
 int qgit_commit_time_offset(qgit_commit *commit)
 {

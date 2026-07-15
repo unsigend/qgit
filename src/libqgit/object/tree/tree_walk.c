@@ -20,7 +20,6 @@
 #include <errno.h>
 #include <libqgit/object/tree.h>
 #include <limits.h>
-#include <stddef.h>
 #include <stdio.h>
 
 /* callback return value macros */

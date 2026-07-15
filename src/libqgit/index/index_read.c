@@ -21,7 +21,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <libqgit/repo/index.h>
-#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>

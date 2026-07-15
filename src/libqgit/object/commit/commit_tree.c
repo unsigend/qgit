@@ -17,9 +17,7 @@
 
 #include "commit.h"
 
-#include <assert.h>
 #include <libqgit/object/commit.h>
-#include <libqgit/object/tree.h>
 
 int qgit_commit_tree(qgit_tree **out, qgit_commit *commit)
 {

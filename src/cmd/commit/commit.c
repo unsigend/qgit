@@ -20,7 +20,6 @@
 #include <credentials.h>
 #include <die.h>
 #include <errno.h>
-#include <libqgit/repo/refs.h>
 #include <libqgit/repo/repository.h>
 #include <limits.h>
 

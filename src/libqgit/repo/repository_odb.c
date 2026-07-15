@@ -17,7 +17,6 @@
 
 #include "repository.h"
 
-#include <assert.h>
 
 qgit_odb *qgit_repository_odb(qgit_repository *repo)
 {

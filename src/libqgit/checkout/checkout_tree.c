@@ -21,7 +21,6 @@
 #include <fileutils.h>
 #include <libqgit/object/blob.h>
 #include <libqgit/object/tree.h>
-#include <libqgit/repo/repository.h>
 #include <limits.h>
 #include <stdio.h>
 #include <sys/stat.h>

@@ -10,7 +10,6 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
    * [add](#add)
    * [branch](#branch)
    * [cat-file](#cat-file)
-   * [check-ignore](#check-ignore)
    * [checkout](#checkout)
    * [commit](#commit)
    * [config](#config)
@@ -21,9 +20,7 @@ qgit is a simplified Git like version control system written in C. It is rebuilt
    * [ls-files](#ls-files)
    * [ls-tree](#ls-tree)
    * [rev-parse](#rev-parse)
-   * [rm](#rm)
    * [show-ref](#show-ref)
-   * [status](#status)
    * [tag](#tag)
    * [update-ref](#update-ref)
    * [version](#version)
@@ -229,12 +226,6 @@ Object type for raw mode.
 `<object>`
 
 Object name, usually a SHA-1 hash.
-
----
-
-### check-ignore
-
-Debug gitignore and exclude files.
 
 ---
 
@@ -635,12 +626,6 @@ Show help message and exit.
 
 ---
 
-### rm
-
-Remove files from the working tree and from the index.
-
----
-
 ### show-ref
 
 List references in a local repository.
@@ -676,12 +661,6 @@ Show the `HEAD` reference, even if it would normally be filtered out.
 `--tags`
 
 Limit to local branches and local tags, respectively. These options are not mutually exclusive. When either or both are given, only the matching namespaces under `refs/heads` and `refs/tags` are displayed.
-
----
-
-### status
-
-Show the working tree status.
 
 ---
 

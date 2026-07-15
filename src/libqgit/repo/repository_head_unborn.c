@@ -17,8 +17,6 @@
 
 #include "repository.h"
 
-#include <assert.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 int qgit_repository_head_unborn(qgit_repository *repo)

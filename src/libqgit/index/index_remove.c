@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <libqgit/repo/index.h>
 
 int qgit_index_remove(qgit_index *index, unsigned int position)
 {

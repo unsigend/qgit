@@ -17,8 +17,6 @@
 
 #include "commit.h"
 
-#include <assert.h>
-#include <collection/vector.h>
 
 const qgit_oid *qgit_commit_parent_oid(qgit_commit *commit, unsigned int n)
 {

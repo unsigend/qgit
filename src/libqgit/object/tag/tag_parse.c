@@ -15,17 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "libqgit/object/object.h"
-#include "libqgit/types.h"
 #include "tag.h"
 
-#include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/error.h>
 #include <libqgit/object/commit.h>
-#include <libqgit/oid.h>
-#include <stddef.h>
-#include <string.h>
 
 static int parse_header(qgit_tag *out, char *start, char *end)
 {

@@ -17,7 +17,6 @@
 
 #include "odb.h"
 
-#include <libqgit/db/odb.h>
 #include <stdlib.h>
 
 void qgit_odb_free(qgit_odb *odb)

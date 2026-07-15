@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <fileutils.h>
-#include <libqgit/db/odb.h>
 #include <stdlib.h>
 
 int qgit_odb_hashfile(qgit_oid *oid, const char *path, qgit_obj_type type)

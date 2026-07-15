@@ -18,7 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
 
 const void *qgit_odb_object_data(qgit_odb_object *object)
 {

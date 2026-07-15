@@ -18,8 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <collection/vector.h>
-#include <libqgit/db/odb.h>
 
 int qgit_odb_write(qgit_oid *oid, qgit_odb *odb, const void *data, size_t len,
                    qgit_obj_type type)

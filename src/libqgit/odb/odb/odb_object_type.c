@@ -18,7 +18,6 @@
 #include "odb.h"
 
 #include <assert.h>
-#include <libqgit/db/odb.h>
 
 qgit_obj_type qgit_odb_object_type(qgit_odb_object *object)
 {
