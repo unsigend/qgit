@@ -17,6 +17,7 @@
 
 #include "tag.h"
 
+#include <credentials.h>
 #include <libqgit/object/object.h>
 #include <libqgit/object/tag.h>
 #include <libqgit/repo/refs.h>
@@ -86,7 +87,8 @@ int cmd_tag(int argc, char **argv)
         {
             qgit_signature *signature;
             qgit_oid oid;
-            get_credentials(&signature, repo);
+            if (credentials_get(&signature, repo) < 0)
+                die_errno();
 
             if (qgit_tag_create(&oid, repo, tagname, qgit_object_id(object),
                                 signature, flags.message, flags.force) < 0)

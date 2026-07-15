@@ -20,10 +20,6 @@
 
 #include <argparse.h>
 #include <die.h>
-#include <libqgit/error.h>
-#include <libqgit/object/signature.h>
-#include <libqgit/repo/config.h>
-#include <libqgit/repo/repository.h>
 
 #define DEFAULT_TARGET "HEAD"
 
@@ -78,33 +74,6 @@ static void mutex_check(void)
         die("Cannot use -d and -l together");
     if (flags.annotate && !flags.message)
         die("annotated tags require message use -m ");
-}
-
-static void get_credentials(qgit_signature **out, qgit_repository *repo)
-{
-    qgit_config *local_config, *global_config = NULL;
-
-    qgit_config_open_global(&global_config);
-    local_config = qgit_repository_config(repo);
-
-    const char *name = NULL, *email = NULL;
-    qgit_config_get_string(&name, local_config, "user.name");
-    if (!name && global_config)
-        qgit_config_get_string(&name, global_config, "user.name");
-
-    qgit_config_get_string(&email, local_config, "user.email");
-    if (!email && global_config)
-        qgit_config_get_string(&email, global_config, "user.email");
-
-    if (!name || !email) {
-        qgit_seterror(QGITERR_NOCREDENTIALS);
-        die_errno();
-    }
-
-    if (qgit_signature_now(out, name, email) < 0)
-        die_errno();
-
-    qgit_config_free(global_config);
 }
 
 #endif

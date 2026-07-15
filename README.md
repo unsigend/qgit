@@ -248,6 +248,36 @@ Switch branches or restore working tree files.
 
 Record changes to the repository.
 
+A message is required via `-m`. qgit does not open an editor. Author and committer come from `user.name` and `user.email` in local or global config.
+
+#### Synopsis
+
+```
+qgit commit -m <message>
+```
+
+#### Description
+
+Create a new commit containing the current contents of the index and the given log message. The command must be run inside a qgit repository.
+
+The new commit is a direct child of `HEAD` when `HEAD` already points at a commit. On an unborn branch, qgit creates a root commit with no parents and creates the branch tip. When `HEAD` is detached, qgit updates `HEAD` to the new commit.
+
+qgit uses the same identity for author and committer. Only a single parent is recorded. Merge commits are not supported.
+
+On success, qgit prints a one line summary in the same form as Git, for example `[main (root-commit) a1b2c3d] initial commit` or `[main a1b2c3d] later change`.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`-m` `<message>`
+`--message` `<message>`
+
+Use `<message>` as the commit message. Required.
+
 ---
 
 ### config
