@@ -242,6 +242,39 @@ Debug gitignore and exclude files.
 
 Switch branches or restore working tree files.
 
+qgit does not switch branches or update `HEAD` or the index. It writes the tree of a commit into a new directory on disk.
+
+#### Synopsis
+
+```
+qgit checkout <commit> <path>
+```
+
+#### Description
+
+Resolve `<commit>` to a tree and write that tree into a new directory `<path>`. The command must be run inside a qgit repository.
+
+`<commit>` is resolved with [Revision Syntax](#revision-syntax). Annotated tags and commits are peeled to a tree. A tree object may be named directly.
+
+`<path>` must not already exist. qgit creates the directory and recursively writes blob entries as files and tree entries as subdirectories. Existing files or directories at `<path>` cause the command to fail.
+
+qgit does not support Git branch switching, pathspecs, or restoring files into the current working tree.
+
+#### Options
+
+`-h`
+`--help`
+
+Show help message and exit.
+
+`<commit>`
+
+Commit, tag, or tree to check out. Required.
+
+`<path>`
+
+New directory that will receive the tree. Required. Must not already exist.
+
 ---
 
 ### commit

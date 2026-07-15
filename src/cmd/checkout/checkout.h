@@ -18,4 +18,25 @@
 #ifndef CMD_CHECKOUT_H
 #define CMD_CHECKOUT_H
 
+#include <argparse.h>
+
+static struct argparse_opt options[] = {
+    OPT_HELP(),
+    OPT_END(),
+};
+
+static const char *usages[] = {
+    "qgit checkout <commit> <path>",
+};
+
+static struct argparse_desc desc = {
+    .prog = "qgit checkout",
+    .desc = "Checkout a commit inside of a directory",
+    .usages = usages,
+    .nusages = sizeof(usages) / sizeof(usages[0]),
+    .epilog = "Write the tree of <commit> into a new directory <path>. "
+              "<path> must not already exist. qgit creates it. "
+              "<commit> may also name a tree.",
+};
+
 #endif
